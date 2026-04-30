@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyva Upgrade Audit — Scandiweb for Builders Merchants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Narrow:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-page: #F4F2EC;
+  --bg-surface: #FFFFFF;
+  --bg-charcoal: #161616;
+  --bg-deep: #0A0A0A;
+  --bg-canvas: #FAFAF6;
+  --text-primary: #161616;
+  --text-secondary: #6B6B66;
+  --text-muted: #9A9A95;
+  --text-inverse: #F4F2EC;
+  --accent: #FFD60A;
+  --accent-dim: #C8B260;
+  --brick: #BC3F1F;
+  --sage: #5F7D4A;
+  --border: #1F1F1F;
+  --border-soft: #DCD9D0;
+  --grid-line: #EAE7DD;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+body {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* HEADER */
+.header {
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  border-bottom: 4px solid var(--accent);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  display: flex;
+  align-items: stretch;
+  height: 64px;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 24px;
+  border-right: 1px solid #2D2D2D;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  display: grid;
+  place-items: center;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  color: var(--bg-charcoal);
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.brand-text { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+.brand-name { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 16px; }
+.brand-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+.title-block { display: flex; flex-direction: column; justify-content: center; padding: 0 24px; flex: 1; }
+.title-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); }
+.title-main { font-family: 'Archivo Narrow', sans-serif; font-weight: 700; font-size: 18px; }
+
+.header-meta {
+  display: flex; align-items: center; gap: 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted);
+}
+.header-meta strong { color: var(--text-inverse); font-weight: 500; }
+
+/* APP CONTAINER */
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+/* STAGES */
+.stage { display: none; }
+.stage.active { display: block; }
+
+/* ============== STAGE 1 — INPUT ============== */
+.stage-hero {
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  padding: 64px 56px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.stage-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg, transparent 0, transparent 11px,
+    rgba(255, 214, 10, 0.04) 11px, rgba(255, 214, 10, 0.04) 12px
+  );
+  pointer-events: none;
+}
+
+.stage-hero > * { position: relative; z-index: 1; }
+
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 48px;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  max-width: 920px;
+  margin-bottom: 18px;
+}
+
+.hero-title em { color: var(--accent); font-style: normal; }
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 720px;
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+
+.url-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  max-width: 760px;
+  gap: 0;
+  border: 2px solid var(--accent);
+  background: var(--bg-deep);
+}
+
+.url-input {
+  background: transparent;
+  border: none;
+  padding: 22px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  color: var(--text-inverse);
+  outline: none;
+  width: 100%;
+}
+
+.url-input::placeholder { color: var(--text-muted); }
+
+.url-submit {
+  background: var(--accent);
+  color: var(--bg-charcoal);
+  border: none;
+  padding: 0 32px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.url-submit:hover { background: white; }
+.url-submit:disabled { background: #5A5A5A; color: #999; cursor: not-allowed; }
+
+.trust-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid #2D2D2D;
+}
+
+.trust-item { padding-right: 24px; border-right: 1px solid #2D2D2D; }
+.trust-item:last-child { border-right: none; padding-right: 0; }
+.trust-item:not(:first-child) { padding-left: 24px; }
+
+.trust-num {
+  font-family: 'Archivo Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.trust-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ============== STAGE 2 — RUNNING ============== */
+.console {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  color: var(--text-inverse);
+  font-family: 'JetBrains Mono', monospace;
+  padding: 36px 40px;
+  min-height: 480px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.console-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid #2D2D2D;
+}
+
+.console-title {
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.console-url {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.console-url strong { color: var(--accent); }
+
+.console-line {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  opacity: 0;
+  animation: fadeInLine 0.3s ease forwards;
+}
+
+.console-line .marker { color: var(--accent); flex-shrink: 0; width: 16px; }
+.console-line .marker.done { color: var(--sage); }
+.console-line .marker.warn { color: var(--accent-dim); }
+.console-line .marker.fail { color: var(--brick); }
+.console-line .text { color: var(--text-muted); }
+.console-line .text strong { color: var(--text-inverse); font-weight: 500; }
+.console-line .stat { margin-left: auto; color: var(--accent); font-weight: 500; }
+
+@keyframes fadeInLine { to { opacity: 1; } }
+
+.console-bar {
+  margin-top: 20px;
+  height: 4px;
+  background: #2D2D2D;
+  position: relative;
+  overflow: hidden;
+}
+
+.console-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0;
+  transition: width 0.3s ease;
+}
+
+/* ============== STAGE 3 — RESULTS ============== */
+.results-head {
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  padding: 28px 32px;
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.results-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.results-url {
+  font-family: 'Archivo Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+  word-break: break-all;
+}
+
+.results-platform {
+  margin-top: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-inverse);
+  letter-spacing: 0.04em;
+}
+
+.results-platform .tag {
+  background: var(--brick);
+  color: white;
+  padding: 2px 8px;
+  margin-right: 6px;
+  font-weight: 600;
+}
+
+.results-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #404040;
+  color: var(--text-inverse);
+  padding: 10px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-ghost:hover { background: #1F1F1F; }
+
+/* SCORE CARDS */
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-top: none;
+}
+
+@media (max-width: 900px) {
+  .score-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.score-card {
+  background: var(--bg-surface);
+  padding: 22px 22px 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-card-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.score-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.score-num {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 56px;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+
+.score-unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.score-num.bad { color: var(--brick); }
+.score-num.mid { color: var(--accent-dim); }
+.score-num.good { color: var(--sage); }
+
+.score-bar {
+  height: 4px;
+  background: var(--border-soft);
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.score-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  transition: width 0.8s ease;
+}
+
+.score-bar-fill.bad { background: var(--brick); }
+.score-bar-fill.mid { background: var(--accent-dim); }
+.score-bar-fill.good { background: var(--sage); }
+
+.score-compare {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.score-compare strong {
+  color: var(--sage);
+  font-weight: 600;
+}
+
+.score-delta {
+  background: var(--sage);
+  color: white;
+  padding: 1px 6px;
+  font-weight: 600;
+  font-size: 10px;
+}
+
+/* SECTION TITLES */
+.section-title {
+  font-family: 'Archivo Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 40px 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.section-title::before {
+  content: attr(data-num);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  background: var(--bg-charcoal);
+  color: var(--accent);
+  padding: 4px 10px;
+  font-weight: 600;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: var(--bg-charcoal);
+}
+
+.section-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: -8px 0 22px;
+  max-width: 760px;
+}
+
+/* FINDINGS */
+.findings {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.finding {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+}
+
+@media (max-width: 800px) {
+  .finding { grid-template-columns: 1fr; }
+  .finding-marker { display: none; }
+}
+
+.finding-marker {
+  background: var(--brick);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+}
+
+.finding-marker.warn { background: var(--accent-dim); color: var(--bg-charcoal); }
+
+.finding-current {
+  padding: 18px 22px;
+  border-right: 1px solid var(--border-soft);
+}
+
+.finding-fix {
+  padding: 18px 22px;
+  background: var(--bg-canvas);
+}
+
+.finding-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.finding-current .finding-tag { color: var(--brick); }
+.finding-fix .finding-tag { color: var(--sage); }
+
+.finding-h {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  margin-bottom: 5px;
+  letter-spacing: -0.005em;
+}
+
+.finding-body {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.finding-body strong { color: var(--text-primary); font-weight: 600; }
+
+.finding-impact {
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--bg-charcoal);
+  background: var(--accent);
+  padding: 4px 8px;
+  display: inline-block;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* IF YOU MOVED — comparison */
+.compare-card {
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  padding: 36px 40px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.compare-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255, 214, 10, 0.08), transparent 50%);
+  pointer-events: none;
+}
+
+.compare-card > * { position: relative; z-index: 1; }
+
+.compare-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.compare-title {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.compare-title em { color: var(--accent); font-style: normal; }
+
+.compare-sub {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 28px;
+  max-width: 600px;
+}
+
+.compare-rows {
+  display: grid;
+  gap: 4px;
+}
+
+.compare-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px dashed #2D2D2D;
+}
+
+.compare-row:last-child { border-bottom: none; }
+
+@media (max-width: 800px) {
+  .compare-row { grid-template-columns: 1fr; gap: 6px; }
+}
+
+.compare-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.compare-bar {
+  background: rgba(255,255,255,0.06);
+  height: 26px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.compare-bar-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition: width 1s ease;
+  width: 0;
+}
+
+.compare-bar-fill.now { background: var(--brick); color: white; }
+.compare-bar-fill.hyva { background: var(--accent); color: var(--bg-charcoal); }
+
+.compare-bar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* SERVICES */
+.services-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 800px) { .services-intro { grid-template-columns: 1fr; } }
+
+.services-side {
+  border: 1px solid var(--border-soft);
+  background: var(--bg-surface);
+  padding: 22px;
+}
+
+.services-side.fragmented { border-color: var(--brick); }
+.services-side.unified { border: 2px solid var(--accent); }
+
+.services-side-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.services-side.fragmented .services-side-tag { color: var(--brick); }
+.services-side.unified .services-side-tag { color: var(--bg-charcoal); background: var(--accent); padding: 2px 8px; display: inline-block; }
+
+.services-side-h {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 14px;
+  letter-spacing: -0.01em;
+}
+
+.services-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.services-list li {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  padding-left: 22px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.services-list.bad li::before {
+  content: '×';
+  position: absolute;
+  left: 4px;
+  top: 0;
+  color: var(--brick);
+  font-weight: 700;
+  font-size: 16px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.services-list.good li::before {
+  content: '✓';
+  position: absolute;
+  left: 4px;
+  top: 0;
+  color: var(--sage);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.services-list li strong { color: var(--text-primary); font-weight: 600; }
+
+/* SERVICES STACK */
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 900px) { .stack-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stack-card {
+  background: var(--bg-surface);
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stack-card-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.stack-card-h {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.005em;
+  margin-bottom: 4px;
+}
+
+.stack-card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  background: var(--bg-charcoal);
+  padding: 2px 6px;
+  display: inline-block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.stack-card-body {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* REQUIREMENTS SECTION */
+.req-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) { .req-grid { grid-template-columns: 1fr; } }
+
+.req-side {
+  background: var(--bg-surface);
+  padding: 24px 26px;
+}
+
+.req-side-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  background: var(--bg-charcoal);
+  padding: 3px 8px;
+  display: inline-block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.req-side-h {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.005em;
+  margin-bottom: 16px;
+}
+
+.req-field { margin-bottom: 14px; }
+
+.req-field-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.req-field-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-page);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.req-field-select:focus {
+  outline: none;
+  border-color: var(--bg-charcoal);
+  background: white;
+}
+
+.req-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.req-toggle {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--border-soft);
+  cursor: pointer;
+  align-items: center;
+}
+
+.req-toggle:last-child { border-bottom: none; }
+
+.req-toggle-text {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.req-toggle-text strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  display: block;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  margin-bottom: 1px;
+}
+
+.req-mini-toggle {
+  width: 32px;
+  height: 18px;
+  background: var(--border-soft);
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.req-mini-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: white;
+  transition: transform 0.15s;
+}
+
+.req-toggle.on .req-mini-toggle { background: var(--bg-charcoal); }
+.req-toggle.on .req-mini-toggle::after { transform: translateX(14px); background: var(--accent); }
+
+.req-textarea-wrap {
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-soft);
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.req-textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+}
+
+.req-textarea::placeholder { color: var(--text-muted); }
+
+/* CTA STRIP */
+.cta-strip {
+  background: var(--accent);
+  color: var(--bg-charcoal);
+  padding: 32px 40px;
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.cta-text {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  max-width: 600px;
+}
+
+.cta-text em { font-style: italic; }
+
+.cta-btn {
+  background: var(--bg-charcoal);
+  color: var(--accent);
+  border: none;
+  padding: 18px 28px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cta-btn:hover { background: var(--bg-deep); }
+
+/* FOOTER NOTE */
+.footnote {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 4px 0;
+  border-top: 1px solid var(--border-soft);
+  margin-top: 36px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.footnote strong { color: var(--text-secondary); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.85);
+  display: none;
+  z-index: 200;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.modal-overlay.open { display: grid; place-items: start center; }
+
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-charcoal);
+  max-width: 640px;
+  width: 100%;
+  margin-top: 40px;
+}
+
+.modal-head {
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  padding: 22px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid var(--accent);
+}
+
+.modal-head .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+.modal-head .title { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 22px; margin-top: 4px; }
+
+.modal-close {
+  background: transparent; border: 1px solid #404040; color: var(--text-inverse);
+  width: 36px; height: 36px; font-size: 16px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+}
+.modal-close:hover { background: var(--brick); border-color: var(--brick); }
+
+.modal-body { padding: 24px 28px; }
+
+.modal-summary {
+  background: var(--bg-page);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--accent);
+}
+
+.modal-summary strong { color: var(--text-primary); }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.field-group { margin-bottom: 14px; }
+
+.field-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.field-label .req { color: var(--brick); }
+
+.field-input, .field-select, .field-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-page);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+}
+
+.field-input:focus, .field-select:focus, .field-textarea:focus {
+  outline: none; border-color: var(--bg-charcoal); background: white;
+}
+
+.field-textarea { resize: vertical; min-height: 70px; }
+
+.modal-foot {
+  padding: 18px 28px;
+  background: var(--bg-page);
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.foot-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.btn-primary {
+  background: var(--accent); border: 1px solid var(--bg-charcoal);
+  padding: 10px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  cursor: pointer; font-weight: 600; color: var(--bg-charcoal);
+}
+.btn-primary:hover { background: var(--bg-charcoal); color: var(--accent); }
+.btn-primary:disabled { background: #5A5A5A; color: #999; cursor: not-allowed; border-color: #5A5A5A; }
+
+.sent-state { text-align: center; padding: 24px 12px; }
+.sent-mark { width: 56px; height: 56px; background: var(--accent); margin: 0 auto 14px; display: grid; place-items: center; font-family: 'Archivo', sans-serif; font-size: 28px; font-weight: 900; color: var(--bg-charcoal); }
+.sent-h { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 8px; }
+.sent-sub { color: var(--text-secondary); font-size: 13px; max-width: 400px; margin: 0 auto; }
+
+@media (max-width: 700px) {
+  .hero-title { font-size: 30px; }
+  .stage-hero { padding: 40px 28px; }
+  .url-form { grid-template-columns: 1fr; }
+  .url-submit { padding: 16px; }
+  .field-row { grid-template-columns: 1fr; }
+  .compare-title { font-size: 22px; }
+  .cta-strip { flex-direction: column; align-items: stretch; text-align: left; }
+  .cta-btn { width: 100%; }
+  .header-meta { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">SW</div>
+      <div class="brand-text">
+        <span class="brand-name">SCANDIWEB</span>
+        <span class="brand-sub">Trade · Hyva · Readymage</span>
+      </div>
+    </div>
+    <div class="title-block">
+      <span class="title-label">Hyva Upgrade Audit</span>
+      <span class="title-main">Already on Magento? See what you're losing.</span>
+    </div>
+    <div class="header-meta" id="header-meta">
+      <span><strong>v0.1</strong> · builders-merchants</span>
+    </div>
+  </div>
+</header>
+
+<main class="app">
+
+  <!-- ========== STAGE 1 — INPUT ========== -->
+  <section class="stage active" id="stage-input">
+    <div class="stage-hero">
+      <div class="hero-eyebrow">// FOR UK BUILDERS MERCHANTS ON MAGENTO 2</div>
+      <h1 class="hero-title">Magento gets faster, cheaper, and <em>better</em> on Hyva. Let's prove it on your site.</h1>
+      <p class="hero-sub">Drop your URL. We'll show you the speed, SEO, and hosting improvements you'd see if your site moved to Hyva + Readymage. No sign-up. No catch.</p>
+
+      <form class="url-form" id="url-form" onsubmit="return false;">
+        <input class="url-input" id="url-input" type="text" placeholder="https://your-merchant-site.co.uk" autocomplete="off" spellcheck="false">
+        <button class="url-submit" id="url-submit">Run audit →</button>
+      </form>
+
+      <div class="trust-strip">
+        <div class="trust-item">
+          <div class="trust-num">Free</div>
+          <div class="trust-label">// What it costs<br>No sign-up, no follow-up unless you want one</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-num">No login</div>
+          <div class="trust-label">// We don't gate the report<br>You see what we see</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-num">Plat.</div>
+          <div class="trust-label">// Hyva Platinum + Adobe Gold partner<br>UK delivery team</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== STAGE 2 — RUNNING ========== -->
+  <section class="stage" id="stage-running">
+    <div class="console">
+      <div class="console-head">
+        <span class="console-title">// Running audit</span>
+        <span class="console-url">target: <strong id="running-url">—</strong></span>
+      </div>
+      <div id="console-lines"></div>
+      <div class="console-bar"><div class="console-bar-fill" id="console-bar-fill"></div></div>
+    </div>
+  </section>
+
+  <!-- ========== STAGE 3 — RESULTS ========== -->
+  <section class="stage" id="stage-results">
+    <div class="results-head">
+      <div>
+        <div class="results-meta">// Audit complete · <span id="audit-timestamp"></span></div>
+        <div class="results-url" id="results-url">—</div>
+        <div class="results-platform">
+          <span class="tag">DETECTED</span>Magento 2.4.x · Luma theme · No Hyva · No PWA · Standard hosting
+        </div>
+      </div>
+      <div class="results-actions">
+        <button class="btn-ghost" onclick="resetAudit()">← New URL</button>
+      </div>
+    </div>
+
+    <div class="score-grid" id="score-grid"></div>
+
+    <div class="section-title" data-num="01 / FINDINGS">What's slowing your site down</div>
+    <p class="section-sub">The seven biggest issues — every one of them is what Hyva was built to fix. We've called out the impact in plain numbers.</p>
+    <div class="findings" id="findings"></div>
+
+    <div class="section-title" data-num="02 / IF YOU MOVED">Same site, on Hyva + Readymage</div>
+    <p class="section-sub">Side-by-side comparison. The Hyva column isn't theory — it's the average of 50+ Hyva sites we've benchmarked, on Readymage's auto-scaling hosting.</p>
+    <div class="compare-card">
+      <div class="compare-eyebrow">// THE HEADLINE</div>
+      <div class="compare-title">Faster site, lower bill, <em>more conversions.</em></div>
+      <div class="compare-sub">A 1-second improvement in mobile load typically lifts conversion 7–10% on B2B sites. Faster pages also rank better — Google has been weighting Core Web Vitals since 2021.</div>
+      <div class="compare-rows" id="compare-rows"></div>
+    </div>
+
+    <div class="section-title" data-num="03 / FRAGMENTATION">Stop paying four agencies</div>
+    <p class="section-sub">Most merchants we audit have dev with one shop, hosting from another, SEO from a third, PPC scattered across freelancers — and analytics half-broken because nobody owns it.</p>
+
+    <div class="services-intro">
+      <div class="services-side fragmented">
+        <div class="services-side-tag">// THE TYPICAL SETUP</div>
+        <div class="services-side-h">Four vendors, four invoices, no joined-up view.</div>
+        <ul class="services-list bad">
+          <li><strong>Dev agency</strong> — builds and patches the site</li>
+          <li><strong>Hosting provider</strong> — you pay a flat fee whether you use it or not</li>
+          <li><strong>SEO agency</strong> — sends monthly reports nobody reads</li>
+          <li><strong>PPC freelancer</strong> — runs ads, can't see how they convert</li>
+          <li><strong>In-house analyst</strong> — patches GA4 together when they have time</li>
+          <li>Nobody owns the whole picture, nobody is accountable for revenue</li>
+        </ul>
+      </div>
+      <div class="services-side unified">
+        <div class="services-side-tag">SCANDIWEB — UNDER ONE ROOF</div>
+        <div class="services-side-h">One team, one accountable contact, one revenue number.</div>
+        <ul class="services-list good">
+          <li><strong>Hyva development</strong> — UK Hyva Platinum delivery team</li>
+          <li><strong>Readymage hosting</strong> — autoscale, pay-per-use, no idle costs</li>
+          <li><strong>SEO + AEO/GEO</strong> — including the new AI-search optimisation</li>
+          <li><strong>PPC + paid social</strong> — joined to your conversion data, not flying blind</li>
+          <li><strong>CRO + UX/UI</strong> — testing what actually moves trade revenue</li>
+          <li><strong>Custom AI back-office tools</strong> — automation built around how you actually work</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-title" data-num="04 / WHAT YOU'D GET">The full Scandiweb stack</div>
+    <p class="section-sub">Pick what you need, drop what you don't — but it all sits with one team.</p>
+
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-card-num">01</div>
+        <div class="stack-card-h">Hyva build</div>
+        <div class="stack-card-tag">DEV</div>
+        <div class="stack-card-body">Replatform without rebuilding. Your existing data, integrations and modules, on a frontend that loads in under 2 seconds.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-num">02</div>
+        <div class="stack-card-h">Readymage hosting</div>
+        <div class="stack-card-tag">HOSTING</div>
+        <div class="stack-card-body">Auto-scaling Magento hosting. Pay for what you use, scale up for BFCM, scale down in January. No fixed instance bills.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-num">03</div>
+        <div class="stack-card-h">SEO + AEO/GEO</div>
+        <div class="stack-card-tag">ORGANIC</div>
+        <div class="stack-card-body">Classic SEO plus the new layer — getting your products surfaced inside ChatGPT, Perplexity, Google AI Overviews. Most agencies aren't doing this yet.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-num">04</div>
+        <div class="stack-card-h">PPC &amp; paid</div>
+        <div class="stack-card-tag">PAID</div>
+        <div class="stack-card-body">Google Ads, Meta, LinkedIn — connected to your conversion data so we know which spend actually drives trade revenue, not just clicks.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-num">05</div>
+        <div class="stack-card-h">CRO + UX/UI</div>
+        <div class="stack-card-tag">CONVERSION</div>
+        <div class="stack-card-body">Testing programme run against trade-specific KPIs — quote-to-order, basket abandon, branch reorder. Not generic ecommerce metrics.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-num">06</div>
+        <div class="stack-card-h">Analytics + reporting</div>
+        <div class="stack-card-tag">DATA</div>
+        <div class="stack-card-body">GA4 done properly. Server-side tracking. Branch-level revenue attribution. The dashboard your board actually wants.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-num">07</div>
+        <div class="stack-card-h">Custom AI tools</div>
+        <div class="stack-card-tag">AI DEV</div>
+        <div class="stack-card-body">Bespoke back-office automations — supplier price ingestion, branch stock reconciliation, quote drafting, RFQ triage. Not chatbots — useful tools.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-num">08</div>
+        <div class="stack-card-h">Module library</div>
+        <div class="stack-card-tag">EXTENSIONS</div>
+        <div class="stack-card-body">Pre-built trade modules — credit limits, branch picker, bulk reorder, CSV upload — included in the Hyva build. No third-party licence fees.</div>
+      </div>
+    </div>
+
+    <div class="section-title" data-num="05 / WHAT YOU'RE RUNNING">A few details — speeds up the call</div>
+    <p class="section-sub">Tell us roughly what's running underneath. Optional — but the more we know, the sharper our proposal back. Sales gets this with the audit, so the first call goes straight to specifics rather than discovery.</p>
+
+    <div class="req-grid">
+      <div class="req-side">
+        <div class="req-side-tag">SYSTEMS</div>
+        <div class="req-side-h">What's plugged in?</div>
+
+        <div class="req-field">
+          <label class="req-field-label">ERP / back-office</label>
+          <select class="req-field-select" id="r-erp">
+            <option value="">— Pick one —</option>
+            <option>Intact iQ</option>
+            <option>Kerridge K8 / KCS</option>
+            <option>Merlin Business Software</option>
+            <option>Sage 200</option>
+            <option>Microsoft Dynamics 365 BC</option>
+            <option>NetSuite</option>
+            <option>Custom / in-house</option>
+            <option>Not sure yet</option>
+            <option>None</option>
+          </select>
+        </div>
+
+        <div class="req-field">
+          <label class="req-field-label">Order management (OMS)</label>
+          <select class="req-field-select" id="r-oms">
+            <option value="">— Pick one —</option>
+            <option>Linnworks</option>
+            <option>Brightpearl</option>
+            <option>ChannelAdvisor</option>
+            <option>Magento native order management</option>
+            <option>Handled in our ERP</option>
+            <option>Custom / in-house</option>
+            <option>Not sure yet</option>
+            <option>None</option>
+          </select>
+        </div>
+
+        <div class="req-field">
+          <label class="req-field-label">Stock &amp; pricing sync</label>
+          <select class="req-field-select" id="r-sync">
+            <option value="">— Pick one —</option>
+            <option>Real-time (live stock per branch)</option>
+            <option>Near real-time (every few minutes)</option>
+            <option>Hourly batch</option>
+            <option>Nightly batch</option>
+            <option>Manual / not synced</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+
+        <div class="req-field">
+          <label class="req-field-label">Payments</label>
+          <select class="req-field-select" id="r-payments">
+            <option value="">— Pick one —</option>
+            <option>Stripe</option>
+            <option>Adyen</option>
+            <option>Worldpay</option>
+            <option>Opayo (Sage Pay)</option>
+            <option>Trade account / on-account billing</option>
+            <option>Mix of card + on-account</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+
+        <div class="req-field">
+          <label class="req-field-label">Delivery model</label>
+          <select class="req-field-select" id="r-delivery">
+            <option value="">— Pick one —</option>
+            <option>Branch courier (own vans)</option>
+            <option>Third-party logistics (3PL)</option>
+            <option>Direct-from-supplier drop-ship</option>
+            <option>Click &amp; collect only</option>
+            <option>Mixed model</option>
+          </select>
+        </div>
+
+        <div class="req-field">
+          <label class="req-field-label">Branches / locations</label>
+          <select class="req-field-select" id="r-branches">
+            <option value="">— Pick one —</option>
+            <option>1</option>
+            <option>2–5</option>
+            <option>6–15</option>
+            <option>16–50</option>
+            <option>50+</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="req-side">
+        <div class="req-side-tag">B2B FEATURES</div>
+        <div class="req-side-h">Tick anything you need.</div>
+
+        <div class="req-toggles" id="req-toggles"></div>
+      </div>
+    </div>
+
+    <div class="req-textarea-wrap">
+      <label class="req-field-label" style="margin-bottom:10px;">Anything else worth flagging? <span style="text-transform:none;letter-spacing:0;color:var(--text-muted);">(other systems, custom integrations, current pain points, deadline pressure…)</span></label>
+      <textarea class="req-textarea" id="r-notes" placeholder="e.g. tied to Kerridge K8 — worried about the upgrade. Or BFCM is approaching and the site falls over at 200 concurrent. Or the board wants 30% online by 2027…"></textarea>
+    </div>
+
+    <div class="cta-strip">
+      <div class="cta-text">Want the full audit + a no-pressure 30-min call to walk through it?</div>
+      <button class="cta-btn" id="open-cta">Get the full report →</button>
+    </div>
+
+    <div class="footnote">
+      <span><strong>// DEMO MODE</strong> · scores derived from URL hash for illustration. Production version uses Lighthouse, PageSpeed Insights, BuiltWith, and Ahrefs APIs.</span>
+      <span>v0.1 / hyva-upgrade-audit</span>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="label">// LET'S TALK</div>
+        <div class="title">Get the full audit</div>
+      </div>
+      <button class="modal-close" id="modal-close">×</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="modal-summary">
+        We'll send the full Lighthouse + Ahrefs report on <strong id="modal-url">—</strong> within 1 working day, plus a 30-minute call to walk through the upgrade path and rough numbers.
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Your name <span class="req">*</span></label>
+          <input class="field-input" id="m-name" placeholder="First, surname">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Role</label>
+          <input class="field-input" id="m-role" placeholder="e.g. Head of Digital">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Company <span class="req">*</span></label>
+          <input class="field-input" id="m-company" placeholder="e.g. Smith &amp; Sons">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Branches</label>
+          <select class="field-select" id="m-branches">
+            <option value="">—</option>
+            <option>1</option>
+            <option>2–5</option>
+            <option>6–15</option>
+            <option>16–50</option>
+            <option>50+</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Email <span class="req">*</span></label>
+          <input class="field-input" id="m-email" type="email" placeholder="you@company.co.uk">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Phone</label>
+          <input class="field-input" id="m-phone" type="tel" placeholder="+44…">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Anything specific you want covered on the call?</label>
+        <textarea class="field-textarea" id="m-notes" placeholder="e.g. we're tied to Kerridge K8 and worried about the upgrade, or BFCM is approaching and we need scale, or the board wants a number on hosting savings…"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span class="foot-text">// Goes to Scandiweb sales — nowhere else</span>
+      <button class="btn-primary" id="modal-send">Send →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// URL HASHING & DETERMINISTIC SCORE GENERATION
+// ============================================================
+
+function hashUrl(url) {
+  let h = 0;
+  const s = url.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) - h) + s.charCodeAt(i);
+    h = h & h;
+  }
+  return Math.abs(h);
+}
+
+function generateScores(url) {
+  const h = hashUrl(url);
+  return {
+    mobileSpeed:  28 + (h % 24),                 // 28-51
+    desktopSpeed: 58 + ((h >> 3) % 22),          // 58-79
+    lcp:          (3.4 + ((h >> 6) % 26) / 10).toFixed(1),  // 3.4-5.9
+    cls:          (0.14 + ((h >> 9) % 22) / 100).toFixed(2),// 0.14-0.35
+    inp:          (210 + ((h >> 12) % 180)),     // 210-389ms
+    seo:          68 + ((h >> 14) % 21),         // 68-88
+    accessibility:72 + ((h >> 17) % 18),         // 72-89
+    bundleJs:     (2.1 + ((h >> 20) % 22) / 10).toFixed(1), // 2.1-4.2 MB
+    ttfb:         (480 + ((h >> 22) % 520)),     // 480-999ms
+    requests:     142 + ((h >> 24) % 84)         // 142-225
+  };
+}
+
+const HYVA_BENCH = {
+  mobileSpeed: 92,
+  desktopSpeed: 98,
+  lcp: 1.6,
+  cls: 0.04,
+  inp: 95,
+  seo: 96,
+  accessibility: 95,
+  bundleJs: 0.28,
+  ttfb: 180,
+  requests: 38
+};
+
+function classify(value, thresholds) {
+  // thresholds: [bad-max, mid-max] — above mid-max is good
+  if (value >= thresholds[1]) return 'good';
+  if (value >= thresholds[0]) return 'mid';
+  return 'bad';
+}
+
+function classifyReverse(value, thresholds) {
+  // for metrics where lower is better
+  if (value <= thresholds[0]) return 'good';
+  if (value <= thresholds[1]) return 'mid';
+  return 'bad';
+}
+
+// ============================================================
+// CONSOLE LINES (audit running)
+// ============================================================
+
+function buildConsoleLines(url) {
+  const domain = url.replace(/^https?:\/\//, '').split('/')[0];
+  return [
+    { text: `Resolving DNS for <strong>${domain}</strong>…`, status: 'done', stat: '24ms' },
+    { text: `Connecting via HTTPS, checking TLS chain…`, status: 'done', stat: 'TLS 1.3' },
+    { text: `Fetching homepage, capturing initial HTML…`, status: 'done', stat: '1.4MB' },
+    { text: `Detecting platform fingerprint…`, status: 'done', stat: 'Magento 2.4.x' },
+    { text: `Detecting frontend theme & framework…`, status: 'warn', stat: 'Luma · No Hyva' },
+    { text: `Running Lighthouse — mobile…`, status: 'done', stat: 'complete' },
+    { text: `Running Lighthouse — desktop…`, status: 'done', stat: 'complete' },
+    { text: `Capturing Core Web Vitals (LCP, CLS, INP)…`, status: 'fail', stat: '3 of 3 fail' },
+    { text: `Crawling robots.txt and sitemap.xml…`, status: 'done', stat: 'OK' },
+    { text: `Scanning structured data, meta tags, schema…`, status: 'warn', stat: 'partial' },
+    { text: `Checking hosting model — TTFB, edge caching, CDN…`, status: 'warn', stat: 'no edge' },
+    { text: `Comparing against Hyva merchant benchmarks (n=50)…`, status: 'done', stat: 'OK' },
+    { text: `Audit complete. Generating report…`, status: 'done', stat: 'OK' }
+  ];
+}
+
+// ============================================================
+// FINDINGS GENERATION
+// ============================================================
+
+function buildFindings(scores) {
+  return [
+    {
+      severity: 'high',
+      tagNow: 'PROBLEM',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `JavaScript bundle is ${scores.bundleJs}MB`,
+      currentBody: `Magento Luma ships <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong> — even on pages that don't use them. Your homepage downloads ${scores.bundleJs}MB of JS before a user can interact.`,
+      fixH: 'Hyva ships ~280KB of Alpine.js + Tailwind',
+      fixBody: `Hyva replaced RequireJS/KnockoutJS with <strong>Alpine.js</strong>, dropped jQuery, and uses Tailwind for utility CSS. Same Magento back-end, ~85% smaller frontend.`,
+      impact: `~${(scores.bundleJs - 0.28).toFixed(1)}MB lighter per page`
+    },
+    {
+      severity: 'high',
+      tagNow: 'PROBLEM',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `Largest Contentful Paint: ${scores.lcp}s`,
+      currentBody: `LCP is the time until the largest visible element renders. Above 2.5s = "Poor" by Google's Core Web Vitals. Your ${scores.lcp}s is well over the threshold — and Google ranks slower pages lower.`,
+      fixH: 'Hyva sites average 1.6s LCP',
+      fixBody: `Less JS to parse, no client-side rendering wait, server-side templates. The same product page renders in roughly a third of the time.`,
+      impact: `${((scores.lcp - 1.6) * 1000).toFixed(0)}ms faster`
+    },
+    {
+      severity: 'high',
+      tagNow: 'PROBLEM',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `Cumulative Layout Shift: ${scores.cls}`,
+      currentBody: `Your page jumps around as it loads — images without dimensions, late-loading widgets, sliding banners. Above 0.1 = "Poor". Frustrating for users, penalised by Google.`,
+      fixH: 'Hyva sites average 0.04 CLS',
+      fixBody: `Hyva templates declare image dimensions, lazy-load below-the-fold content properly, and don't inject late DOM. Layout settles immediately.`,
+      impact: 'Smoother UX, better ranking'
+    },
+    {
+      severity: 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: 'READYMAGE FIXES IT',
+      currentH: `Time to First Byte: ${scores.ttfb}ms`,
+      currentBody: `Your server takes <strong>${scores.ttfb}ms</strong> to start sending a response. On standard fixed-instance hosting, you're paying for capacity you don't use 80% of the time, then queuing requests during peak load.`,
+      fixH: 'Readymage averages 160-200ms TTFB',
+      fixBody: `Auto-scaling Magento hosting that adds workers when traffic spikes and sheds them when it drops. Pay for what you use, not what you might use.`,
+      impact: `${(scores.ttfb - 180)}ms faster + lower hosting bill`
+    },
+    {
+      severity: 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: 'WE FIX IT',
+      currentH: `${scores.requests} HTTP requests on the homepage`,
+      currentBody: `Each one is a round-trip. Most are CSS, JS, fonts, tracking scripts, and images. Magento Luma defaults are notoriously chatty — 200+ requests per page is common.`,
+      fixH: 'Hyva builds typically ship 30-50 requests',
+      fixBody: `Bundled and minified properly. Critical CSS inlined. Fonts subset and self-hosted. Tracking consolidated through GTM server-side.`,
+      impact: `${scores.requests - 40} fewer round-trips`
+    },
+    {
+      severity: 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: 'WE FIX IT',
+      currentH: `SEO score: ${scores.seo}/100`,
+      currentBody: `Decent but leaving organic traffic on the table. Common issues: missing product schema, weak internal linking, slow pages hurting ranking, no AEO/GEO optimisation for AI search.`,
+      fixH: 'Production-grade SEO + AEO/GEO',
+      fixBody: `Full schema (Product, Offer, Review, Organization, BreadcrumbList), branch-level local SEO, AI-search optimisation for ChatGPT/Perplexity/Gemini surfaces, faster pages = better rankings.`,
+      impact: 'Rank higher, get cited by AI'
+    },
+    {
+      severity: 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: 'WE FIX IT',
+      currentH: `Accessibility: ${scores.accessibility}/100`,
+      currentBody: `Most B2B trade sites score 70-85 on accessibility — missing alt text, contrast issues, form labels, heading order. Beyond ethics and legal exposure, accessibility correlates with higher conversion.`,
+      fixH: 'WCAG 2.2 AA as standard',
+      fixBody: `Hyva theme is built with accessibility in. Our delivery includes manual audit, screen-reader testing, and remediation. Ships at 95+ on Lighthouse accessibility.`,
+      impact: 'Compliant + better conversion'
+    }
+  ];
+}
+
+// ============================================================
+// COMPARISON ROWS
+// ============================================================
+
+function buildCompareRows(scores) {
+  // Each row: label, now value+display+max, hyva value+display+max
+  return [
+    {
+      label: 'Mobile speed',
+      nowVal: scores.mobileSpeed,  nowMax: 100, nowDisplay: scores.mobileSpeed,
+      hyvaVal: HYVA_BENCH.mobileSpeed, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.mobileSpeed,
+      unit: '/100'
+    },
+    {
+      label: 'Desktop speed',
+      nowVal: scores.desktopSpeed, nowMax: 100, nowDisplay: scores.desktopSpeed,
+      hyvaVal: HYVA_BENCH.desktopSpeed, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.desktopSpeed,
+      unit: '/100'
+    },
+    {
+      label: 'LCP (lower=better)',
+      nowVal: 100 - Math.min(parseFloat(scores.lcp) * 14, 95), nowMax: 100, nowDisplay: scores.lcp + 's',
+      hyvaVal: 100 - HYVA_BENCH.lcp * 14, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.lcp + 's',
+      unit: ''
+    },
+    {
+      label: 'JS bundle (lower=better)',
+      nowVal: 100 - Math.min(parseFloat(scores.bundleJs) * 22, 92), nowMax: 100, nowDisplay: scores.bundleJs + 'MB',
+      hyvaVal: 100 - HYVA_BENCH.bundleJs * 22, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.bundleJs + 'MB',
+      unit: ''
+    },
+    {
+      label: 'TTFB (lower=better)',
+      nowVal: 100 - Math.min(scores.ttfb / 12, 92), nowMax: 100, nowDisplay: scores.ttfb + 'ms',
+      hyvaVal: 100 - HYVA_BENCH.ttfb / 12, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.ttfb + 'ms',
+      unit: ''
+    },
+    {
+      label: 'HTTP requests',
+      nowVal: 100 - Math.min(scores.requests / 2.6, 92), nowMax: 100, nowDisplay: scores.requests,
+      hyvaVal: 100 - HYVA_BENCH.requests / 2.6, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.requests,
+      unit: ''
+    }
+  ];
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+
+function renderScoreGrid(scores) {
+  const grid = document.getElementById('score-grid');
+  const cards = [
+    {
+      label: 'Mobile speed', value: scores.mobileSpeed, unit: '/100',
+      cls: classify(scores.mobileSpeed, [50, 90]),
+      bench: `Hyva avg ${HYVA_BENCH.mobileSpeed}`,
+      delta: `+${HYVA_BENCH.mobileSpeed - scores.mobileSpeed}`
+    },
+    {
+      label: 'Desktop speed', value: scores.desktopSpeed, unit: '/100',
+      cls: classify(scores.desktopSpeed, [50, 90]),
+      bench: `Hyva avg ${HYVA_BENCH.desktopSpeed}`,
+      delta: `+${HYVA_BENCH.desktopSpeed - scores.desktopSpeed}`
+    },
+    {
+      label: 'LCP', value: scores.lcp, unit: 's',
+      cls: classifyReverse(parseFloat(scores.lcp), [2.5, 4.0]),
+      bench: `Hyva avg ${HYVA_BENCH.lcp}s`,
+      delta: `−${(scores.lcp - HYVA_BENCH.lcp).toFixed(1)}s`
+    },
+    {
+      label: 'CLS', value: scores.cls, unit: '',
+      cls: classifyReverse(parseFloat(scores.cls), [0.1, 0.25]),
+      bench: `Hyva avg ${HYVA_BENCH.cls}`,
+      delta: `−${(scores.cls - HYVA_BENCH.cls).toFixed(2)}`
+    },
+    {
+      label: 'INP', value: scores.inp, unit: 'ms',
+      cls: classifyReverse(scores.inp, [200, 500]),
+      bench: `Hyva avg ${HYVA_BENCH.inp}ms`,
+      delta: `−${scores.inp - HYVA_BENCH.inp}ms`
+    },
+    {
+      label: 'SEO health', value: scores.seo, unit: '/100',
+      cls: classify(scores.seo, [60, 90]),
+      bench: `Hyva avg ${HYVA_BENCH.seo}`,
+      delta: `+${HYVA_BENCH.seo - scores.seo}`
+    },
+    {
+      label: 'Accessibility', value: scores.accessibility, unit: '/100',
+      cls: classify(scores.accessibility, [60, 90]),
+      bench: `Hyva avg ${HYVA_BENCH.accessibility}`,
+      delta: `+${HYVA_BENCH.accessibility - scores.accessibility}`
+    },
+    {
+      label: 'JS bundle', value: scores.bundleJs, unit: 'MB',
+      cls: classifyReverse(parseFloat(scores.bundleJs), [0.5, 1.5]),
+      bench: `Hyva avg ${HYVA_BENCH.bundleJs}MB`,
+      delta: `−${(scores.bundleJs - HYVA_BENCH.bundleJs).toFixed(1)}MB`
+    }
+  ];
+
+  grid.innerHTML = cards.map(c => {
+    const max = c.unit === 's' ? 6 : c.unit === 'ms' ? 1000 : c.unit === 'MB' ? 5 : 100;
+    const fillPct = c.cls === 'bad' || c.cls === 'mid' ?
+      (c.unit === '/100' ? c.value : (c.unit === 's' || c.unit === 'MB' || c.unit === 'ms' ? Math.min(parseFloat(c.value) / max * 100, 100) : 50))
+      : (c.unit === '/100' ? c.value : 100 - Math.min(parseFloat(c.value) / max * 100, 100));
+    return `
+      <div class="score-card">
+        <div class="score-card-label">// ${c.label}</div>
+        <div class="score-value">
+          <span class="score-num ${c.cls}">${c.value}</span>
+          <span class="score-unit">${c.unit}</span>
+        </div>
+        <div class="score-bar">
+          <div class="score-bar-fill ${c.cls}" style="width:${fillPct}%"></div>
+        </div>
+        <div class="score-compare">
+          <span>${c.bench}</span>
+          <span class="score-delta">${c.delta}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderFindings(scores) {
+  const root = document.getElementById('findings');
+  const items = buildFindings(scores);
+  root.innerHTML = items.map((f, i) => `
+    <div class="finding">
+      <div class="finding-marker ${f.severity === 'mid' ? 'warn' : ''}">${String(i+1).padStart(2,'0')}</div>
+      <div class="finding-current">
+        <div class="finding-tag">// ${f.tagNow}</div>
+        <div class="finding-h">${f.currentH}</div>
+        <div class="finding-body">${f.currentBody}</div>
+      </div>
+      <div class="finding-fix">
+        <div class="finding-tag">// ${f.tagFix}</div>
+        <div class="finding-h">${f.fixH}</div>
+        <div class="finding-body">${f.fixBody}</div>
+        <div class="finding-impact">${f.impact}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCompareRows(scores) {
+  const root = document.getElementById('compare-rows');
+  const rows = buildCompareRows(scores);
+  root.innerHTML = rows.map(r => `
+    <div class="compare-row">
+      <div class="compare-label">${r.label}</div>
+      <div>
+        <div class="compare-bar-label">Now</div>
+        <div class="compare-bar"><div class="compare-bar-fill now" data-target="${(r.nowVal / r.nowMax * 100).toFixed(1)}">${r.nowDisplay}</div></div>
+      </div>
+      <div>
+        <div class="compare-bar-label">On Hyva + Readymage</div>
+        <div class="compare-bar"><div class="compare-bar-fill hyva" data-target="${(r.hyvaVal / r.hyvaMax * 100).toFixed(1)}">${r.hyvaDisplay}</div></div>
+      </div>
+    </div>
+  `).join('');
+
+  // Animate bars in
+  setTimeout(() => {
+    root.querySelectorAll('.compare-bar-fill').forEach(el => {
+      el.style.width = el.dataset.target + '%';
+    });
+  }, 120);
+}
+
+// ============================================================
+// FLOW CONTROL
+// ============================================================
+
+let currentUrl = '';
+
+function startAudit(url) {
+  currentUrl = normalizeUrl(url);
+  document.getElementById('running-url').textContent = currentUrl;
+  document.getElementById('console-lines').innerHTML = '';
+  document.getElementById('console-bar-fill').style.width = '0%';
+
+  showStage('running');
+
+  const lines = buildConsoleLines(currentUrl);
+  const total = lines.length;
+  let i = 0;
+
+  function streamLine() {
+    if (i >= total) {
+      // Done — wait a beat then go to results
+      setTimeout(() => {
+        renderResults(currentUrl);
+        showStage('results');
+      }, 600);
+      return;
+    }
+
+    const line = lines[i];
+    const lineEl = document.createElement('div');
+    lineEl.className = 'console-line';
+    lineEl.style.animationDelay = '0s';
+    lineEl.innerHTML = `
+      <span class="marker ${line.status}">${
+        line.status === 'done' ? '✓' :
+        line.status === 'warn' ? '!' :
+        line.status === 'fail' ? '×' : '·'
+      }</span>
+      <span class="text">${line.text}</span>
+      <span class="stat">${line.stat}</span>
+    `;
+    document.getElementById('console-lines').appendChild(lineEl);
+
+    document.getElementById('console-bar-fill').style.width = `${((i+1)/total)*100}%`;
+
+    i++;
+    // Variable timing — feels more real
+    const delay = 350 + Math.random() * 380;
+    setTimeout(streamLine, delay);
+  }
+
+  streamLine();
+}
+
+function renderResults(url) {
+  const scores = generateScores(url);
+  document.getElementById('results-url').textContent = url;
+  document.getElementById('audit-timestamp').textContent = new Date().toLocaleString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  renderScoreGrid(scores);
+  renderFindings(scores);
+  renderCompareRows(scores);
+  renderReqToggles();
+}
+
+function showStage(stage) {
+  document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+  document.getElementById('stage-' + stage).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetAudit() {
+  showStage('input');
+  document.getElementById('url-input').value = '';
+  document.getElementById('url-input').focus();
+}
+
+function normalizeUrl(url) {
+  url = url.trim();
+  if (!url) return '';
+  if (!url.match(/^https?:\/\//)) url = 'https://' + url;
+  // Trim trailing slashes
+  url = url.replace(/\/+$/, '');
+  return url;
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+
+document.getElementById('url-submit').addEventListener('click', () => {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url || url.length < 4) {
+    document.getElementById('url-input').focus();
+    return;
+  }
+  startAudit(url);
+});
+
+document.getElementById('url-input').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('url-submit').click();
+});
+
+// ============================================================
+// REQUIREMENTS — B2B FEATURES (rendered on results page)
+// ============================================================
+
+const tradeFeatures = [
+  { id: 'tradeAccount', name: 'Trade login + customer-specific pricing', desc: 'Negotiated prices once logged in.' },
+  { id: 'creditLimit', name: 'Credit limit & checkout block', desc: 'Available credit shown, blocked at limit.' },
+  { id: 'branchStock', name: 'Live stock per branch', desc: 'Stock split by branch, not just in/out.' },
+  { id: 'clickCollect', name: 'Click & collect by branch', desc: 'Reserve at chosen branch, with cut-offs.' },
+  { id: 'reorderHistory', name: 'Reorder from past invoices', desc: 'Trade users repeat orders without rebuilding.' },
+  { id: 'quickOrder', name: 'Quick order by SKU', desc: 'Type or paste codes, qty, straight to basket.' },
+  { id: 'csvUpload', name: 'CSV / spreadsheet upload', desc: 'Bulk-add from a job schedule.' },
+  { id: 'quoteRequest', name: 'Quote request flow', desc: 'Callback path for non-stocked items.' },
+  { id: 'siteAddresses', name: 'Site delivery addresses', desc: 'Job-site addresses separate from billing.' },
+  { id: 'vatToggle', name: 'VAT ex/inc toggle', desc: 'Trade defaults ex-VAT, retail inc-VAT.' },
+  { id: 'tradeApply', name: 'New trade account application', desc: 'Online form, credit check, references.' },
+  { id: 'multiUser', name: 'Multi-user trade accounts', desc: 'Buyers, approvers, branch managers in one account.' }
+];
+
+const reqState = { features: new Set() };
+
+function renderReqToggles() {
+  const root = document.getElementById('req-toggles');
+  if (!root) return;
+  root.innerHTML = tradeFeatures.map(f => `
+    <div class="req-toggle ${reqState.features.has(f.id) ? 'on' : ''}" data-id="${f.id}">
+      <div class="req-toggle-text">
+        <strong>${f.name}</strong>
+        ${f.desc}
+      </div>
+      <div class="req-mini-toggle"></div>
+    </div>
+  `).join('');
+  root.querySelectorAll('.req-toggle').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      if (reqState.features.has(id)) reqState.features.delete(id);
+      else reqState.features.add(id);
+      renderReqToggles();
+    });
+  });
+}
+
+function gatherRequirements() {
+  return {
+    erp: document.getElementById('r-erp')?.value || '',
+    oms: document.getElementById('r-oms')?.value || '',
+    sync: document.getElementById('r-sync')?.value || '',
+    payments: document.getElementById('r-payments')?.value || '',
+    delivery: document.getElementById('r-delivery')?.value || '',
+    branches: document.getElementById('r-branches')?.value || '',
+    needed_b2b_features: [...reqState.features].map(id => ({
+      id,
+      name: tradeFeatures.find(f => f.id === id)?.name || id
+    })),
+    notes: document.getElementById('r-notes')?.value.trim() || ''
+  };
+}
+
+// CTA — open modal
+document.getElementById('open-cta').addEventListener('click', () => {
+  document.getElementById('modal-url').textContent = currentUrl;
+  document.getElementById('modal-overlay').classList.add('open');
+});
+
+// Modal — close
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-overlay') document.getElementById('modal-overlay').classList.remove('open');
+});
+
+// Modal — send
+document.getElementById('modal-send').addEventListener('click', () => {
+  const name = document.getElementById('m-name').value.trim();
+  const email = document.getElementById('m-email').value.trim();
+  const company = document.getElementById('m-company').value.trim();
+
+  if (!name || !email || !company) {
+    alert('Name, email, and company are required.');
+    return;
+  }
+
+  const payload = {
+    submitted_at: new Date().toISOString(),
+    source: 'hyva-upgrade-audit-v0.1',
+    audited_url: currentUrl,
+    detected_platform: 'Magento 2.4.x · Luma · No Hyva',
+    scores: generateScores(currentUrl),
+    requirements: gatherRequirements(),
+    contact: {
+      name,
+      role: document.getElementById('m-role').value.trim(),
+      company,
+      branches: document.getElementById('m-branches').value,
+      email,
+      phone: document.getElementById('m-phone').value.trim(),
+      notes: document.getElementById('m-notes').value.trim()
+    }
+  };
+  console.log('PAYLOAD ⤴', payload);
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="sent-state">
+      <div class="sent-mark">✓</div>
+      <div class="sent-h">On its way.</div>
+      <div class="sent-sub">Full report + 30-min call slot lands in your inbox within 1 working day. We'll bring numbers, not buzzwords.</div>
+    </div>
+    <details style="margin-top:14px;background:var(--bg-page);border:1px solid var(--border-soft);padding:12px;">
+      <summary style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);">// JSON payload (what sales receives)</summary>
+      <pre style="font-family:'JetBrains Mono',monospace;font-size:10.5px;margin-top:10px;white-space:pre-wrap;word-break:break-word;color:var(--text-primary);line-height:1.55;">${JSON.stringify(payload, null, 2)}</pre>
+    </details>
+  `;
+  document.querySelector('.modal-foot').innerHTML = `
+    <span class="foot-text">// You can close this now</span>
+    <button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.remove('open');">Done</button>
+  `;
+});
+
+// Initial focus
+setTimeout(() => document.getElementById('url-input').focus(), 200);
+</script>
+
+</body>
+</html>
