@@ -1218,6 +1218,85 @@ body {
   .cta-btn { width: 100%; }
   .header-meta { display: none; }
 }
+
+/* ── RESULTS STAGE — clean/minimal ─────────────────────────── */
+#stage-results {
+  background: var(--bg-page);
+  background-image: none;
+}
+
+/* Score grid: soft dividers, colored top accent per card */
+#stage-results .score-grid {
+  background: var(--border-soft);
+  border-color: var(--border-soft);
+  gap: 1px;
+}
+
+#stage-results .score-card {
+  border-top: 3px solid var(--border-soft);
+  padding: 20px 20px 16px;
+}
+
+#stage-results .score-card:has(.score-num.bad)  { border-top-color: var(--brick); }
+#stage-results .score-card:has(.score-num.mid)  { border-top-color: var(--accent-dim); }
+#stage-results .score-card:has(.score-num.good) { border-top-color: var(--sage); }
+
+/* Score delta pill — cleaner */
+#stage-results .score-delta {
+  background: transparent;
+  color: var(--sage);
+  border: 1px solid var(--sage);
+  font-weight: 700;
+}
+
+/* Section titles — lighter chrome */
+#stage-results .section-title::before {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-soft);
+  padding: 3px 10px;
+}
+#stage-results .section-title::after {
+  background: var(--border-soft);
+  height: 1px;
+}
+
+/* Findings — thin left severity bar instead of bulky numbered column */
+#stage-results .finding {
+  grid-template-columns: 5px 1fr 1fr;
+  border-color: var(--border-soft);
+}
+#stage-results .finding-marker {
+  font-size: 0;
+  min-height: 60px;
+}
+#stage-results .finding-marker.warn { background: var(--accent-dim); }
+#stage-results .finding-current { border-right-color: var(--border-soft); }
+#stage-results .finding-fix { background: #f8f9ff; }
+
+/* Finding impact tag — softer */
+#stage-results .finding-impact {
+  background: var(--bg-canvas);
+  color: var(--accent);
+  border: 1px solid var(--border-soft);
+}
+
+/* Stack + req grids — soft dividers */
+#stage-results .stack-grid,
+#stage-results .req-grid {
+  background: var(--border-soft);
+  border-color: var(--border-soft);
+}
+
+#stage-results .stack-card-tag {
+  background: var(--bg-canvas);
+  color: var(--accent);
+}
+
+#stage-results .req-side-tag {
+  background: var(--bg-canvas);
+  color: var(--accent);
+}
 </style>
 </head>
 <body>
@@ -1308,7 +1387,7 @@ body {
         <div class="results-meta">// Audit complete · <span id="audit-timestamp"></span></div>
         <div class="results-url" id="results-url">—</div>
         <div class="results-platform" id="results-platform">
-          <span class="tag" id="results-platform-tag">DETECTED</span><span id="results-platform-text">Magento 2.4.x · Luma theme · No Hyva · Standard hosting</span>
+          <span class="tag" id="results-platform-tag">DETECTED</span><span id="results-platform-text">Magento 2.4.x · Luma theme · Standard hosting</span>
         </div>
       </div>
       <div class="results-actions">
@@ -1725,10 +1804,23 @@ async function detectPlatform(url) {
         result.themeDisplay = 'Magento 2 · Hyva theme detected · Compare to Readymage average';
       } else if (isLuma) {
         result.theme        = 'Luma';
-        result.themeDisplay = 'Magento 2.4.x · Luma theme · No Hyva · Standard hosting';
+        result.themeDisplay = 'Magento 2.4.x · Luma theme · Standard hosting';
       } else {
-        result.theme        = 'Custom';
-        result.themeDisplay = 'Magento 2 · Custom theme · No Hyva detected';
+        // Fingerprint known marketplace / third-party themes
+        let customName = null;
+        if      (/porto[_\-\/]|sm-porto|porto\.phtml/i.test(html))          customName = 'Porto';
+        else if (/ultimo[_\-\/]|ultimo\.phtml/i.test(html))                  customName = 'Ultimo';
+        else if (/argento[_\-\/]|argento\.phtml/i.test(html))                customName = 'Argento';
+        else if (/claue[_\-\/]|claue\.phtml/i.test(html))                    customName = 'Claue';
+        else if (/halothemes|halo[_\-\/]theme/i.test(html))                  customName = 'Halo';
+        else if (/fastest[_\-\/]|sm-fastest/i.test(html))                    customName = 'Fastest';
+        else if (/bootstrap\.min\.(js|css)|bootstrap\.bundle\.min/i.test(html)) customName = 'Bootstrap-based custom';
+
+        result.theme           = 'Custom';
+        result.customThemeName = customName;
+        result.themeDisplay    = customName
+          ? `Magento 2 · ${customName} theme`
+          : 'Magento 2 · Custom theme';
       }
     }
 
@@ -1792,7 +1884,7 @@ async function detectPlatform(url) {
     result.error = (e.name === 'AbortError') ? 'timeout' : 'cors';
     result.isMagento    = null;
     result.theme        = 'Luma';
-    result.themeDisplay = 'Magento 2.4.x · Luma theme · No Hyva · Standard hosting (unverified)';
+    result.themeDisplay = 'Magento 2.4.x · Luma theme · Standard hosting (unverified)';
   }
 
   return result;
@@ -1957,9 +2049,10 @@ function buildConsoleLines(url, platform) {
     if (platform.theme === 'Hyva') {
       lines.push({ text: `Frontend theme: <strong>Hyva</strong> detected — speed comparison adjusted`, status: 'done', stat: 'Hyva ✓' });
     } else if (platform.theme === 'Luma') {
-      lines.push({ text: `Frontend theme: <strong>Luma</strong> — RequireJS + KnockoutJS stack confirmed`, status: 'fail', stat: 'Luma · No Hyva' });
+      lines.push({ text: `Frontend theme: <strong>Luma</strong> — RequireJS + KnockoutJS stack confirmed`, status: 'fail', stat: 'Luma' });
     } else {
-      lines.push({ text: `Frontend theme: custom — no Hyva patterns found`, status: 'warn', stat: 'Custom · No Hyva' });
+      const customLabel = platform.customThemeName || 'Custom';
+      lines.push({ text: `Frontend theme: <strong>${customLabel}</strong> — custom build on Magento frontend stack`, status: 'warn', stat: customLabel });
     }
   }
 
@@ -2008,9 +2101,14 @@ function buildFindings(scores, platform) {
       impact: `Protect your ${(4.2 - bundle).toFixed(1)}MB advantage over Luma`
     });
   } else if (bundleHeavy) {
-    const themeLabel = (platform && platform.theme === 'Custom') ? 'Custom Magento themes' : 'Magento Luma';
+    const customName  = platform && platform.customThemeName;
+    const themeLabel  = (platform && platform.theme === 'Custom')
+      ? (customName ? `${customName} theme` : 'custom Magento theme')
+      : 'Magento Luma';
     const themeReason = (platform && platform.theme === 'Custom')
-      ? `Most custom Magento themes inherit the Luma or Blank frontend stack and still ship <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong>. Unless yours was built specifically to remove them, the browser is downloading and executing all ${scores.bundleJs}MB before any interaction is possible.`
+      ? customName
+        ? `${customName} is built on the Magento Luma or Blank frontend stack and still ships <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong> on every page. The theme layer changes the look — the JS architecture underneath stays the same. The browser downloads and executes all ${scores.bundleJs}MB before any interaction is possible.`
+        : `Most custom Magento themes inherit the Luma or Blank frontend stack and still ship <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong>. Unless yours was purpose-built to remove them, the browser is downloading and executing all ${scores.bundleJs}MB before any interaction is possible.`
       : `Magento Luma ships <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong> on every page — even when the page doesn't need them. The browser must download, parse, and execute all ${scores.bundleJs}MB before any interaction is possible. This is structural, not something you can tune away.`;
     findings.push({
       severity: 'high',
@@ -2697,7 +2795,7 @@ function renderResults(url, platform, scores) {
     text.textContent = platform.themeDisplay;
   } else {
     tag.style.background = '';
-    text.textContent = platform ? platform.themeDisplay : 'Magento 2.4.x · Luma theme · No Hyva · Standard hosting';
+    text.textContent = platform ? platform.themeDisplay : 'Magento 2.4.x · Luma theme · Standard hosting';
   }
 
   // Footnote — live vs demo
@@ -2727,7 +2825,7 @@ function renderResults(url, platform, scores) {
   // Update modal payload platform string
   const platformStr = platform
     ? (platform.theme === 'Hyva' ? 'Magento 2 · Hyva theme' : platform.themeDisplay)
-    : 'Magento 2.4.x · Luma · No Hyva';
+    : 'Magento 2.4.x · Luma theme · Standard hosting';
   document.querySelector('[data-platform-str]')?.setAttribute('data-platform-str', platformStr);
 }
 
@@ -2844,7 +2942,7 @@ document.getElementById('modal-send').addEventListener('click', () => {
     submitted_at: new Date().toISOString(),
     source: 'hyva-upgrade-audit-v0.1',
     audited_url: currentUrl,
-    detected_platform: currentPlatform.themeDisplay || 'Magento 2.4.x · Luma · No Hyva',
+    detected_platform: currentPlatform.themeDisplay || 'Magento 2.4.x · Luma theme · Standard hosting',
     scores: generateScores(currentUrl),
     requirements: gatherRequirements(),
     contact: {
