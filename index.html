@@ -2307,7 +2307,7 @@ function buildFindings(scores, platform) {
       tagNow: 'IMPROVEMENT AVAILABLE',
       tagFix: 'HYVA FIXES IT',
       currentH: `Main content appears in ${scores.lcp}s`,
-      currentBody: `${scores.lcp}s is just within Google's "Good" range (under 2.5s) — better than most Luma sites we audit. The JavaScript delays are still there, but not crossing the threshold. Moving to Hyva removes the structural cause entirely and takes this well below 2s.`,
+      currentBody: `${scores.lcp}s is just within Google's "Good" range (under 2.5s) — better than many standard Magento sites we scan. The JavaScript delays are still present, but not crossing the threshold yet. Moving to Hyva removes the structural cause entirely and takes this well below 2s.`,
       fixH: 'Hyva sites average 1.6s',
       fixBody: `Even starting from a decent load time, Hyva's lighter frontend creates headroom — new features and third-party scripts have less impact on a faster baseline.`,
       impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to visible content`
@@ -2336,7 +2336,7 @@ function buildFindings(scores, platform) {
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
       currentH: `Your page jumps around as it loads (score: ${scores.cls})`,
-      currentBody: `Your page visibly shifts and moves while loading — elements appear, then jump to different positions. Google marks this as "Poor" and penalises it in rankings. On Luma, the cause is structural: Magento initialises many components in JavaScript after the initial page paint, so images, banners and carousels settle into their final positions several seconds after first appearing.`,
+      currentBody: `Your page visibly shifts and moves while loading — elements appear, then jump to different positions. Google marks this as "Poor" and penalises it in rankings. On standard Magento themes, the cause is structural: components initialise in JavaScript after the initial page paint, so images, banners and carousels settle into their final positions several seconds after first appearing.`,
       fixH: 'Hyva pages settle immediately on first render',
       fixBody: `Hyva renders all components server-side with correct dimensions already set. Nothing injects or shifts after paint. The page is stable on arrival, not after several rounds of JavaScript running.`,
       impact: 'Smoother experience, better rankings'
@@ -2430,7 +2430,7 @@ function buildFindings(scores, platform) {
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
       currentH: `${scores.unusedJs}KB of JavaScript downloaded but never used`,
-      currentBody: `Every time someone visits your site, their browser downloads <strong>${scores.unusedJs}KB</strong> of JavaScript that the page never actually uses — it just sits there. This is how ${onHyva ? 'Magento' : 'Luma\'s'} module system works: it loads code for every possible feature on every page, whether that page needs it or not. Every visitor pays the download cost — especially noticeable on mobile.`,
+      currentBody: `Every time someone visits your site, their browser downloads <strong>${scores.unusedJs}KB</strong> of JavaScript that the page never actually uses — it just sits there. Magento's module system loads code for every possible feature on every page, whether that page needs it or not. Every visitor pays the download cost — especially noticeable on mobile.`,
       fixH: 'Hyva only ships the code each page actually needs',
       fixBody: `Hyva compiles JavaScript per-page at build time — if a feature isn't used on that page, its code never ships. No speculative loading, no dead weight downloaded. The ${scores.unusedJs}KB is eliminated at the build step.`,
       impact: `${scores.unusedJs}KB removed from every page load`
@@ -2444,7 +2444,7 @@ function buildFindings(scores, platform) {
       tagNow: scores.domSize > 3000 ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
       tagFix: 'HYVA FIXES IT',
       currentH: `Page has ${scores.domSize.toLocaleString()} elements — ${(scores.domSize / 1500).toFixed(1)}× Google's limit`,
-      currentBody: `Your page contains <strong>${scores.domSize.toLocaleString()} individual elements</strong> — Google flags anything over 1,500. The more elements a page has, the slower every click, scroll, and visual update becomes. Luma packs pages with hidden containers, invisible placeholders, and nested wrappers for components that may not even be visible on the current page.`,
+      currentBody: `Your page contains <strong>${scores.domSize.toLocaleString()} individual elements</strong> — Google flags anything over 1,500. The more elements a page has, the slower every click, scroll, and visual update becomes. Standard Magento themes pack pages with hidden containers, invisible placeholders, and nested wrappers for components that may not even be visible on the current page.`,
       fixH: 'Hyva pages average 400–600 elements',
       fixBody: `Hyva builds pages with only what's visible on screen. No hidden containers, no invisible placeholders, no deeply nested wrappers. The page is leaner, responds faster to interaction, and browsers handle it with much less effort.`,
       impact: `~${Math.round((scores.domSize - 500) / scores.domSize * 100)}% fewer page elements`
@@ -3078,7 +3078,7 @@ function buildPreviewInsights(platform) {
 
   cards.push({
     tag: 'Checkout',
-    h: 'B2B checkout abandonment averages 68% on Luma sites.',
+    h: 'B2B checkout abandonment is high — and most of the causes are fixable.',
     body: 'The main culprits: slow page transitions, missing trade features (credit limit, VAT toggle, site addresses), and no quick-reorder path. Scandiweb\'s Hyva builds include all of these as standard — no third-party modules, no licence fees.',
     cta: 'Scandiweb → trade checkout built for how merchants actually buy'
   });
@@ -3125,9 +3125,9 @@ function buildPreviewInsights(platform) {
 
   cards.push({
     tag: 'Case study',
-    h: 'A B2B distributor we migrated from Luma saw 2.3× mobile conversion in 90 days.',
-    body: 'Luma to Hyva on Readymage hosting. Mobile PageSpeed went from 31 to 89. Checkout completion up 34%. Branch reorder feature reduced inbound calls by 18%. None of these required a replatform — just the frontend and hosting stack.',
-    cta: 'Scandiweb → ask us for the full case study'
+    h: 'B2B merchants on Hyva see measurable uplift in mobile conversion.',
+    body: 'Across the merchants we\'ve migrated, the pattern is consistent: mobile PageSpeed improves significantly, checkout completion goes up, and trade-specific features reduce inbound support calls. None of this requires a full replatform — just the frontend and hosting stack.',
+    cta: 'Scandiweb → ask us for client examples'
   });
 
   cards.push({
