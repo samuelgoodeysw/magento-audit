@@ -335,7 +335,7 @@ body {
 }
 .preview-card-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
 .preview-card-h { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.55rem; }
-.preview-card-body { font-size: 0.88rem; color: #4a5068; line-height: 1.65; }
+.preview-card-body { font-size: 0.88rem; color: #1e2140; line-height: 1.65; }
 .preview-card-cta { margin-top: 0.9rem; font-size: 0.78rem; font-weight: 600; color: var(--accent); letter-spacing: 0.03em; }
 
 .console-bar {
@@ -2551,7 +2551,7 @@ function buildFindings(scores, platform) {
       currentH: 'No dedicated site search tool detected',
       currentBody: `We didn't find a dedicated search tool on your site. Magento's native search handles basic queries but struggles with typos, synonyms, and the kind of trade-specific searches — part numbers, product codes, spec-based lookups — that B2B buyers use. Poor search is one of the most direct causes of lost trade orders.`,
       fixH: 'Intelligent search built for trade catalogues',
-      fixBody: `Scandiweb Search is built for trade catalogues — synonym management, part-number matching, and relevance tuning out of the box. Fully compatible with Hyva. B2B buyers who use search convert at significantly higher rates than those who browse — removing friction here has a direct revenue impact.`,
+      fixBody: `Scandiweb AI Search is built for trade catalogues — synonym management, part-number matching, and relevance tuning out of the box. Fully compatible with Hyva. B2B buyers who use search convert at significantly higher rates than those who browse — removing friction here has a direct revenue impact.`,
       impact: 'Higher search conversion, fewer abandoned sessions'
     });
   }
@@ -2905,7 +2905,6 @@ async function finishConsoleWithPSI(scoresPromise) {
   let insightIdx = 0;
   const insightTimer = setInterval(() => {
     if (insightIdx >= insights.length) { clearInterval(insightTimer); return; }
-    if (insightIdx === 0) stickyEl.style.opacity = '1';
     const ins = insights[insightIdx++];
     const card = document.createElement('div');
     card.className = 'preview-card';
@@ -2916,7 +2915,12 @@ async function finishConsoleWithPSI(scoresPromise) {
       <div class="preview-card-cta">${ins.cta} →</div>
     `;
     streamEl.appendChild(card);
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (insightIdx === 1) {
+      stickyEl.style.opacity = '1';
+      document.getElementById('preview-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }, 4000);
 
   // Wait for PSI — then show results with live data straight away
@@ -3195,7 +3199,7 @@ function buildPreviewInsights(platform) {
       tag: 'Site search',
       h: 'No dedicated search tool detected.',
       body: 'Magento\'s native search handles simple queries but falls over on part numbers, product codes, and trade-specific lookups. B2B buyers who use site search convert at 3–5× the rate of those who browse — and they abandon faster when search fails them.',
-      cta: 'Scandiweb → Scandiweb Search, built for trade catalogues'
+      cta: 'Scandiweb → Scandiweb AI Search, built for trade catalogues'
     });
   }
 
