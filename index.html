@@ -1247,8 +1247,8 @@ body {
   <section class="stage active" id="stage-input">
     <div class="stage-hero">
       <div class="hero-eyebrow">// FOR BUILDERS MERCHANTS ON MAGENTO 2</div>
-      <h1 class="hero-title">Your Magento site could be <em>faster, leaner, and converting more.</em> Let's prove it.</h1>
-      <p class="hero-sub">Drop your URL. We'll audit your speed, SEO, hosting, and conversion gaps — then show you exactly what changes with Scandiweb. Hyva frontend, Readymage hosting, AEO/SEO, PPC, CRO. No sign-up. No catch.</p>
+      <h1 class="hero-title" id="hero-title">Your Magento site could be <em>faster, leaner, and converting more.</em> Let's prove it.</h1>
+      <p class="hero-sub" id="hero-sub">Drop your URL. We'll audit your speed, SEO, hosting, and conversion gaps — then show you exactly what changes with Scandiweb. Hyva frontend, Readymage hosting, AEO/SEO, PPC, CRO. No sign-up. No catch.</p>
 
       <form class="url-form" id="url-form" onsubmit="return false;">
         <input class="url-input" id="url-input" type="text" placeholder="https://your-merchant-site.com" autocomplete="off" spellcheck="false">
@@ -1323,18 +1323,18 @@ body {
     <div class="findings" id="findings"></div>
 
     <div class="section-title" data-num="02 / IF YOU MOVED">Same site, on Hyva + Readymage</div>
-    <p class="section-sub">Side-by-side comparison. The Hyva column isn't theory — it's the average of 50+ Hyva sites we've benchmarked, on Readymage's auto-scaling hosting.</p>
+    <p class="section-sub" id="compare-sub-text">Side-by-side comparison. The Hyva column isn't theory — it's the average of 50+ Hyva sites we've benchmarked, on Readymage's auto-scaling hosting.</p>
     <div class="compare-card">
       <div class="compare-eyebrow">// THE HEADLINE</div>
       <div class="compare-title">Faster site, lower bill, <em>more conversions.</em></div>
-      <div class="compare-sub">A 1-second improvement in mobile load typically lifts conversion 7–10% on B2B sites. Faster pages also rank better — Google has been weighting Core Web Vitals since 2021.</div>
+      <div class="compare-sub" id="compare-conversion-stat">A 1-second improvement in mobile load typically lifts conversion 7–10% on B2B sites. Faster pages also rank better — Google has been weighting Core Web Vitals since 2021.</div>
       <div class="compare-rows" id="compare-rows"></div>
     </div>
 
     <div class="section-title" data-num="03 / FRAGMENTATION">Stop paying four agencies</div>
-    <p class="section-sub">Most merchants we audit have dev with one shop, hosting from another, SEO from a third, PPC scattered across freelancers — and analytics half-broken because nobody owns it.</p>
+    <p class="section-sub" id="fragmentation-sub">Most merchants we audit have dev with one shop, hosting from another, SEO from a third, PPC scattered across freelancers — and analytics half-broken because nobody owns it.</p>
 
-    <div class="services-intro">
+    <div class="services-intro" id="services-intro">
       <div class="services-side fragmented">
         <div class="services-side-tag">// THE TYPICAL SETUP</div>
         <div class="services-side-h">Four vendors, four invoices, no joined-up view.</div>
@@ -1364,7 +1364,7 @@ body {
     <div class="section-title" data-num="04 / WHAT YOU'D GET">The full Scandiweb stack</div>
     <p class="section-sub">Pick what you need, drop what you don't — but it all sits with one team.</p>
 
-    <div class="stack-grid">
+    <div class="stack-grid" id="stack-grid">
       <div class="stack-card">
         <div class="stack-card-num">01</div>
         <div class="stack-card-h">Hyva build</div>
@@ -1507,8 +1507,8 @@ body {
       </div>
 
       <div class="req-side">
-        <div class="req-side-tag">B2B FEATURES</div>
-        <div class="req-side-h">Tick anything you need.</div>
+        <div class="req-side-tag" id="req-features-label">B2B FEATURES</div>
+        <div class="req-side-h" id="req-features-heading">Tick anything you need.</div>
 
         <div class="req-toggles" id="req-toggles"></div>
       </div>
@@ -1596,6 +1596,79 @@ body {
 </div>
 
 <script>
+// ============================================================
+// VERTICAL CONFIG
+// ============================================================
+
+const VERTICALS = {
+  'builders-merchant': {
+    pageTitle: 'Magento Audit — Scandiweb',
+    heroTitle: 'Your Magento site could be <em>faster, leaner, and converting more.</em> Let\'s prove it.',
+    heroSub: 'Drop your URL. We\'ll audit your speed, SEO, hosting, and conversion gaps — then show you exactly what changes with Scandiweb. Hyva frontend, Readymage hosting, AEO/SEO, PPC, CRO. No sign-up. No catch.',
+    urlPlaceholder: 'https://your-merchant-site.com',
+    compareLabel: 'On Hyva + Readymage',
+    compareSub: 'Side-by-side comparison. The Hyva column isn\'t theory — it\'s the average of 50+ Hyva sites we\'ve benchmarked, on Readymage\'s auto-scaling hosting.',
+    conversionStat: 'A 1-second improvement in mobile load typically lifts conversion 7–10% on B2B sites. Faster pages also rank better — Google has been weighting Core Web Vitals since 2021.',
+    fragmentationSub: 'Most merchants we audit have dev with one shop, hosting from another, SEO from a third, PPC scattered across freelancers — and analytics half-broken because nobody owns it.',
+    reqFeaturesLabel: 'B2B FEATURES',
+    reqFeaturesHeading: 'Tick anything you need.',
+    notesCue: 'e.g. tied to Kerridge K8 — worried about the upgrade. Or BFCM is approaching and the site falls over at 200 concurrent. Or the board wants 30% online by 2027…',
+    modalNotesCue: 'e.g. we\'re tied to Kerridge K8 and worried about the upgrade, or BFCM is approaching and we need scale, or the board wants a number on hosting savings…',
+    features: [
+      { id: 'tradeAccount',  name: 'Trade login + customer-specific pricing', desc: 'Negotiated prices once logged in.' },
+      { id: 'creditLimit',   name: 'Credit limit & checkout block',           desc: 'Available credit shown, blocked at limit.' },
+      { id: 'branchStock',   name: 'Live stock per branch',                   desc: 'Stock split by branch, not just in/out.' },
+      { id: 'clickCollect',  name: 'Click & collect by branch',               desc: 'Reserve at chosen branch, with cut-offs.' },
+      { id: 'reorderHistory',name: 'Reorder from past invoices',              desc: 'Trade users repeat orders without rebuilding.' },
+      { id: 'quickOrder',    name: 'Quick order by SKU',                      desc: 'Type or paste codes, qty, straight to basket.' },
+      { id: 'csvUpload',     name: 'CSV / spreadsheet upload',                desc: 'Bulk-add from a job schedule.' },
+      { id: 'quoteRequest',  name: 'Quote request flow',                      desc: 'Callback path for non-stocked items.' },
+      { id: 'siteAddresses', name: 'Site delivery addresses',                 desc: 'Job-site addresses separate from billing.' },
+      { id: 'vatToggle',     name: 'VAT ex/inc toggle',                       desc: 'Trade defaults ex-VAT, retail inc-VAT.' },
+      { id: 'tradeApply',    name: 'New trade account application',           desc: 'Online form, credit check, references.' },
+      { id: 'multiUser',     name: 'Multi-user trade accounts',               desc: 'Buyers, approvers, branch managers in one account.' }
+    ],
+    erpOptions: ['Intact iQ','Kerridge K8 / KCS','Merlin Business Software','Sage 200','Microsoft Dynamics 365 BC','NetSuite','Custom / in-house','Not sure yet','None'],
+    deliveryOptions: ['Branch courier (own vans)','Third-party logistics (3PL)','Direct-from-supplier drop-ship','Click & collect only','Mixed model'],
+    stackCards: [
+      { num:'01', h:'Hyva build',            tag:'DEV',        body:'Replatform without rebuilding. Your existing data, integrations and modules, on a frontend that loads in under 2 seconds.' },
+      { num:'02', h:'Readymage hosting',     tag:'HOSTING',    body:'Auto-scaling Magento hosting. Pay for what you use, scale up for BFCM, scale down in January. No fixed instance bills.' },
+      { num:'03', h:'SEO + AEO/GEO',         tag:'ORGANIC',    body:'Classic SEO plus the new layer — getting your products surfaced inside ChatGPT, Perplexity, Google AI Overviews. Most agencies aren\'t doing this yet.' },
+      { num:'04', h:'PPC &amp; paid',         tag:'PAID',       body:'Google Ads, Meta, LinkedIn — connected to your conversion data so we know which spend actually drives trade revenue, not just clicks.' },
+      { num:'05', h:'CRO + UX/UI',            tag:'CONVERSION', body:'Testing programme run against trade-specific KPIs — quote-to-order, basket abandon, branch reorder. Not generic ecommerce metrics.' },
+      { num:'06', h:'Analytics + reporting',  tag:'DATA',       body:'GA4 done properly. Server-side tracking. Branch-level revenue attribution. The dashboard your board actually wants.' },
+      { num:'07', h:'Custom AI tools',        tag:'AI DEV',     body:'Bespoke back-office automations — supplier price ingestion, branch stock reconciliation, quote drafting, RFQ triage. Not chatbots — useful tools.' },
+      { num:'08', h:'Module library',         tag:'EXTENSIONS', body:'Pre-built trade modules — credit limits, branch picker, bulk reorder, CSV upload — included in the Hyva build. No third-party licence fees.' }
+    ],
+    fragmented: {
+      heading: 'Four vendors, four invoices, no joined-up view.',
+      items: [
+        '<strong>Dev agency</strong> — builds and patches the site',
+        '<strong>Hosting provider</strong> — you pay a flat fee whether you use it or not',
+        '<strong>SEO agency</strong> — sends monthly reports nobody reads',
+        '<strong>PPC freelancer</strong> — runs ads, can\'t see how they convert',
+        '<strong>In-house analyst</strong> — patches GA4 together when they have time',
+        'Nobody owns the whole picture, nobody is accountable for revenue'
+      ]
+    },
+    unified: {
+      heading: 'One team, one accountable contact, one revenue number.',
+      items: [
+        '<strong>Hyva development</strong> — Hyva Platinum delivery team',
+        '<strong>Readymage hosting</strong> — autoscale, pay-per-use, no idle costs',
+        '<strong>SEO + AEO/GEO</strong> — including the new AI-search optimisation',
+        '<strong>PPC + paid social</strong> — joined to your conversion data, not flying blind',
+        '<strong>CRO + UX/UI</strong> — testing what actually moves trade revenue',
+        '<strong>Custom AI back-office tools</strong> — automation built around how you actually work'
+      ]
+    }
+  }
+  // To add a new vertical: 'auto-parts': { ... }, 'food-service': { ... }
+};
+
+const vParam = new URLSearchParams(location.search).get('v') || 'builders-merchant';
+const V = VERTICALS[vParam] || VERTICALS['builders-merchant'];
+
 // ============================================================
 // PLATFORM DETECTION
 // ============================================================
@@ -2177,7 +2250,7 @@ function renderCompareRows(scores) {
         <div class="compare-bar"><div class="compare-bar-fill now" data-target="${(r.nowVal / r.nowMax * 100).toFixed(1)}">${r.nowDisplay}</div></div>
       </div>
       <div>
-        <div class="compare-bar-label">On Hyva + Readymage</div>
+        <div class="compare-bar-label">${V.compareLabel}</div>
         <div class="compare-bar"><div class="compare-bar-fill hyva" data-target="${(r.hyvaVal / r.hyvaMax * 100).toFixed(1)}">${r.hyvaDisplay}</div></div>
       </div>
     </div>
@@ -2189,6 +2262,76 @@ function renderCompareRows(scores) {
       el.style.width = el.dataset.target + '%';
     });
   }, 120);
+}
+
+// ============================================================
+// VERTICAL CONFIG — DOM HYDRATION
+// ============================================================
+
+function renderStackGrid() {
+  const el = document.getElementById('stack-grid');
+  if (!el) return;
+  el.innerHTML = V.stackCards.map(c => `
+    <div class="stack-card">
+      <div class="stack-card-num">${c.num}</div>
+      <div class="stack-card-h">${c.h}</div>
+      <div class="stack-card-tag">${c.tag}</div>
+      <div class="stack-card-body">${c.body}</div>
+    </div>`).join('');
+}
+
+function renderServicesSection() {
+  const el = document.getElementById('services-intro');
+  if (!el) return;
+  const f = V.fragmented;
+  const u = V.unified;
+  el.innerHTML = `
+    <div class="services-side fragmented">
+      <div class="services-side-tag">// THE TYPICAL SETUP</div>
+      <div class="services-side-h">${f.heading}</div>
+      <ul class="services-list bad">
+        ${f.items.map(i => `<li>${i}</li>`).join('')}
+      </ul>
+    </div>
+    <div class="services-side unified">
+      <div class="services-side-tag">SCANDIWEB — UNDER ONE ROOF</div>
+      <div class="services-side-h">${u.heading}</div>
+      <ul class="services-list good">
+        ${u.items.map(i => `<li>${i}</li>`).join('')}
+      </ul>
+    </div>`;
+}
+
+function renderErpOptions() {
+  const sel = document.getElementById('r-erp');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Pick one —</option>' +
+    V.erpOptions.map(o => `<option>${o}</option>`).join('');
+}
+
+function renderDeliveryOptions() {
+  const sel = document.getElementById('r-delivery');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Pick one —</option>' +
+    V.deliveryOptions.map(o => `<option>${o}</option>`).join('');
+}
+
+function applyVerticalConfig() {
+  document.title = V.pageTitle;
+  document.getElementById('hero-title').innerHTML      = V.heroTitle;
+  document.getElementById('hero-sub').textContent      = V.heroSub;
+  document.getElementById('url-input').placeholder     = V.urlPlaceholder;
+  document.getElementById('compare-sub-text').textContent     = V.compareSub;
+  document.getElementById('compare-conversion-stat').textContent = V.conversionStat;
+  document.getElementById('fragmentation-sub').textContent    = V.fragmentationSub;
+  document.getElementById('req-features-label').textContent   = V.reqFeaturesLabel;
+  document.getElementById('req-features-heading').textContent = V.reqFeaturesHeading;
+  document.getElementById('r-notes').placeholder       = V.notesCue;
+  document.getElementById('m-notes').placeholder       = V.modalNotesCue;
+  renderStackGrid();
+  renderServicesSection();
+  renderErpOptions();
+  renderDeliveryOptions();
 }
 
 // ============================================================
@@ -2413,27 +2556,13 @@ document.getElementById('url-input').addEventListener('keypress', (e) => {
 // REQUIREMENTS — B2B FEATURES (rendered on results page)
 // ============================================================
 
-const tradeFeatures = [
-  { id: 'tradeAccount', name: 'Trade login + customer-specific pricing', desc: 'Negotiated prices once logged in.' },
-  { id: 'creditLimit', name: 'Credit limit & checkout block', desc: 'Available credit shown, blocked at limit.' },
-  { id: 'branchStock', name: 'Live stock per branch', desc: 'Stock split by branch, not just in/out.' },
-  { id: 'clickCollect', name: 'Click & collect by branch', desc: 'Reserve at chosen branch, with cut-offs.' },
-  { id: 'reorderHistory', name: 'Reorder from past invoices', desc: 'Trade users repeat orders without rebuilding.' },
-  { id: 'quickOrder', name: 'Quick order by SKU', desc: 'Type or paste codes, qty, straight to basket.' },
-  { id: 'csvUpload', name: 'CSV / spreadsheet upload', desc: 'Bulk-add from a job schedule.' },
-  { id: 'quoteRequest', name: 'Quote request flow', desc: 'Callback path for non-stocked items.' },
-  { id: 'siteAddresses', name: 'Site delivery addresses', desc: 'Job-site addresses separate from billing.' },
-  { id: 'vatToggle', name: 'VAT ex/inc toggle', desc: 'Trade defaults ex-VAT, retail inc-VAT.' },
-  { id: 'tradeApply', name: 'New trade account application', desc: 'Online form, credit check, references.' },
-  { id: 'multiUser', name: 'Multi-user trade accounts', desc: 'Buyers, approvers, branch managers in one account.' }
-];
 
 const reqState = { features: new Set() };
 
 function renderReqToggles() {
   const root = document.getElementById('req-toggles');
   if (!root) return;
-  root.innerHTML = tradeFeatures.map(f => `
+  root.innerHTML = V.features.map(f => `
     <div class="req-toggle ${reqState.features.has(f.id) ? 'on' : ''}" data-id="${f.id}">
       <div class="req-toggle-text">
         <strong>${f.name}</strong>
@@ -2462,7 +2591,7 @@ function gatherRequirements() {
     branches: document.getElementById('r-branches')?.value || '',
     needed_b2b_features: [...reqState.features].map(id => ({
       id,
-      name: tradeFeatures.find(f => f.id === id)?.name || id
+      name: V.features.find(f => f.id === id)?.name || id
     })),
     notes: document.getElementById('r-notes')?.value.trim() || ''
   };
@@ -2528,6 +2657,9 @@ document.getElementById('modal-send').addEventListener('click', () => {
     <button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.remove('open');">Done</button>
   `;
 });
+
+// Apply vertical config on load
+applyVerticalConfig();
 
 // Initial focus
 setTimeout(() => document.getElementById('url-input').focus(), 200);
