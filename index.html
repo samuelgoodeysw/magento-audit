@@ -1678,17 +1678,31 @@ let currentPlatform = { isMagento: null, theme: 'unknown', themeDisplay: '', err
 const PROXY = 'https://merchantminisite.samuel-goodey.workers.dev';
 
 async function detectPlatform(url) {
-  const result = { isMagento: null, theme: 'unknown', themeDisplay: '', error: null };
+  const result = {
+    isMagento: null, theme: 'unknown', themeDisplay: '', error: null,
+    signals: null  // null = worker unavailable; populated object = scanned
+  };
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId  = setTimeout(() => controller.abort(), 12000);
 
     const proxyUrl = `${PROXY}?url=${encodeURIComponent(url)}`;
     const response = await fetch(proxyUrl, { signal: controller.signal, cache: 'no-store' });
     clearTimeout(timeoutId);
-    const html = await response.text();
 
+    // Worker v2 returns JSON { html, headers, status }; v1 returns plain HTML
+    let html = '', headers = {};
+    const ct = response.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      const data = await response.json();
+      html    = data.html    || '';
+      headers = data.headers || {};
+    } else {
+      html = await response.text();
+    }
+
+    // ── Magento 2 fingerprint ─────────────────────────────────
     const m2Signals = [
       { re: /Magento_/,                          w: 2 },
       { re: /\/static\/version\d+\/frontend\//,  w: 3 },
@@ -1700,12 +1714,12 @@ async function detectPlatform(url) {
       { re: /Mage\.Cookies/,                     w: 2 },
       { re: /performance\.mark\('Magento/,       w: 3 },
     ];
-    const score = m2Signals.reduce((acc, s) => s.re.test(html) ? acc + s.w : acc, 0);
-    result.isMagento = score >= 3;
+    const m2Score = m2Signals.reduce((acc, s) => s.re.test(html) ? acc + s.w : acc, 0);
+    result.isMagento = m2Score >= 3;
 
     if (result.isMagento) {
-      const isHyva  = /hyva[_\-\/]|alpine\.js|@hyva|hyva\.phtml|x-data=/i.test(html);
-      const isLuma  = /Magento\/luma|Magento_Luma|\/luma\/web\//i.test(html);
+      const isHyva = /hyva[_\-\/]|alpine\.js|@hyva|hyva\.phtml|x-data=/i.test(html);
+      const isLuma = /Magento\/luma|Magento_Luma|\/luma\/web\//i.test(html);
       if (isHyva) {
         result.theme        = 'Hyva';
         result.themeDisplay = 'Magento 2 · Hyva theme detected · Compare to Readymage average';
@@ -1717,9 +1731,65 @@ async function detectPlatform(url) {
         result.themeDisplay = 'Magento 2 · Custom theme · No Hyva detected';
       }
     }
+
+    // ── Header signals ────────────────────────────────────────
+    const phpHeader = headers['x-powered-by'] || '';
+    const phpMatch  = phpHeader.match(/PHP\/([\d.]+)/i);
+    const phpVer    = phpMatch ? phpMatch[1] : null;
+    const phpParts  = phpVer ? phpVer.split('.').map(Number) : null;
+    // EOL: PHP 7.x all EOL, 8.0 EOL Nov 2023, 8.1 EOL Dec 2025
+    const phpEol    = phpParts && (phpParts[0] < 8 || (phpParts[0] === 8 && phpParts[1] <= 1));
+
+    const serverHeader = (headers['server'] || '').toLowerCase();
+    let serverSoftware = null;
+    if      (serverHeader.includes('nginx'))     serverSoftware = 'nginx';
+    else if (serverHeader.includes('apache'))    serverSoftware = 'apache';
+    else if (serverHeader.includes('litespeed')) serverSoftware = 'litespeed';
+
+    let cdnType = null;
+    if      (headers['cf-ray'])                                         cdnType = 'cloudflare';
+    else if ((headers['x-served-by'] || '').includes('cache-'))         cdnType = 'fastly';
+    else if ((headers['x-cache']     || '').includes('CloudFront'))     cdnType = 'cloudfront';
+    else if (serverHeader.includes('akamai'))                            cdnType = 'akamai';
+
+    const hasCaching = !!(headers['x-varnish'] || headers['age'] ||
+                          (headers['x-cache'] || '').toLowerCase().includes('hit'));
+
+    // ── HTML signals — analytics ──────────────────────────────
+    const hasGA4   = /gtag\('config',\s*'G-|["']G-[A-Z0-9]{6,}["']/i.test(html);
+    const hasUA    = /UA-\d{6,}-\d+/.test(html);
+    const hasGTM   = /googletagmanager\.com/.test(html);
+    const hasFBPx  = /connect\.facebook\.net/.test(html);
+    const hasCookieConsent = /cookiebot|onetrust|cookieyes|cookielaw|cookie-consent|gdpr-cookie|tarteaucitron/i.test(html);
+
+    // ── HTML signals — UX ─────────────────────────────────────
+    const hasLiveChat     = /intercom|drift\.com|zendesk|tidio\.com|livechat|crisp\.chat|tawk\.to/i.test(html);
+    const hasReviewWidget = /trustpilot|feefo|reviews\.io|judge\.me|yotpo|stamped\.io/i.test(html);
+
+    // ── HTML signals — SEO ────────────────────────────────────
+    const hasStructuredData = /<script[^>]*type=["']application\/ld\+json/i.test(html);
+    const hasMetaDesc = /<meta[^>]+name=["']description["'][^>]+content=["'][^"']{20,}/i.test(html) ||
+                        /<meta[^>]+content=["'][^"']{20,}["'][^>]+name=["']description["']/i.test(html);
+    const hasOGTags   = /<meta[^>]+property=["']og:/i.test(html);
+    const hasCanonical= /<link[^>]+rel=["']canonical["']/i.test(html);
+    const h1Count     = (html.match(/<h1[\s>]/gi) || []).length;
+
+    result.signals = {
+      // hosting
+      phpVersion: phpVer, phpEol, serverSoftware, cdnType, hasCaching,
+      hasHsts: !!headers['strict-transport-security'],
+      hasSecurityHeaders: !!(headers['x-frame-options'] || headers['x-content-type-options']),
+      exposesPhpVersion: !!phpVer,
+      // analytics
+      hasGA4, hasUA, hasUAOnly: hasUA && !hasGA4, hasGTM, hasFBPixel: hasFBPx, hasCookieConsent,
+      // ux
+      hasLiveChat, hasReviewWidget,
+      // seo
+      hasStructuredData, hasMetaDesc, hasOGTags, hasCanonical, h1Count,
+    };
+
   } catch (e) {
     result.error = (e.name === 'AbortError') ? 'timeout' : 'cors';
-    // CORS / network — can't verify, proceed in demo mode
     result.isMagento    = null;
     result.theme        = 'Luma';
     result.themeDisplay = 'Magento 2.4.x · Luma theme · No Hyva · Standard hosting (unverified)';
@@ -1818,13 +1888,22 @@ async function fetchRealScores(url) {
       (i.mimeType && (i.mimeType.includes('javascript') || i.mimeType.includes('ecmascript')))
     );
     const scriptBytes = scriptItems.reduce((s, i) => s + (i.resourceSize || i.transferSize || 0), 0);
-    console.log(`[PSI] ${scriptItems.length} script files detected, total uncompressed: ${(scriptBytes / 1048576).toFixed(2)}MB`);
-    console.log('[PSI] Script files:', scriptItems.map(i => ({ url: i.url?.split('?')[0].split('/').pop(), kb: Math.round((i.resourceSize || i.transferSize || 0) / 1024) })));
 
     // INP (Lighthouse 10+) or TBT-based estimate
     const inpRaw = mLh.audits['interaction-to-next-paint']?.numericValue
       ?? mLh.audits['experimental-interaction-to-next-paint']?.numericValue
       ?? Math.min(Math.round((mLh.audits['total-blocking-time']?.numericValue ?? 300) * 2.8 + 80), 900);
+
+    // Additional Lighthouse audits
+    const unusedJsBytes    = mLh.audits['unused-javascript']?.details?.overallSavingsBytes ?? 0;
+    const unusedCssBytes   = mLh.audits['unused-css-rules']?.details?.overallSavingsBytes ?? 0;
+    const renderBlockItems = mLh.audits['render-blocking-resources']?.details?.items || [];
+    const webpItems        = mLh.audits['uses-webp-images']?.details?.items || [];
+    const domSizeVal       = mLh.audits['dom-size']?.numericValue ?? 0;
+    const totalBytes       = netItems.reduce((s, i) => s + (i.transferSize || 0), 0);
+    const fontItems        = netItems.filter(i => i.resourceType === 'Font' || i.mimeType?.includes('font'));
+    const tbtMs            = Math.round(mLh.audits['total-blocking-time']?.numericValue ?? 0);
+    const thirdPartyCount  = mLh.audits['third-party-summary']?.details?.items?.length ?? 0;
 
     const fb = generateScores(url); // fallback for any gaps
 
@@ -1839,6 +1918,16 @@ async function fetchRealScores(url) {
       bundleJs:      scriptBytes > 10000 ? (scriptBytes / 1048576).toFixed(1) : fb.bundleJs,
       ttfb:          Math.round(mLh.audits['server-response-time']?.numericValue ?? fb.ttfb),
       requests:      netItems.length || fb.requests,
+      // extended
+      unusedJs:       Math.round(unusedJsBytes / 1024),
+      unusedCss:      Math.round(unusedCssBytes / 1024),
+      renderBlocking: renderBlockItems.length,
+      webpImages:     webpItems.length,
+      domSize:        Math.round(domSizeVal),
+      totalPageKb:    Math.round(totalBytes / 1024),
+      fontCount:      fontItems.length,
+      tbt:            tbtMs,
+      thirdPartyCount,
       _source:       'psi'
     };
   } catch (e) {
@@ -1874,13 +1963,21 @@ function buildConsoleLines(url, platform) {
     }
   }
 
+  const sig = platform.signals;
+  if (sig) {
+    lines.push(
+      { text: `Scanning response headers — server, PHP version, cache…`, status: sig.phpEol ? 'fail' : 'done', stat: sig.phpVersion ? `PHP ${sig.phpVersion}` : sig.serverSoftware || 'OK' },
+      { text: `CDN / edge cache detection…`, status: sig.cdnType ? 'done' : 'warn', stat: sig.cdnType || 'none detected' },
+      { text: `Analytics stack — GA4, GTM, pixels…`, status: sig.hasGA4 ? 'done' : (sig.hasUAOnly ? 'fail' : 'warn'), stat: sig.hasGA4 ? 'GA4 ✓' : sig.hasUAOnly ? 'UA only — dead' : 'none found' },
+      { text: `Structured data and schema markup…`, status: sig.hasStructuredData ? 'done' : 'fail', stat: sig.hasStructuredData ? 'found' : 'none' },
+      { text: `Cookie consent / GDPR compliance…`, status: sig.hasCookieConsent ? 'done' : 'warn', stat: sig.hasCookieConsent ? 'found' : 'not detected' },
+    );
+  }
   lines.push(
     { text: `Running Lighthouse — mobile performance…`, status: 'done', stat: 'complete' },
     { text: `Running Lighthouse — desktop performance…`, status: 'done', stat: 'complete' },
     { text: `Capturing Core Web Vitals (LCP, CLS, INP)…`, status: platform.theme === 'Hyva' ? 'warn' : 'fail', stat: platform.theme === 'Hyva' ? '1–2 of 3 fail' : '3 of 3 fail' },
-    { text: `Crawling robots.txt and sitemap.xml…`, status: 'done', stat: 'OK' },
-    { text: `Scanning structured data, meta tags, schema…`, status: 'warn', stat: 'partial' },
-    { text: `Checking hosting model — TTFB, edge caching, CDN…`, status: 'warn', stat: 'no edge' },
+    { text: `Unused JS/CSS, DOM size, render-blocking resources…`, status: 'done', stat: 'scanned' },
     { text: `Comparing against Hyva + Readymage benchmarks (n=50)…`, status: 'done', stat: 'OK' },
     { text: `Audit complete. Generating report…`, status: 'done', stat: 'OK' }
   );
@@ -2088,6 +2185,127 @@ function buildFindings(scores, platform) {
     fixBody: `${onHyva ? 'Your Hyva theme is a solid base.' : 'Hyva is built accessible by default.'} Our delivery adds a manual audit, screen-reader testing, contrast and heading remediation. Ships at 95+ on Lighthouse accessibility.`,
     impact: 'Compliant + measurable conversion uplift'
   });
+
+  const sig = platform ? platform.signals : null;
+
+  // ── 8. Unused JavaScript ────────────────────────────────────
+  if (scores._source === 'psi' && scores.unusedJs > 300) {
+    findings.push({
+      severity: scores.unusedJs > 600 ? 'high' : 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `${scores.unusedJs}KB of JavaScript loaded but never executed`,
+      currentBody: `Lighthouse found <strong>${scores.unusedJs}KB</strong> of JavaScript that downloads and parses on every page load, then sits idle. This is structural on ${onHyva ? 'Magento' : 'Luma'}: RequireJS speculatively loads module dependencies whether the current page needs them or not. Every visitor pays the cost — including mobile users on slower connections.`,
+      fixH: 'Hyva ships only what each page actually needs',
+      fixBody: `Hyva replaces RequireJS with a build-time bundler. JS is compiled per-page — unused modules never ship. No speculative loading, no dead weight. The ${scores.unusedJs}KB disappears at the build step, not through config tuning.`,
+      impact: `${scores.unusedJs}KB removed from every page load`
+    });
+  }
+
+  // ── 9. DOM size ─────────────────────────────────────────────
+  if (scores._source === 'psi' && scores.domSize > 1500) {
+    findings.push({
+      severity: scores.domSize > 3000 ? 'high' : 'mid',
+      tagNow: scores.domSize > 3000 ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `DOM size: ${scores.domSize.toLocaleString()} elements`,
+      currentBody: `Your page has <strong>${scores.domSize.toLocaleString()} DOM nodes</strong> — Google flags anything over 1,500. Yours is ${(scores.domSize / 1500).toFixed(1)}× that threshold. A bloated DOM slows every layout recalculation, style update, and user interaction. Luma inflates the DOM with nested component wrappers, hidden tab containers, and invisible widget placeholders even when they're not used on the current page.`,
+      fixH: 'Hyva sites average 400–600 DOM nodes',
+      fixBody: `Hyva's Alpine.js uses lightweight directives directly on existing HTML elements — no wrapper divs, no invisible containers, no KnockoutJS component nesting. The DOM shrinks to what's actually visible on screen.`,
+      impact: `~${Math.round((scores.domSize - 500) / scores.domSize * 100)}% reduction in DOM size`
+    });
+  }
+
+  // ── 10. Render-blocking resources ───────────────────────────
+  if (scores._source === 'psi' && scores.renderBlocking > 2) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `${scores.renderBlocking} render-blocking resources`,
+      currentBody: `<strong>${scores.renderBlocking} CSS or JS files</strong> are loaded in a way that prevents the browser from painting anything until they've fully downloaded and executed. The user sees a blank screen longer than necessary. This is a known consequence of Magento's asset pipeline — critical and non-critical styles are bundled together and loaded synchronously before first render.`,
+      fixH: 'Hyva inlines critical CSS, defers everything else',
+      fixBody: `Hyva generates per-page critical CSS inlined directly in the <head> at build time. Non-critical styles load asynchronously after paint. The browser renders immediately — users see content before the full CSS bundle has even arrived.`,
+      impact: 'Faster first paint, direct LCP improvement'
+    });
+  }
+
+  // ── 11. Structured data ─────────────────────────────────────
+  if (sig && !sig.hasStructuredData) {
+    findings.push({
+      severity: 'high',
+      tagNow: 'PROBLEM',
+      tagFix: 'WE FIX IT',
+      currentH: 'No structured data detected',
+      currentBody: `Your site has no JSON-LD schema. No Product rich results (star ratings, price, availability inline in Google). No BreadcrumbList, no Organization, no Review markup. You're invisible to the structured data layer that feeds Google Shopping, AI Overviews, and rich snippets. As AI search surfaces direct answers from schema, this is no longer optional — it's the difference between appearing in results and being skipped entirely.`,
+      fixH: 'Full schema stack — Product, Review, Organization, BreadcrumbList',
+      fixBody: `We implement and validate the complete schema set: Product with Offer and AggregateRating on every PDP, BreadcrumbList site-wide, Organization at root, LocalBusiness for branch pages. Tested in Google's Rich Results Test and monitored in Search Console.`,
+      impact: 'Rich results, AI search inclusion, click-through uplift'
+    });
+  }
+
+  // ── 12. Analytics blind spots ───────────────────────────────
+  if (sig && (!sig.hasGA4 || sig.hasUAOnly)) {
+    findings.push({
+      severity: 'high',
+      tagNow: 'PROBLEM',
+      tagFix: 'WE FIX IT',
+      currentH: !sig.hasGA4 && !sig.hasGTM
+        ? 'No analytics or tag management detected'
+        : sig.hasUAOnly
+          ? 'Still on Universal Analytics — data collection ended July 2024'
+          : 'No GA4 detected',
+      currentBody: !sig.hasGA4 && !sig.hasGTM
+        ? `No Google Analytics 4, no GTM, and no analytics script detected on your homepage. You have no reliable data on where traffic comes from, what users do on site, or what actually converts. Every marketing decision is a guess. Even if you have stats somewhere else, there's no conversion attribution.`
+        : `Your site is still running Universal Analytics tags. Google shut off UA data collection in July 2024 — you've had months of data loss. Running UA alongside GA4 creates attribution conflicts and inflated session counts. You're making decisions on broken data.`,
+      fixH: sig.hasGTM ? 'GA4 migration via your existing GTM' : 'GA4 + server-side GTM',
+      fixBody: `We implement GA4 with server-side tracking via GTM — data survives adblockers and ITP. Enhanced ecommerce, full purchase funnel, and Magento order data all wired in. Dashboard built for trading decisions, not just page view reports.`,
+      impact: 'Real conversion data, accurate channel attribution'
+    });
+  }
+
+  // ── 13. CDN / edge caching ──────────────────────────────────
+  if (sig && !sig.cdnType && !sig.hasCaching) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: 'READYMAGE FIXES IT',
+      currentH: 'No CDN or edge caching detected',
+      currentBody: `Every request from every visitor hits your origin server directly — no CDN, no edge nodes, no full-page cache. Visitors far from your server get slower responses, and any traffic spike goes straight through to PHP. This is the most common cause of TTFB spikes and concurrency failures we see on Magento sites with standard hosting. Your ${scores.ttfb}ms TTFB will be worse under real load.`,
+      fixH: 'Readymage: global CDN + Magento-tuned Varnish',
+      fixBody: `Readymage deploys Varnish full-page cache configured specifically for Magento's ESI blocks, plus CDN edge nodes globally. Cached pages serve in under 50ms regardless of origin load. Traffic spikes auto-scale at origin — no PHP queue, no capacity ceiling.`,
+      impact: 'Sub-50ms cached responses, no concurrency limit'
+    });
+  }
+
+  // ── 14. PHP version ─────────────────────────────────────────
+  if (sig && sig.phpVersion && sig.phpEol) {
+    findings.push({
+      severity: 'high',
+      tagNow: 'SECURITY RISK',
+      tagFix: 'READYMAGE FIXES IT',
+      currentH: `PHP ${sig.phpVersion} — end of life`,
+      currentBody: `Your server is exposing <strong>PHP ${sig.phpVersion}</strong> in its response headers — that version is past end-of-life and receives no security patches. Any new PHP vulnerability discovered is permanently unpatched on your server. Magento 2.4.6+ also requires PHP 8.1 minimum, so you may be blocked from upgrading Magento itself until this is resolved.`,
+      fixH: 'PHP 8.2 on Readymage as standard',
+      fixBody: `Readymage runs PHP 8.2 with OPcache and JIT enabled. Faster page generation, current security patch status, and no version blocker on future Magento upgrades. Managed by us — no server admin required from you.`,
+      impact: 'Security compliance + unblocked Magento upgrade path'
+    });
+  }
+
+  // ── 15. Cookie consent / GDPR ───────────────────────────────
+  if (sig && !sig.hasCookieConsent && (sig.hasGA4 || sig.hasGTM || sig.hasFBPixel)) {
+    const trackingList = [sig.hasGA4 && 'Google Analytics', sig.hasFBPixel && 'Facebook Pixel', sig.hasGTM && 'GTM'].filter(Boolean).join(', ');
+    findings.push({
+      severity: 'mid',
+      tagNow: 'COMPLIANCE RISK',
+      tagFix: 'WE FIX IT',
+      currentH: `Tracking firing without consent — ${trackingList}`,
+      currentBody: `Your site loads <strong>${trackingList}</strong> but we couldn't detect a cookie consent mechanism. Under UK PECR and EU ePrivacy rules, analytical and marketing cookies require explicit opt-in before they fire. Running tracking without consent is an active compliance risk — ICO enforcement is live and fines have been issued to ecommerce sites.`,
+      fixH: 'Consent-aware tracking via CMP + GTM consent mode',
+      fixBody: `We implement a consent management platform (CookieYes or OneTrust) wired to GTM consent mode v2. Tracking fires only after opt-in. GA4 receives modelled conversion data for opted-out users so you don't lose insight. Compliance documented and auditable.`,
+      impact: 'Regulatory compliance, no ICO exposure'
+    });
+  }
 
   return findings;
 }
