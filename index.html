@@ -300,6 +300,8 @@ body {
 .console-line .stat { margin-left: auto; color: var(--accent); font-weight: 500; }
 
 @keyframes fadeInLine { to { opacity: 1; } }
+@keyframes scorePulse { 0%,100% { opacity: 0.4 } 50% { opacity: 0.75 } }
+.score-loading { animation: scorePulse 1.4s ease-in-out infinite; }
 
 .console-bar {
   margin-top: 20px;
@@ -2522,7 +2524,15 @@ function renderScoreGrid(scores) {
     }
   ];
 
+  const isLoading = scores._source === 'loading';
   grid.innerHTML = cards.map(c => {
+    if (isLoading) return `
+      <div class="score-card score-loading">
+        <div class="score-card-label">// ${c.label}</div>
+        <div class="score-value"><span class="score-num mid">—</span></div>
+        <div class="score-bar"><div class="score-bar-fill mid" style="width:0%"></div></div>
+        <div class="score-compare"><span>Fetching live score…</span></div>
+      </div>`;
     const max = c.unit === 's' ? 6 : c.unit === 'ms' ? 1000 : c.unit === 'MB' ? 5 : 100;
     const fillPct = c.cls === 'bad' || c.cls === 'mid' ?
       (c.unit === '/100' ? c.value : (c.unit === 's' || c.unit === 'MB' || c.unit === 'ms' ? Math.min(parseFloat(c.value) / max * 100, 100) : 50))
@@ -2749,41 +2759,64 @@ async function finishConsoleWithPSI(scoresPromise) {
     if (el) el.textContent = frames[f++ % frames.length];
   }, 400);
 
+  // Show results immediately with skeleton score cards — don't wait for PSI
+  document.getElementById('console-bar-fill').style.width = '100%';
+  const loadingScores = Object.assign(generateScores(currentUrl), { _source: 'loading' });
+  setTimeout(() => {
+    renderResults(currentUrl, currentPlatform, loadingScores);
+    showStage('results');
+  }, 800);
+
+  // PSI resolves in background — patch live numbers into the visible report
   const scores = await scoresPromise;
   clearInterval(ticker);
 
   const markerEl = document.getElementById('psi-marker');
   const textEl   = document.getElementById('psi-text');
   const statEl   = document.getElementById('psi-stat');
-
-  if (scores._source === 'psi') {
-    markerEl.className   = 'marker done';
-    markerEl.textContent = '✓';
-    textEl.innerHTML     = `PageSpeed Insights complete — mobile <strong>${scores.mobileSpeed}</strong>/100, desktop <strong>${scores.desktopSpeed}</strong>/100`;
-    statEl.textContent   = 'live data';
-  } else if (scores._source === 'psi-mobile-only') {
-    markerEl.className   = 'marker warn';
-    markerEl.textContent = '!';
-    textEl.innerHTML     = `PageSpeed Insights — mobile <strong>${scores.mobileSpeed}</strong>/100 (desktop call failed, estimated)`;
-    statEl.textContent   = 'partial data';
-  } else if (scores._source === 'partial') {
-    markerEl.className   = 'marker warn';
-    markerEl.textContent = '!';
-    textEl.innerHTML     = `PageSpeed Insights — mobile failed, desktop <strong>${scores.desktopSpeed}</strong>/100. Other scores estimated.`;
-    statEl.textContent   = 'partial data';
-  } else {
-    markerEl.className   = 'marker warn';
-    markerEl.textContent = '!';
-    textEl.textContent   = 'PageSpeed Insights unavailable — scores are estimated based on page signals';
-    statEl.textContent   = 'estimated';
+  if (markerEl) {
+    if (scores._source === 'psi') {
+      markerEl.className   = 'marker done';
+      markerEl.textContent = '✓';
+      textEl.innerHTML     = `PageSpeed Insights complete — mobile <strong>${scores.mobileSpeed}</strong>/100, desktop <strong>${scores.desktopSpeed}</strong>/100`;
+      statEl.textContent   = 'live data';
+    } else if (scores._source === 'psi-mobile-only') {
+      markerEl.className   = 'marker warn';
+      markerEl.textContent = '!';
+      textEl.innerHTML     = `PageSpeed Insights — mobile <strong>${scores.mobileSpeed}</strong>/100 (desktop call failed, estimated)`;
+      statEl.textContent   = 'partial data';
+    } else if (scores._source === 'partial') {
+      markerEl.className   = 'marker warn';
+      markerEl.textContent = '!';
+      textEl.innerHTML     = `PageSpeed Insights — mobile failed, desktop <strong>${scores.desktopSpeed}</strong>/100. Other scores estimated.`;
+      statEl.textContent   = 'partial data';
+    } else {
+      markerEl.className   = 'marker warn';
+      markerEl.textContent = '!';
+      textEl.textContent   = 'PageSpeed Insights unavailable — scores are estimated based on page signals';
+      statEl.textContent   = 'estimated';
+    }
   }
 
-  document.getElementById('console-bar-fill').style.width = '100%';
+  patchLiveScores(scores);
+}
 
-  setTimeout(() => {
-    renderResults(currentUrl, currentPlatform, scores);
-    showStage('results');
-  }, 800);
+function patchLiveScores(scores) {
+  renderScoreGrid(scores);
+  renderCompareRows(scores);
+  renderFindings(scores, currentPlatform);
+  const footnote = document.getElementById('footnote-source');
+  if (!footnote) return;
+  const t = new Date().toLocaleTimeString('en-GB');
+  if (scores._source === 'psi') {
+    footnote.innerHTML = `<strong>// LIVE DATA</strong> · scores from Google PageSpeed Insights (Lighthouse). Ran ${t}.`;
+  } else if (scores._source === 'psi-mobile-only') {
+    footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · mobile scores live from PageSpeed Insights; desktop speed estimated. Ran ${t}.`;
+  } else if (scores._source === 'partial') {
+    footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · desktop speed live from PageSpeed Insights; mobile scores estimated. Ran ${t}.`;
+  } else {
+    footnote.innerHTML = '<strong>// ESTIMATED</strong> · PageSpeed Insights was unavailable — scores are illustrative. Try again in a moment, or check the URL is publicly accessible.';
+  }
 }
 
 function showError(url, platform) {
@@ -2822,7 +2855,9 @@ function renderResults(url, platform, scores) {
   const footnote = document.getElementById('footnote-source');
   if (footnote) {
     const t = new Date().toLocaleTimeString('en-GB');
-    if (scores._source === 'psi') {
+    if (scores._source === 'loading') {
+      footnote.innerHTML = `<strong>// LOADING</strong> · fetching live PageSpeed scores — report will update automatically.`;
+    } else if (scores._source === 'psi') {
       footnote.innerHTML = `<strong>// LIVE DATA</strong> · scores from Google PageSpeed Insights (Lighthouse). Ran ${t}.`;
     } else if (scores._source === 'psi-mobile-only') {
       footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · mobile scores live from PageSpeed Insights; desktop speed estimated. Ran ${t}.`;
