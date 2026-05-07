@@ -302,6 +302,20 @@ body {
 @keyframes fadeInLine { to { opacity: 1; } }
 @keyframes scorePulse { 0%,100% { opacity: 0.4 } 50% { opacity: 0.75 } }
 .score-loading { animation: scorePulse 1.4s ease-in-out infinite; }
+@keyframes previewIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+#preview-stream { max-width: 720px; margin: 2.5rem auto 0; padding: 0 1rem; }
+.preview-card {
+  border-left: 3px solid var(--accent);
+  padding: 1.4rem 1.8rem;
+  margin-bottom: 1.4rem;
+  background: var(--surface);
+  opacity: 0;
+  animation: previewIn 0.45s ease forwards;
+}
+.preview-card-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+.preview-card-h { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.55rem; }
+.preview-card-body { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+.preview-card-cta { margin-top: 0.9rem; font-size: 0.78rem; font-weight: 600; color: var(--accent); letter-spacing: 0.03em; }
 
 .console-bar {
   margin-top: 20px;
@@ -1363,6 +1377,7 @@ body {
       <div id="console-lines"></div>
       <div class="console-bar"><div class="console-bar-fill" id="console-bar-fill"></div></div>
     </div>
+    <div id="preview-stream"></div>
   </section>
 
   <!-- ========== STAGE 2b — NOT MAGENTO ERROR ========== -->
@@ -2773,6 +2788,26 @@ async function finishConsoleWithPSI(scoresPromise) {
     showStage('results');
   }, 800);
 
+  // Stream insight cards while PSI loads
+  const insights = buildPreviewInsights(currentPlatform);
+  const streamEl = document.getElementById('preview-stream');
+  streamEl.innerHTML = '';
+  let insightIdx = 0;
+  const insightTimer = setInterval(() => {
+    if (insightIdx >= insights.length) { clearInterval(insightTimer); return; }
+    const ins = insights[insightIdx++];
+    const card = document.createElement('div');
+    card.className = 'preview-card';
+    card.innerHTML = `
+      <div class="preview-card-tag">// ${ins.tag}</div>
+      <div class="preview-card-h">${ins.h}</div>
+      <div class="preview-card-body">${ins.body}</div>
+      <div class="preview-card-cta">${ins.cta} →</div>
+    `;
+    streamEl.appendChild(card);
+    streamEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 3500);
+
   // PSI resolves in background — patch live numbers into the visible report
   const scores = await scoresPromise;
   clearInterval(ticker);
@@ -2805,6 +2840,83 @@ async function finishConsoleWithPSI(scoresPromise) {
   }
 
   patchLiveScores(scores);
+}
+
+function buildPreviewInsights(platform) {
+  const sig = platform?.signals || {};
+  const isHyva = platform?.theme === 'Hyva';
+  const cards = [];
+
+  if (!isHyva) {
+    cards.push({
+      tag: 'Frontend theme',
+      h: 'Luma was built for desktop in 2015.',
+      body: 'On mobile — where 60% of B2B buyers now research suppliers — Luma sites typically score 28–45 on Google PageSpeed. Hyva sites built by Scandiweb average 91/100. That gap costs you leads every day.',
+      cta: 'Scandiweb → Hyva migration in 6–12 weeks, no data loss'
+    });
+  } else {
+    cards.push({
+      tag: 'Frontend theme',
+      h: 'You\'re already ahead of 90% of Magento merchants.',
+      body: 'Hyva detected. The speed foundation is there — the remaining gains are in hosting, SEO/AEO, and conversion rate. Full scores are loading now.',
+      cta: 'Scandiweb → Hyva Platinum delivery partner'
+    });
+  }
+
+  if (!sig.cdnType || sig.cdnType === 'none detected') {
+    cards.push({
+      tag: 'Hosting',
+      h: 'No CDN detected — every visitor hits your origin server.',
+      body: 'A buyer in Manchester and one in Edinburgh are both waiting for the same single server to respond. Readymage serves from the edge globally, and auto-scales for BFCM without you touching anything.',
+      cta: 'Scandiweb → Readymage: pay-per-use, no idle instance bills'
+    });
+  } else {
+    cards.push({
+      tag: 'Hosting',
+      h: `${sig.cdnType} detected — good start, but the bottleneck is usually the app server.`,
+      body: 'Edge caching helps with static assets, but time-to-first-byte from your origin is what Lighthouse actually measures. Readymage combines edge delivery with auto-scaling Magento infrastructure.',
+      cta: 'Scandiweb → Readymage hosting, built for Magento'
+    });
+  }
+
+  cards.push({
+    tag: 'Conversion',
+    h: 'Every extra second on mobile costs you roughly 7–10% of conversions.',
+    body: 'Google\'s own data, confirmed across B2B benchmarks. For a site turning over £2M/yr, a 2-second improvement in mobile load is worth £140k–£200k in recoverable revenue — before touching a single ad or email.',
+    cta: 'Scandiweb → CRO programme tied to trade KPIs, not generic ecommerce metrics'
+  });
+
+  if (!sig.hasGA4) {
+    cards.push({
+      tag: 'Analytics',
+      h: 'GA4 not detected — you\'re optimising blind.',
+      body: 'Without GA4 you can\'t see which products, categories, or search terms drive revenue. You can\'t optimise what you can\'t measure. Scandiweb sets up server-side tracking so attribution survives ad blockers and iOS.',
+      cta: 'Scandiweb → GA4 + server-side tracking, branch-level attribution'
+    });
+  } else {
+    cards.push({
+      tag: 'Analytics',
+      h: 'GA4 is installed — but is it tracking the right things?',
+      body: 'Most B2B GA4 setups miss trade account logins, quote requests, and branch-level orders. That\'s 30–40% of your conversion funnel invisible to you. Server-side tracking and a proper data layer fix that.',
+      cta: 'Scandiweb → GA4 audit + server-side event tracking'
+    });
+  }
+
+  cards.push({
+    tag: 'SEO + AEO',
+    h: 'AI search is changing how B2B buyers find suppliers.',
+    body: 'ChatGPT, Perplexity, and Google AI Overviews now influence 18%+ of B2B product research — and most SEO agencies aren\'t optimising for it yet. Scandiweb\'s AEO/GEO work gets your products surfaced where buyers are actually searching.',
+    cta: 'Scandiweb → SEO + AEO/GEO, the new search layer most agencies are ignoring'
+  });
+
+  cards.push({
+    tag: 'Operations',
+    h: 'Four vendors, four invoices, nobody accountable for revenue.',
+    body: 'Dev agency, hosting provider, SEO shop, PPC freelancer — the average merchant we audit has all four. No joined-up view, no single number to hold anyone to. Scandiweb runs all seven services under one team with one revenue target.',
+    cta: 'Scandiweb → one team, one contact, one number'
+  });
+
+  return cards;
 }
 
 function patchLiveScores(scores) {
