@@ -1755,6 +1755,8 @@ const V = VERTICALS[vParam] || VERTICALS['smb'];
 // ============================================================
 
 let currentPlatform = { isMagento: null, theme: 'unknown', themeDisplay: '', error: null };
+let earlyPsiUrl = '';
+let earlyPsiPromise = null;
 
 const PROXY = 'https://merchantminisite.samuel-goodey.workers.dev';
 
@@ -2687,8 +2689,12 @@ async function startAudit(url) {
   submitBtn.textContent = 'Checking…';
   inputEl.disabled     = true;
 
-  // Fire PSI and platform detection in parallel — PSI is slow, every second counts
-  const scoresPromise = fetchRealScores(currentUrl);
+  // Reuse pre-fetched PSI promise if user typed this URL before clicking Run
+  const scoresPromise = (earlyPsiUrl === currentUrl && earlyPsiPromise)
+    ? earlyPsiPromise
+    : fetchRealScores(currentUrl);
+  earlyPsiUrl = '';
+  earlyPsiPromise = null;
   const platform = await detectPlatform(currentUrl);
   currentPlatform = platform;
 
@@ -2926,6 +2932,20 @@ document.getElementById('url-submit').addEventListener('click', () => {
 
 document.getElementById('url-input').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') document.getElementById('url-submit').click();
+});
+
+// Pre-fire PSI as soon as the user types a valid-looking URL
+let psiEarlyTimer = null;
+document.getElementById('url-input').addEventListener('input', () => {
+  clearTimeout(psiEarlyTimer);
+  const raw = document.getElementById('url-input').value.trim();
+  if (!raw || raw.length < 6 || !raw.includes('.')) return;
+  psiEarlyTimer = setTimeout(() => {
+    const url = normalizeUrl(raw);
+    if (url === earlyPsiUrl) return;
+    earlyPsiUrl = url;
+    earlyPsiPromise = fetchRealScores(url);
+  }, 800);
 });
 
 // ============================================================
