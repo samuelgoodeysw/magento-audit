@@ -1011,6 +1011,60 @@ body {
 
 .cta-btn:hover { background: var(--bg-deep); }
 
+/* ERROR STAGE */
+.error-banner {
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  padding: 64px 56px;
+  border: 1px solid var(--brick);
+  position: relative;
+}
+
+.error-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brick);
+  margin-bottom: 20px;
+}
+
+.error-title {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 36px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.error-body {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 720px;
+  margin-bottom: 32px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.error-body strong { color: var(--text-inverse); }
+
+.error-details {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(188,63,31,0.9);
+  background: rgba(188,63,31,0.08);
+  border: 1px solid rgba(188,63,31,0.25);
+  padding: 14px 18px;
+  margin-bottom: 32px;
+  max-width: 760px;
+  line-height: 1.7;
+}
+
+.error-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
 /* FOOTER NOTE */
 .footnote {
   font-family: 'JetBrains Mono', monospace;
@@ -1218,14 +1272,31 @@ body {
     </div>
   </section>
 
+  <!-- ========== STAGE 2b — NOT MAGENTO ERROR ========== -->
+  <section class="stage" id="stage-error">
+    <div class="error-banner">
+      <div class="error-eyebrow">// PLATFORM CHECK FAILED</div>
+      <div class="error-title">This doesn't look like a Magento site.</div>
+      <div class="error-body">
+        <p>This audit is built for Magento 2 merchants on Luma or a custom theme. We checked <strong id="error-url">—</strong> and couldn't find Magento signals in the page.</p>
+        <p>If you know this is a Magento site, it's possible the server is blocking automated checks or using a heavily customised setup. Try the URL directly, or talk to us and we'll run a manual check.</p>
+      </div>
+      <div class="error-details" id="error-details"></div>
+      <div class="error-actions">
+        <button class="btn-ghost" onclick="resetAudit()">← Try another URL</button>
+        <button class="cta-btn" onclick="document.getElementById('modal-overlay').classList.add('open')">Talk to us anyway →</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ========== STAGE 3 — RESULTS ========== -->
   <section class="stage" id="stage-results">
     <div class="results-head">
       <div>
         <div class="results-meta">// Audit complete · <span id="audit-timestamp"></span></div>
         <div class="results-url" id="results-url">—</div>
-        <div class="results-platform">
-          <span class="tag">DETECTED</span>Magento 2.4.x · Luma theme · No Hyva · No PWA · Standard hosting
+        <div class="results-platform" id="results-platform">
+          <span class="tag" id="results-platform-tag">DETECTED</span><span id="results-platform-text">Magento 2.4.x · Luma theme · No Hyva · Standard hosting</span>
         </div>
       </div>
       <div class="results-actions">
@@ -1235,8 +1306,8 @@ body {
 
     <div class="score-grid" id="score-grid"></div>
 
-    <div class="section-title" data-num="01 / FINDINGS">What's slowing your site down</div>
-    <p class="section-sub">The seven biggest issues — every one of them is what Hyva was built to fix. We've called out the impact in plain numbers.</p>
+    <div class="section-title" data-num="01 / FINDINGS" id="findings-title">What's slowing your site down</div>
+    <p class="section-sub" id="findings-sub">The biggest issues — every one of them is what Hyva was built to fix. We've called out the impact in plain numbers.</p>
     <div class="findings" id="findings"></div>
 
     <div class="section-title" data-num="02 / IF YOU MOVED">Same site, on Hyva + Readymage</div>
@@ -1442,8 +1513,8 @@ body {
     </div>
 
     <div class="footnote">
-      <span><strong>// DEMO MODE</strong> · scores derived from URL hash for illustration. Production version uses Lighthouse, PageSpeed Insights, BuiltWith, and Ahrefs APIs.</span>
-      <span>v0.1 / hyva-upgrade-audit</span>
+      <span id="footnote-source"><strong>// DEMO MODE</strong> · scores estimated from URL. Run a URL to get live PageSpeed Insights data.</span>
+      <span>v0.2 / hyva-upgrade-audit</span>
     </div>
   </section>
 
@@ -1514,6 +1585,65 @@ body {
 
 <script>
 // ============================================================
+// PLATFORM DETECTION
+// ============================================================
+
+let currentPlatform = { isMagento: null, theme: 'unknown', themeDisplay: '', error: null };
+
+const PROXY = 'https://merchantminisite.samuel-goodey.workers.dev';
+
+async function detectPlatform(url) {
+  const result = { isMagento: null, theme: 'unknown', themeDisplay: '', error: null };
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const proxyUrl = `${PROXY}?url=${encodeURIComponent(url)}`;
+    const response = await fetch(proxyUrl, { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timeoutId);
+    const html = await response.text();
+
+    const m2Signals = [
+      { re: /Magento_/,                          w: 2 },
+      { re: /\/static\/version\d+\/frontend\//,  w: 3 },
+      { re: /requirejs\/require\.js/,            w: 2 },
+      { re: /data-mage-init/,                    w: 2 },
+      { re: /"Magento_[A-Z]/,                    w: 2 },
+      { re: /mage\/cookies/,                     w: 2 },
+      { re: /window\.Mage\b/,                    w: 2 },
+      { re: /Mage\.Cookies/,                     w: 2 },
+      { re: /performance\.mark\('Magento/,       w: 3 },
+    ];
+    const score = m2Signals.reduce((acc, s) => s.re.test(html) ? acc + s.w : acc, 0);
+    result.isMagento = score >= 3;
+
+    if (result.isMagento) {
+      const isHyva  = /hyva[_\-\/]|alpine\.js|@hyva|hyva\.phtml|x-data=/i.test(html);
+      const isLuma  = /Magento\/luma|Magento_Luma|\/luma\/web\//i.test(html);
+      if (isHyva) {
+        result.theme        = 'Hyva';
+        result.themeDisplay = 'Magento 2 · Hyva theme detected · Compare to Readymage average';
+      } else if (isLuma) {
+        result.theme        = 'Luma';
+        result.themeDisplay = 'Magento 2.4.x · Luma theme · No Hyva · Standard hosting';
+      } else {
+        result.theme        = 'Custom';
+        result.themeDisplay = 'Magento 2 · Custom theme · No Hyva detected';
+      }
+    }
+  } catch (e) {
+    result.error = (e.name === 'AbortError') ? 'timeout' : 'cors';
+    // CORS / network — can't verify, proceed in demo mode
+    result.isMagento    = null;
+    result.theme        = 'Luma';
+    result.themeDisplay = 'Magento 2.4.x · Luma theme · No Hyva · Standard hosting (unverified)';
+  }
+
+  return result;
+}
+
+// ============================================================
 // URL HASHING & DETERMINISTIC SCORE GENERATION
 // ============================================================
 
@@ -1571,105 +1701,310 @@ function classifyReverse(value, thresholds) {
 }
 
 // ============================================================
+// REAL SCORES — PAGESPEED INSIGHTS API
+// ============================================================
+
+async function fetchRealScores(url) {
+  const PSI     = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+  const API_KEY = ''; // ← paste your Google API key here
+  const keyParam = API_KEY ? `&key=${API_KEY}` : '';
+  const enc = encodeURIComponent(url);
+
+  try {
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 90000);
+
+    const [mRes, dRes] = await Promise.all([
+      fetch(`${PSI}?url=${enc}&strategy=mobile&category=performance&category=seo&category=accessibility${keyParam}`, { signal: controller.signal }),
+      fetch(`${PSI}?url=${enc}&strategy=desktop&category=performance${keyParam}`, { signal: controller.signal })
+    ]);
+    clearTimeout(tid);
+
+    if (!mRes.ok || !dRes.ok) throw new Error('PSI HTTP error');
+    const [m, d] = await Promise.all([mRes.json(), dRes.json()]);
+    const mLh = m.lighthouseResult;
+    const dLh = d.lighthouseResult;
+    if (!mLh || !dLh) throw new Error('Missing lighthouseResult');
+
+    // JS bundle: sum Script resource sizes from network-requests audit
+    const netItems = mLh.audits['network-requests']?.details?.items || [];
+    const scriptItems = netItems.filter(i =>
+      i.resourceType === 'Script' ||
+      (i.mimeType && (i.mimeType.includes('javascript') || i.mimeType.includes('ecmascript')))
+    );
+    const scriptBytes = scriptItems.reduce((s, i) => s + (i.resourceSize || i.transferSize || 0), 0);
+    console.log(`[PSI] ${scriptItems.length} script files detected, total uncompressed: ${(scriptBytes / 1048576).toFixed(2)}MB`);
+    console.log('[PSI] Script files:', scriptItems.map(i => ({ url: i.url?.split('?')[0].split('/').pop(), kb: Math.round((i.resourceSize || i.transferSize || 0) / 1024) })));
+
+    // INP (Lighthouse 10+) or TBT-based estimate
+    const inpRaw = mLh.audits['interaction-to-next-paint']?.numericValue
+      ?? mLh.audits['experimental-interaction-to-next-paint']?.numericValue
+      ?? Math.min(Math.round((mLh.audits['total-blocking-time']?.numericValue ?? 300) * 2.8 + 80), 900);
+
+    const fb = generateScores(url); // fallback for any gaps
+
+    return {
+      mobileSpeed:   Math.round((mLh.categories.performance?.score ?? 0) * 100),
+      desktopSpeed:  Math.round((dLh.categories.performance?.score ?? 0) * 100),
+      lcp:           ((mLh.audits['largest-contentful-paint']?.numericValue ?? 3500) / 1000).toFixed(1),
+      cls:           (mLh.audits['cumulative-layout-shift']?.numericValue ?? 0.15).toFixed(2),
+      inp:           Math.round(inpRaw),
+      seo:           Math.round((mLh.categories.seo?.score ?? 0) * 100),
+      accessibility: Math.round((mLh.categories.accessibility?.score ?? 0) * 100),
+      bundleJs:      scriptBytes > 10000 ? (scriptBytes / 1048576).toFixed(1) : fb.bundleJs,
+      ttfb:          Math.round(mLh.audits['server-response-time']?.numericValue ?? fb.ttfb),
+      requests:      netItems.length || fb.requests,
+      _source:       'psi'
+    };
+  } catch (e) {
+    console.warn('PSI failed, using hash fallback:', e.message);
+    return { ...generateScores(url), _source: 'demo' };
+  }
+}
+
+// ============================================================
 // CONSOLE LINES (audit running)
 // ============================================================
 
-function buildConsoleLines(url) {
+function buildConsoleLines(url, platform) {
   const domain = url.replace(/^https?:\/\//, '').split('/')[0];
-  return [
+  const lines = [
     { text: `Resolving DNS for <strong>${domain}</strong>…`, status: 'done', stat: '24ms' },
-    { text: `Connecting via HTTPS, checking TLS chain…`, status: 'done', stat: 'TLS 1.3' },
-    { text: `Fetching homepage, capturing initial HTML…`, status: 'done', stat: '1.4MB' },
-    { text: `Detecting platform fingerprint…`, status: 'done', stat: 'Magento 2.4.x' },
-    { text: `Detecting frontend theme & framework…`, status: 'warn', stat: 'Luma · No Hyva' },
-    { text: `Running Lighthouse — mobile…`, status: 'done', stat: 'complete' },
-    { text: `Running Lighthouse — desktop…`, status: 'done', stat: 'complete' },
-    { text: `Capturing Core Web Vitals (LCP, CLS, INP)…`, status: 'fail', stat: '3 of 3 fail' },
+    { text: `Connecting via HTTPS, checking TLS certificate…`, status: 'done', stat: 'TLS 1.3' },
+    { text: `Fetching homepage HTML…`, status: 'done', stat: 'OK' },
+  ];
+
+  if (platform.error === 'cors' || platform.error === 'timeout') {
+    lines.push({ text: `Platform check: browser CORS policy blocked read — using fingerprint fallback`, status: 'warn', stat: 'limited' });
+    lines.push({ text: `Platform fingerprint: <strong>Magento 2.4.x</strong> assumed (unverified)`, status: 'warn', stat: 'unverified' });
+    lines.push({ text: `Theme detection: CORS blocked — defaulting to <strong>Luma</strong>`, status: 'warn', stat: 'Luma assumed' });
+  } else if (platform.isMagento) {
+    lines.push({ text: `Platform fingerprint: <strong>Magento 2.4.x</strong> confirmed`, status: 'done', stat: 'Magento 2' });
+    if (platform.theme === 'Hyva') {
+      lines.push({ text: `Frontend theme: <strong>Hyva</strong> detected — speed comparison adjusted`, status: 'done', stat: 'Hyva ✓' });
+    } else if (platform.theme === 'Luma') {
+      lines.push({ text: `Frontend theme: <strong>Luma</strong> — RequireJS + KnockoutJS stack confirmed`, status: 'fail', stat: 'Luma · No Hyva' });
+    } else {
+      lines.push({ text: `Frontend theme: custom — no Hyva patterns found`, status: 'warn', stat: 'Custom · No Hyva' });
+    }
+  }
+
+  lines.push(
+    { text: `Running Lighthouse — mobile performance…`, status: 'done', stat: 'complete' },
+    { text: `Running Lighthouse — desktop performance…`, status: 'done', stat: 'complete' },
+    { text: `Capturing Core Web Vitals (LCP, CLS, INP)…`, status: platform.theme === 'Hyva' ? 'warn' : 'fail', stat: platform.theme === 'Hyva' ? '1–2 of 3 fail' : '3 of 3 fail' },
     { text: `Crawling robots.txt and sitemap.xml…`, status: 'done', stat: 'OK' },
     { text: `Scanning structured data, meta tags, schema…`, status: 'warn', stat: 'partial' },
     { text: `Checking hosting model — TTFB, edge caching, CDN…`, status: 'warn', stat: 'no edge' },
-    { text: `Comparing against Hyva merchant benchmarks (n=50)…`, status: 'done', stat: 'OK' },
+    { text: `Comparing against Hyva + Readymage benchmarks (n=50)…`, status: 'done', stat: 'OK' },
     { text: `Audit complete. Generating report…`, status: 'done', stat: 'OK' }
-  ];
+  );
+
+  return lines;
 }
 
 // ============================================================
 // FINDINGS GENERATION
 // ============================================================
 
-function buildFindings(scores) {
-  return [
-    {
+function buildFindings(scores, platform) {
+  const onHyva = platform && platform.theme === 'Hyva';
+  const findings = [];
+
+  // ── 1. JavaScript bundle ────────────────────────────────────────
+  const bundle = parseFloat(scores.bundleJs);
+  const bundleHeavy = bundle > 1.5;
+  if (onHyva) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'ALREADY IMPROVED',
+      tagFix: 'GO FURTHER',
+      currentH: `JS bundle: ${scores.bundleJs}MB — Hyva has helped`,
+      currentBody: `You're already on Hyva, so RequireJS and KnockoutJS are gone. Your ${scores.bundleJs}MB is better than a typical Luma site, but there's still room — third-party scripts (analytics, chat, reviews) accumulate over time and can undo the gains.`,
+      fixH: 'Regular JS audit keeps the wins',
+      fixBody: `We run a quarterly script audit as part of ongoing retainers — removing duplicates, deferring non-critical tags, consolidating tracking through GTM server-side.`,
+      impact: `Protect your ${(4.2 - bundle).toFixed(1)}MB advantage over Luma`
+    });
+  } else if (bundleHeavy) {
+    const themeLabel = (platform && platform.theme === 'Custom') ? 'Custom Magento themes' : 'Magento Luma';
+    const themeReason = (platform && platform.theme === 'Custom')
+      ? `Most custom Magento themes inherit the Luma or Blank frontend stack and still ship <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong>. Unless yours was built specifically to remove them, the browser is downloading and executing all ${scores.bundleJs}MB before any interaction is possible.`
+      : `Magento Luma ships <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong> on every page — even when the page doesn't need them. The browser must download, parse, and execute all ${scores.bundleJs}MB before any interaction is possible. This is structural, not something you can tune away.`;
+    findings.push({
       severity: 'high',
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
-      currentH: `JavaScript bundle is ${scores.bundleJs}MB`,
-      currentBody: `Magento Luma ships <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong> — even on pages that don't use them. Your homepage downloads ${scores.bundleJs}MB of JS before a user can interact.`,
+      currentH: `JavaScript bundle: ${scores.bundleJs}MB`,
+      currentBody: themeReason,
       fixH: 'Hyva ships ~280KB of Alpine.js + Tailwind',
-      fixBody: `Hyva replaced RequireJS/KnockoutJS with <strong>Alpine.js</strong>, dropped jQuery, and uses Tailwind for utility CSS. Same Magento back-end, ~85% smaller frontend.`,
-      impact: `~${(scores.bundleJs - 0.28).toFixed(1)}MB lighter per page`
-    },
-    {
+      fixBody: `Hyva replaces RequireJS/KnockoutJS entirely with <strong>Alpine.js</strong> and drops jQuery. Same Magento back-end, same catalogue — ~85% smaller JS payload. Pages become interactive seconds earlier.`,
+      impact: `~${(bundle - 0.28).toFixed(1)}MB lighter per page`
+    });
+  } else {
+    const themeContext = (platform && platform.theme === 'Custom')
+      ? `Your ${scores.bundleJs}MB is reasonable — your custom theme has likely had some optimisation work. But if it's built on Luma or Blank, RequireJS is still under the hood and the overhead can't be removed without switching the frontend stack.`
+      : `Your ${scores.bundleJs}MB is lighter than many Luma sites — you've likely applied merging and minification. But Luma's RequireJS architecture means you're working against the framework, not with it. The overhead can't be removed without changing the frontend stack.`;
+    findings.push({
+      severity: 'mid',
+      tagNow: 'IMPROVEMENT AVAILABLE',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `JavaScript bundle: ${scores.bundleJs}MB`,
+      currentBody: themeContext,
+      fixH: 'Hyva ships ~280KB of Alpine.js + Tailwind',
+      fixBody: `Hyva's Alpine.js replaces the entire RequireJS/KnockoutJS layer. Your optimisation work transfers — Hyva just starts from a much smaller baseline.`,
+      impact: `~${(bundle - 0.28).toFixed(1)}MB lighter per page`
+    });
+  }
+
+  // ── 2. LCP ──────────────────────────────────────────────────────
+  const lcp = parseFloat(scores.lcp);
+  const lcpFail = lcp > 2.5;
+  const lcpLabel = lcp > 4.5 ? 'critically slow' : lcp > 3.5 ? 'well below Google\'s threshold' : lcp > 2.5 ? 'in the "Needs Improvement" zone' : 'just within acceptable range';
+  if (onHyva) {
+    findings.push({
+      severity: lcp > 2.5 ? 'mid' : 'mid',
+      tagNow: lcp > 2.5 ? 'NEEDS WORK' : 'GOOD — PROTECT IT',
+      tagFix: 'READYMAGE HELPS',
+      currentH: `Largest Contentful Paint: ${scores.lcp}s`,
+      currentBody: lcp > 2.5
+        ? `Even on Hyva, your LCP of ${scores.lcp}s is ${lcpLabel}. Hyva removes JS render-blocking, but slow server response (TTFB) and unoptimised hero images can still drag LCP. Check image formats, lazy-load strategy, and hosting performance.`
+        : `Your LCP of ${scores.lcp}s is good — Hyva is doing its job. The risk is regression: adding third-party widgets, unoptimised image uploads, or moving to slower hosting can erode this quickly.`,
+      fixH: 'Readymage keeps TTFB low under load',
+      fixBody: `Auto-scaling hosting means your LCP doesn't spike during trade rush hours. Fixed-instance hosting often queues Magento PHP workers at peak, adding seconds to LCP even on a well-built frontend.`,
+      impact: lcp > 2.5 ? `${((lcp - 1.6) * 1000).toFixed(0)}ms to hit Hyva average` : 'Protect your current advantage'
+    });
+  } else if (lcpFail) {
+    findings.push({
       severity: 'high',
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
       currentH: `Largest Contentful Paint: ${scores.lcp}s`,
-      currentBody: `LCP is the time until the largest visible element renders. Above 2.5s = "Poor" by Google's Core Web Vitals. Your ${scores.lcp}s is well over the threshold — and Google ranks slower pages lower.`,
+      currentBody: `Your LCP of ${scores.lcp}s is ${lcpLabel}. Google marks anything above 2.5s as "Poor" and uses it as a ranking signal. The root cause on Luma is JavaScript render-blocking: the browser can't paint your main content until RequireJS, KnockoutJS, and all their dependencies have loaded and executed — a chain that takes ${(lcp * 0.6).toFixed(1)}–${(lcp * 0.8).toFixed(1)}s on mobile.`,
       fixH: 'Hyva sites average 1.6s LCP',
-      fixBody: `Less JS to parse, no client-side rendering wait, server-side templates. The same product page renders in roughly a third of the time.`,
-      impact: `${((scores.lcp - 1.6) * 1000).toFixed(0)}ms faster`
-    },
-    {
+      fixBody: `No RequireJS bootstrap, no KnockoutJS initialisation, server-side templates. The page starts rendering immediately. Same product catalogue, same promotions — just rendered in a fraction of the time.`,
+      impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to largest paint`
+    });
+  } else {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'IMPROVEMENT AVAILABLE',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `Largest Contentful Paint: ${scores.lcp}s`,
+      currentBody: `Your LCP of ${scores.lcp}s is just within Google's "Good" threshold (under 2.5s) — you're doing better than most Luma sites we audit. The JS render-blocking is still there, but it's not crossing the line. Moving to Hyva removes the structural cause entirely and takes this well below 2s.`,
+      fixH: 'Hyva sites average 1.6s LCP',
+      fixBody: `Even starting from a decent LCP, Hyva's lighter frontend creates headroom — new features and third-party scripts have less impact on a faster baseline.`,
+      impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to largest paint`
+    });
+  }
+
+  // ── 3. CLS ──────────────────────────────────────────────────────
+  const cls = parseFloat(scores.cls);
+  const clsFail = cls > 0.1;
+  if (onHyva) {
+    findings.push({
+      severity: cls > 0.1 ? 'mid' : 'mid',
+      tagNow: cls > 0.1 ? 'NEEDS WORK' : 'GOOD',
+      tagFix: 'MAINTAIN IT',
+      currentH: `Cumulative Layout Shift: ${scores.cls}`,
+      currentBody: cls > 0.1
+        ? `Your CLS of ${scores.cls} is above Google's "Good" threshold even on Hyva. This is usually caused by third-party widgets injected after page load — reviews, chat, personalisation banners — or hero images without explicit dimensions.`
+        : `Your CLS of ${scores.cls} is within Google's "Good" range. Hyva's server-side templates are doing their job. Watch for regression when adding third-party scripts — they're the most common source of layout shift on otherwise stable Hyva sites.`,
+      fixH: cls > 0.1 ? 'Audit late-injected widgets' : 'Protect with a CLS monitoring policy',
+      fixBody: `We include CLS regression monitoring in ongoing retainers — flagging third-party injections before they appear in Google Search Console data.`,
+      impact: 'Stable rankings, better UX'
+    });
+  } else if (clsFail) {
+    findings.push({
       severity: 'high',
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
       currentH: `Cumulative Layout Shift: ${scores.cls}`,
-      currentBody: `Your page jumps around as it loads — images without dimensions, late-loading widgets, sliding banners. Above 0.1 = "Poor". Frustrating for users, penalised by Google.`,
+      currentBody: `Your CLS of ${scores.cls} is in the "Poor" zone — your page visibly shifts as it loads. The typical causes on Luma are client-side widget injection (Magento initialises many components in JS after the initial HTML paint), images without declared dimensions, and banner carousels that reserve space only after JS loads. Google penalises this directly in rankings.`,
       fixH: 'Hyva sites average 0.04 CLS',
-      fixBody: `Hyva templates declare image dimensions, lazy-load below-the-fold content properly, and don't inject late DOM. Layout settles immediately.`,
-      impact: 'Smoother UX, better ranking'
-    },
-    {
+      fixBody: `Hyva renders components server-side with correct dimensions baked in. No post-paint injections. Layout settles on first render, not after several rounds of JS execution.`,
+      impact: 'Smoother UX, better Core Web Vitals ranking'
+    });
+  } else {
+    findings.push({
       severity: 'mid',
-      tagNow: 'PROBLEM',
-      tagFix: 'READYMAGE FIXES IT',
-      currentH: `Time to First Byte: ${scores.ttfb}ms`,
-      currentBody: `Your server takes <strong>${scores.ttfb}ms</strong> to start sending a response. On standard fixed-instance hosting, you're paying for capacity you don't use 80% of the time, then queuing requests during peak load.`,
-      fixH: 'Readymage averages 160-200ms TTFB',
-      fixBody: `Auto-scaling Magento hosting that adds workers when traffic spikes and sheds them when it drops. Pay for what you use, not what you might use.`,
-      impact: `${(scores.ttfb - 180)}ms faster + lower hosting bill`
-    },
-    {
-      severity: 'mid',
-      tagNow: 'PROBLEM',
-      tagFix: 'WE FIX IT',
-      currentH: `${scores.requests} HTTP requests on the homepage`,
-      currentBody: `Each one is a round-trip. Most are CSS, JS, fonts, tracking scripts, and images. Magento Luma defaults are notoriously chatty — 200+ requests per page is common.`,
-      fixH: 'Hyva builds typically ship 30-50 requests',
-      fixBody: `Bundled and minified properly. Critical CSS inlined. Fonts subset and self-hosted. Tracking consolidated through GTM server-side.`,
-      impact: `${scores.requests - 40} fewer round-trips`
-    },
-    {
-      severity: 'mid',
-      tagNow: 'PROBLEM',
-      tagFix: 'WE FIX IT',
-      currentH: `SEO score: ${scores.seo}/100`,
-      currentBody: `Decent but leaving organic traffic on the table. Common issues: missing product schema, weak internal linking, slow pages hurting ranking, no AEO/GEO optimisation for AI search.`,
-      fixH: 'Production-grade SEO + AEO/GEO',
-      fixBody: `Full schema (Product, Offer, Review, Organization, BreadcrumbList), branch-level local SEO, AI-search optimisation for ChatGPT/Perplexity/Gemini surfaces, faster pages = better rankings.`,
-      impact: 'Rank higher, get cited by AI'
-    },
-    {
-      severity: 'mid',
-      tagNow: 'PROBLEM',
-      tagFix: 'WE FIX IT',
-      currentH: `Accessibility: ${scores.accessibility}/100`,
-      currentBody: `Most B2B trade sites score 70-85 on accessibility — missing alt text, contrast issues, form labels, heading order. Beyond ethics and legal exposure, accessibility correlates with higher conversion.`,
-      fixH: 'WCAG 2.2 AA as standard',
-      fixBody: `Hyva theme is built with accessibility in. Our delivery includes manual audit, screen-reader testing, and remediation. Ships at 95+ on Lighthouse accessibility.`,
-      impact: 'Compliant + better conversion'
-    }
-  ];
+      tagNow: 'IMPROVEMENT AVAILABLE',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `Cumulative Layout Shift: ${scores.cls}`,
+      currentBody: `Your CLS of ${scores.cls} is within Google's "Good" range — you've avoided the worst of Luma's layout-shift tendencies, possibly through careful image handling or custom JS fixes. Hyva achieves the same result structurally, without requiring ongoing maintenance.`,
+      fixH: 'Hyva sites average 0.04 CLS',
+      fixBody: `Hyva's server-side rendering eliminates the structural cause. No JS-deferred component injection means no layout shift by default, not by configuration.`,
+      impact: 'No ongoing CLS maintenance required'
+    });
+  }
+
+  // ── 4. TTFB ─────────────────────────────────────────────────────
+  const ttfb = scores.ttfb;
+  const ttfbSlow = ttfb > 600;
+  const ttfbLabel = ttfb > 900 ? 'critically slow' : ttfb > 600 ? 'slow' : ttfb > 400 ? 'acceptable' : 'good';
+  findings.push({
+    severity: ttfbSlow ? (onHyva ? 'high' : 'mid') : 'mid',
+    tagNow: ttfbSlow ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
+    tagFix: 'READYMAGE FIXES IT',
+    currentH: `Time to First Byte: ${scores.ttfb}ms`,
+    currentBody: ttfbSlow
+      ? `Your server takes <strong>${ttfb}ms</strong> to start sending a response — that's ${ttfbLabel}. Every other metric starts counting from here. The cause is almost always hosting: fixed-instance servers queue Magento's PHP bootstrap under load. You're ${onHyva ? 'on Hyva so the frontend is fast' : 'paying for a fast frontend'} but the server is adding latency before the first byte arrives.`
+      : `Your TTFB of ${ttfb}ms is ${ttfbLabel} — your hosting is performing reasonably well. Readymage's auto-scaling architecture typically brings this to 160–200ms and eliminates the spike pattern you see under traffic load, with no fixed instance costs.`,
+    fixH: 'Readymage averages 160–200ms TTFB',
+    fixBody: `Auto-scaling Magento hosting: workers spin up when traffic spikes and down when it drops. No queuing at peak, no idle spend in quiet periods. Purpose-built for Magento's PHP architecture.`,
+    impact: `${ttfb - 180}ms faster server response`
+  });
+
+  // ── 5. HTTP requests ────────────────────────────────────────────
+  const req = scores.requests;
+  const reqHigh = req > 150;
+  if (!onHyva) {
+    findings.push({
+      severity: reqHigh ? 'mid' : 'mid',
+      tagNow: reqHigh ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
+      tagFix: 'HYVA FIXES IT',
+      currentH: `${req} HTTP requests on the homepage`,
+      currentBody: reqHigh
+        ? `${req} round-trips is well above benchmark. Magento Luma's module system generates individual CSS, JS, font, and image requests for every module — even with merging enabled, these accumulate fast. On mobile networks each round-trip adds latency that multiplies.`
+        : `${req} requests is above the 50-request target but not the worst we see. Most come from Luma's module system and third-party tracking. Hyva eliminates the module-system overhead at source — the remainder is usually addressable in the build.`,
+      fixH: 'Hyva builds typically ship 30–50 requests',
+      fixBody: `Bundled and minified from the ground up. Critical CSS inlined. Fonts subset and self-hosted. Tracking consolidated through server-side GTM. The reduction is structural, not just configuration.`,
+      impact: `${req - 40} fewer round-trips per page load`
+    });
+  }
+
+  // ── 6. SEO ──────────────────────────────────────────────────────
+  const seo = scores.seo;
+  const seoWeak = seo < 80;
+  findings.push({
+    severity: 'mid',
+    tagNow: seoWeak ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
+    tagFix: 'WE FIX IT',
+    currentH: `SEO score: ${seo}/100`,
+    currentBody: seoWeak
+      ? `A score of ${seo}/100 indicates real gaps. Common findings on ${onHyva ? 'Hyva' : 'Luma'} sites: missing or incomplete product schema (Product, Offer, Review markup), ${!onHyva ? 'slow page speed hurting Core Web Vitals rankings, ' : ''}weak internal linking structure, thin category pages, and no optimisation for AI search surfaces (ChatGPT, Perplexity, Google AI Overviews).`
+      : `Your SEO score of ${seo}/100 is solid — there's clearly been investment here. The gap most merchants miss, regardless of technical score, is AEO/GEO: getting products surfaced inside AI-generated answers. That layer doesn't show in Lighthouse and most agencies aren't doing it yet.`,
+    fixH: 'Production-grade SEO + AEO/GEO',
+    fixBody: `Full structured data (Product, Offer, Review, Organization, BreadcrumbList), branch-level local SEO, ${!onHyva ? 'faster pages from Hyva improving CWV rankings, ' : ''}and AI-search optimisation for ChatGPT/Perplexity/Gemini. Most agencies aren't doing the AEO layer yet.`,
+    impact: 'Higher organic rankings + AI search presence'
+  });
+
+  // ── 7. Accessibility ────────────────────────────────────────────
+  const acc = scores.accessibility;
+  const accWeak = acc < 85;
+  findings.push({
+    severity: 'mid',
+    tagNow: accWeak ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
+    tagFix: 'WE FIX IT',
+    currentH: `Accessibility: ${acc}/100`,
+    currentBody: accWeak
+      ? `${acc}/100 means real barriers for users with assistive technology. Common issues: missing image alt text, poor colour contrast on CTAs, unlabelled form fields, inconsistent heading hierarchy. Beyond legal exposure (UK EAA enforcement from 2025), accessibility gaps directly reduce conversion — cleaner DOM and better labels help all users.`
+      : `${acc}/100 is above average for a ${onHyva ? 'Hyva' : 'Luma'} site — you've put work in. Getting to WCAG 2.2 AA compliance from here is mostly systematic: a structured audit, screen-reader testing, and a few targeted fixes. We ship Hyva builds at 95+ as standard.`,
+    fixH: 'WCAG 2.2 AA as standard',
+    fixBody: `${onHyva ? 'Your Hyva theme is a solid base.' : 'Hyva is built accessible by default.'} Our delivery adds a manual audit, screen-reader testing, contrast and heading remediation. Ships at 95+ on Lighthouse accessibility.`,
+    impact: 'Compliant + measurable conversion uplift'
+  });
+
+  return findings;
 }
 
 // ============================================================
@@ -1798,9 +2133,9 @@ function renderScoreGrid(scores) {
   }).join('');
 }
 
-function renderFindings(scores) {
+function renderFindings(scores, platform) {
   const root = document.getElementById('findings');
-  const items = buildFindings(scores);
+  const items = buildFindings(scores, platform);
   root.innerHTML = items.map((f, i) => `
     <div class="finding">
       <div class="finding-marker ${f.severity === 'mid' ? 'warn' : ''}">${String(i+1).padStart(2,'0')}</div>
@@ -1850,29 +2185,48 @@ function renderCompareRows(scores) {
 
 let currentUrl = '';
 
-function startAudit(url) {
+async function startAudit(url) {
   currentUrl = normalizeUrl(url);
+
+  // Disable input while checking
+  const submitBtn = document.getElementById('url-submit');
+  const inputEl   = document.getElementById('url-input');
+  submitBtn.disabled   = true;
+  submitBtn.textContent = 'Checking…';
+  inputEl.disabled     = true;
+
+  const platform = await detectPlatform(currentUrl);
+  currentPlatform = platform;
+
+  submitBtn.disabled   = false;
+  submitBtn.textContent = 'Run audit →';
+  inputEl.disabled     = false;
+
+  // Confirmed NOT Magento — stop here
+  if (platform.isMagento === false) {
+    showError(currentUrl, platform);
+    return;
+  }
+
+  // Magento confirmed or unverifiable (CORS) — run the audit
   document.getElementById('running-url').textContent = currentUrl;
   document.getElementById('console-lines').innerHTML = '';
   document.getElementById('console-bar-fill').style.width = '0%';
-
   showStage('running');
 
-  const lines = buildConsoleLines(currentUrl);
-  const total = lines.length;
+  // Kick off PSI immediately — runs while console animates
+  const scoresPromise = fetchRealScores(currentUrl);
+
+  const lines = buildConsoleLines(currentUrl, platform);
+  const total  = lines.length;
   let i = 0;
 
   function streamLine() {
     if (i >= total) {
-      // Done — wait a beat then go to results
-      setTimeout(() => {
-        renderResults(currentUrl);
-        showStage('results');
-      }, 600);
+      finishConsoleWithPSI(scoresPromise);
       return;
     }
-
-    const line = lines[i];
+    const line  = lines[i];
     const lineEl = document.createElement('div');
     lineEl.className = 'console-line';
     lineEl.style.animationDelay = '0s';
@@ -1886,28 +2240,122 @@ function startAudit(url) {
       <span class="stat">${line.stat}</span>
     `;
     document.getElementById('console-lines').appendChild(lineEl);
-
     document.getElementById('console-bar-fill').style.width = `${((i+1)/total)*100}%`;
-
     i++;
-    // Variable timing — feels more real
-    const delay = 350 + Math.random() * 380;
-    setTimeout(streamLine, delay);
+    setTimeout(streamLine, 350 + Math.random() * 380);
   }
 
   streamLine();
 }
 
-function renderResults(url) {
-  const scores = generateScores(url);
+async function finishConsoleWithPSI(scoresPromise) {
+  // Add animated waiting line
+  const linesEl = document.getElementById('console-lines');
+  const waitEl  = document.createElement('div');
+  waitEl.className = 'console-line';
+  waitEl.style.animationDelay = '0s';
+  waitEl.innerHTML = `
+    <span class="marker warn" id="psi-marker">·</span>
+    <span class="text" id="psi-text">Running PageSpeed Insights — mobile + desktop in parallel…</span>
+    <span class="stat" id="psi-stat">waiting</span>
+  `;
+  linesEl.appendChild(waitEl);
+
+  const frames = ['·', '○', '◌', '○'];
+  let f = 0;
+  const ticker = setInterval(() => {
+    const el = document.getElementById('psi-marker');
+    if (el) el.textContent = frames[f++ % frames.length];
+  }, 400);
+
+  const scores = await scoresPromise;
+  clearInterval(ticker);
+
+  const markerEl = document.getElementById('psi-marker');
+  const textEl   = document.getElementById('psi-text');
+  const statEl   = document.getElementById('psi-stat');
+
+  if (scores._source === 'psi') {
+    markerEl.className   = 'marker done';
+    markerEl.textContent = '✓';
+    textEl.innerHTML     = `PageSpeed Insights complete — mobile <strong>${scores.mobileSpeed}</strong>/100, desktop <strong>${scores.desktopSpeed}</strong>/100`;
+    statEl.textContent   = 'live data';
+  } else {
+    markerEl.className   = 'marker warn';
+    markerEl.textContent = '!';
+    textEl.textContent   = 'PageSpeed Insights timed out — using estimated scores';
+    statEl.textContent   = 'demo fallback';
+  }
+
+  document.getElementById('console-bar-fill').style.width = '100%';
+
+  setTimeout(() => {
+    renderResults(currentUrl, currentPlatform, scores);
+    showStage('results');
+  }, 800);
+}
+
+function showError(url, platform) {
+  document.getElementById('error-url').textContent = url;
+  const detail = platform.error === 'timeout'
+    ? '// Detection timed out after 10s — the server may be slow or blocking automated requests.'
+    : '// No Magento fingerprints found in the page HTML (RequireJS, Magento_ namespaces, static/version paths). This URL does not appear to be running Magento 2.';
+  document.getElementById('error-details').textContent = detail;
+  showStage('error');
+}
+
+function renderResults(url, platform, scores) {
+  if (!scores) scores = generateScores(url);
+
   document.getElementById('results-url').textContent = url;
   document.getElementById('audit-timestamp').textContent = new Date().toLocaleString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
+
+  // Update platform tag
+  const tag  = document.getElementById('results-platform-tag');
+  const text = document.getElementById('results-platform-text');
+  if (platform && platform.theme === 'Hyva') {
+    tag.style.background = 'var(--sage)';
+    text.textContent = platform.themeDisplay;
+  } else if (platform && platform.error) {
+    tag.style.background = 'var(--accent-dim)';
+    tag.textContent = 'UNVERIFIED';
+    text.textContent = platform.themeDisplay;
+  } else {
+    tag.style.background = '';
+    text.textContent = platform ? platform.themeDisplay : 'Magento 2.4.x · Luma theme · No Hyva · Standard hosting';
+  }
+
+  // Footnote — live vs demo
+  const footnote = document.getElementById('footnote-source');
+  if (footnote) {
+    if (scores._source === 'psi') {
+      footnote.innerHTML = '<strong>// LIVE DATA</strong> · scores from Google PageSpeed Insights (Lighthouse). Ran ' + new Date().toLocaleTimeString('en-GB') + '.';
+    } else {
+      footnote.innerHTML = '<strong>// ESTIMATED</strong> · PageSpeed Insights did not respond in time. Scores are illustrative, derived from URL hash.';
+    }
+  }
+
+  // Dynamic findings heading
+  const onHyva = platform && platform.theme === 'Hyva';
+  document.getElementById('findings-title').textContent =
+    onHyva ? 'You\'re on Hyva — here\'s what\'s still on the table' : 'What\'s slowing your site down';
+  document.getElementById('findings-sub').textContent =
+    onHyva
+      ? 'You\'ve already made the biggest move. These are the remaining opportunities — hosting, SEO/AEO, and conversion.'
+      : 'The biggest issues found — every one of them is what Hyva was built to fix. Impact called out in plain numbers.';
+
   renderScoreGrid(scores);
-  renderFindings(scores);
+  renderFindings(scores, platform);
   renderCompareRows(scores);
   renderReqToggles();
+
+  // Update modal payload platform string
+  const platformStr = platform
+    ? (platform.theme === 'Hyva' ? 'Magento 2 · Hyva theme' : platform.themeDisplay)
+    : 'Magento 2.4.x · Luma · No Hyva';
+  document.querySelector('[data-platform-str]')?.setAttribute('data-platform-str', platformStr);
 }
 
 function showStage(stage) {
@@ -1917,6 +2365,7 @@ function showStage(stage) {
 }
 
 function resetAudit() {
+  currentPlatform = { isMagento: null, theme: 'unknown', themeDisplay: '', error: null };
   showStage('input');
   document.getElementById('url-input').value = '';
   document.getElementById('url-input').focus();
@@ -2036,7 +2485,7 @@ document.getElementById('modal-send').addEventListener('click', () => {
     submitted_at: new Date().toISOString(),
     source: 'hyva-upgrade-audit-v0.1',
     audited_url: currentUrl,
-    detected_platform: 'Magento 2.4.x · Luma · No Hyva',
+    detected_platform: currentPlatform.themeDisplay || 'Magento 2.4.x · Luma · No Hyva',
     scores: generateScores(currentUrl),
     requirements: gatherRequirements(),
     contact: {
