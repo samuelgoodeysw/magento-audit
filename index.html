@@ -2677,6 +2677,8 @@ async function startAudit(url) {
   submitBtn.textContent = 'Checking…';
   inputEl.disabled     = true;
 
+  // Fire PSI and platform detection in parallel — PSI is slow, every second counts
+  const scoresPromise = fetchRealScores(currentUrl);
   const platform = await detectPlatform(currentUrl);
   currentPlatform = platform;
 
@@ -2684,7 +2686,7 @@ async function startAudit(url) {
   submitBtn.textContent = 'Run audit →';
   inputEl.disabled     = false;
 
-  // Confirmed NOT Magento — stop here
+  // Confirmed NOT Magento — stop here (scoresPromise silently abandoned)
   if (platform.isMagento === false) {
     showError(currentUrl, platform);
     return;
@@ -2695,9 +2697,6 @@ async function startAudit(url) {
   document.getElementById('console-lines').innerHTML = '';
   document.getElementById('console-bar-fill').style.width = '0%';
   showStage('running');
-
-  // Kick off PSI immediately — runs while console animates
-  const scoresPromise = fetchRealScores(currentUrl);
 
   const lines = buildConsoleLines(currentUrl, platform);
   const total  = lines.length;
