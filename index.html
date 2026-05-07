@@ -1951,13 +1951,14 @@ function classifyReverse(value, thresholds) {
 // REAL SCORES — PAGESPEED INSIGHTS API
 // ============================================================
 
-async function psiCall(url, strategy, keyParam, signal) {
-  const PSI = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
-  const enc = encodeURIComponent(url);
+async function psiCall(url, strategy, signal) {
+  const WORKER = 'https://merchantminisite.samuel-goodey.workers.dev/psi';
+  const params = new URLSearchParams({ url, strategy });
   const cats = strategy === 'mobile'
-    ? '&category=performance&category=seo&category=accessibility'
-    : '&category=performance';
-  const res = await fetch(`${PSI}?url=${enc}&strategy=${strategy}${cats}${keyParam}`, { signal });
+    ? ['performance', 'seo', 'accessibility']
+    : ['performance'];
+  cats.forEach(c => params.append('category', c));
+  const res = await fetch(`${WORKER}?${params}`, { signal });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err?.error?.message || `HTTP ${res.status}`);
@@ -1968,16 +1969,13 @@ async function psiCall(url, strategy, keyParam, signal) {
 }
 
 async function fetchRealScores(url) {
-  const API_KEY  = 'AIzaSyDXcnOhpfsjOi7m_C_goV3xXNhsVrdZN3E';
-  const keyParam = API_KEY ? `&key=${API_KEY}` : '';
-
   const attempt = async () => {
     const controller = new AbortController();
     const tid = setTimeout(() => controller.abort(), 90000);
     try {
       const results = await Promise.allSettled([
-        psiCall(url, 'mobile',  keyParam, controller.signal),
-        psiCall(url, 'desktop', keyParam, controller.signal)
+        psiCall(url, 'mobile',  controller.signal),
+        psiCall(url, 'desktop', controller.signal)
       ]);
       clearTimeout(tid);
       return results;
