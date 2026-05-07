@@ -329,13 +329,13 @@ body {
   border-left: 3px solid var(--accent);
   padding: 1.4rem 1.8rem;
   margin-bottom: 1.4rem;
-  background: var(--surface);
+  background: var(--bg-surface);
   opacity: 0;
   animation: previewIn 0.45s ease forwards;
 }
-.preview-card-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+.preview-card-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
 .preview-card-h { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.55rem; }
-.preview-card-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65; }
+.preview-card-body { font-size: 0.88rem; color: #4a5068; line-height: 1.65; }
 .preview-card-cta { margin-top: 0.9rem; font-size: 0.78rem; font-weight: 600; color: var(--accent); letter-spacing: 0.03em; }
 
 .console-bar {
@@ -620,7 +620,7 @@ body {
 
 .finding-body {
   font-size: 12.5px;
-  color: var(--text-secondary);
+  color: #4a5068;
   line-height: 1.5;
 }
 
@@ -630,7 +630,7 @@ body {
   margin-top: 10px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10.5px;
-  color: var(--bg-charcoal);
+  color: #ffffff;
   background: var(--accent);
   padding: 4px 8px;
   display: inline-block;
@@ -999,30 +999,34 @@ body {
 .req-toggle.on .req-mini-toggle::after { transform: translateX(14px); background: var(--accent); }
 
 .req-textarea-wrap {
-  background: var(--bg-canvas);
-  border: 1px solid var(--border-soft);
-  padding: 18px 20px;
   margin-bottom: 24px;
 }
 
 .req-textarea {
   width: 100%;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-page);
   font-family: 'Manrope', sans-serif;
   font-size: 13px;
   color: var(--text-primary);
   resize: vertical;
-  min-height: 60px;
+  min-height: 80px;
   outline: none;
+  padding: 10px 12px;
 }
 
-.req-textarea::placeholder { color: var(--text-muted); }
+.req-textarea:focus {
+  border-color: var(--bg-charcoal);
+  background: white;
+}
+
+.req-textarea::placeholder { color: var(--text-secondary); }
 
 /* CTA STRIP */
 .cta-strip {
-  background: var(--accent);
-  color: var(--bg-charcoal);
+  --accent: #6EF76E;
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
   padding: 32px 40px;
   border: 1px solid var(--border);
   display: flex;
@@ -1035,18 +1039,18 @@ body {
 
 .cta-text {
   font-family: 'Archivo', sans-serif;
-  font-weight: 800;
-  font-size: 24px;
-  letter-spacing: -0.015em;
-  line-height: 1.15;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
   max-width: 600px;
 }
 
 .cta-text em { font-style: italic; }
 
 .cta-btn {
-  background: var(--bg-charcoal);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--bg-charcoal);
   border: none;
   padding: 18px 28px;
   font-family: 'Archivo', sans-serif;
@@ -1058,7 +1062,7 @@ body {
   white-space: nowrap;
 }
 
-.cta-btn:hover { background: var(--bg-deep); }
+.cta-btn:hover { opacity: 0.88; }
 
 /* ERROR STAGE */
 .error-banner {
@@ -1313,9 +1317,9 @@ body {
 
 /* Finding impact tag — softer */
 #stage-results .finding-impact {
-  background: var(--bg-canvas);
-  color: var(--accent);
-  border: 1px solid var(--border-soft);
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
 }
 
 /* Stack + req grids — soft dividers */
@@ -1454,7 +1458,7 @@ body {
     <p class="section-sub" id="compare-sub-text">Side-by-side comparison. The Hyva column isn't theory — it's the average of 50+ Hyva sites we've benchmarked, on Readymage's auto-scaling hosting.</p>
     <div class="compare-card">
       <div class="compare-eyebrow">// THE HEADLINE</div>
-      <div class="compare-title">Faster site, lower bill, <em>more conversions.</em></div>
+      <div class="compare-title">Faster site, <em>more conversions.</em></div>
       <div class="compare-sub" id="compare-conversion-stat">A 1-second improvement in mobile load typically lifts conversion 7–10% on B2B sites. Faster pages also rank better — Google has been weighting Core Web Vitals since 2021.</div>
       <div class="compare-rows" id="compare-rows"></div>
     </div>
@@ -1648,8 +1652,8 @@ body {
     </div>
 
     <div class="cta-strip">
-      <div class="cta-text">Want this report as a PDF, plus a call to talk through your goals?</div>
-      <button class="cta-btn" id="open-cta">Get the full report →</button>
+      <div class="cta-text">Want a call, plus get this as a PDF?</div>
+      <button class="cta-btn" id="open-cta">Get the report →</button>
     </div>
 
     <div class="footnote">
@@ -1734,6 +1738,7 @@ const VERTICALS = {
     heroTitle: 'Could your Magento site be <em>faster, leaner, and converting more?</em> Let\'s test it.',
     heroSub: 'Drop your URL. We run a live scan of your speed, SEO, hosting, and conversion gaps, then show you what a Scandiweb engagement on Hyva typically changes. No account needed.',
     urlPlaceholder: 'https://your-merchant-site.com',
+    currency: '£',
     compareLabel: 'On Hyva + Readymage',
     compareSub: 'Side-by-side comparison. The Hyva column is drawn from real benchmarks across 50+ live Hyva sites, all running on Readymage hosting.',
     conversionStat: 'A 1-second improvement in mobile load typically lifts conversion 7-10% on B2B sites. Page speed also feeds directly into search rankings. Google has weighted Core Web Vitals since 2021.',
@@ -1760,7 +1765,7 @@ const VERTICALS = {
     deliveryOptions: ['Branch courier (own vans)','Third-party logistics (3PL)','Direct-from-supplier drop-ship','Click & collect only','Mixed model'],
     stackCards: [
       { num:'01', h:'Hyva build',            tag:'DEV',        body:'Move to Hyva without rebuilding from scratch. Your data and core integrations carry over. We review your existing modules for compatibility and scope anything that needs rebuilding.' },
-      { num:'02', h:'Readymage hosting',     tag:'HOSTING',    body:'Auto-scaling Magento hosting. Pay for what you use, scale up for BFCM, scale down in January. No fixed instance bills.' },
+      { num:'02', h:'Readymage hosting',     tag:'HOSTING',    body:'Auto-scaling Magento hosting. Capacity adjusts with your traffic — handles BFCM peaks without the risk of fixed-instance limits.' },
       { num:'03', h:'SEO + AEO/GEO',         tag:'ORGANIC',    body:'Traditional SEO plus the newer layer: getting your products found inside ChatGPT, Perplexity, and Google AI Overviews. It\'s early, and brands that move now tend to benefit most.' },
       { num:'04', h:'PPC &amp; paid',         tag:'PAID',       body:'Google Ads, Meta, LinkedIn. Connected to your conversion data so every campaign is measured against trade revenue, not just clicks.' },
       { num:'05', h:'CRO + UX/UI',            tag:'CONVERSION', body:'Conversion rate work and UX improvements focused on your actual goals, not generic ecommerce benchmarks.' },
@@ -1783,7 +1788,7 @@ const VERTICALS = {
       heading: 'One team, one accountable contact, one revenue number.',
       items: [
         '<strong>Hyva development</strong> — Hyva Platinum delivery team',
-        '<strong>Readymage hosting</strong> — autoscale, pay-per-use, no idle costs',
+        '<strong>Readymage hosting</strong> — auto-scaling Magento hosting',
         '<strong>SEO + AEO/GEO</strong> — including the new AI-search optimisation',
         '<strong>PPC + paid social</strong> — joined to your conversion data, not flying blind',
         '<strong>CRO + UX/UI</strong> — testing what actually moves trade revenue',
@@ -1936,6 +1941,10 @@ async function detectPlatform(url) {
     if      (/loyaltylion/i.test(html))                          loyaltyTool = 'LoyaltyLion';
     else if (/smile\.io|sweetTooth/i.test(html))                 loyaltyTool = 'Smile.io';
 
+    // ── Frontend stack signals ────────────────────────────────
+    const hasRequireJs = /requirejs\/require\.js/i.test(html);
+    const isHeadless   = /__NEXT_DATA__|window\.__NUXT__|vue-storefront|ScandiPWA|window\.SCANDI\b/i.test(html);
+
     // ── HTML signals — SEO ────────────────────────────────────
     const hasStructuredData = /<script[^>]*type=["']application\/ld\+json/i.test(html);
     const hasMetaDesc = /<meta[^>]+name=["']description["'][^>]+content=["'][^"']{20,}/i.test(html) ||
@@ -1954,6 +1963,8 @@ async function detectPlatform(url) {
       hasGA4, hasUA, hasUAOnly: hasUA && !hasGA4, hasGTM, hasFBPixel: hasFBPx, hasCookieConsent,
       // ux
       hasLiveChat, hasReviewWidget,
+      // frontend stack
+      hasRequireJs, isHeadless,
       // third-party tools
       searchTool, emailTool, heatmapTool, abtestTool, loyaltyTool,
       // seo
@@ -2222,43 +2233,42 @@ function buildFindings(scores, platform) {
       tagNow: 'ALREADY IMPROVED',
       tagFix: 'GO FURTHER',
       currentH: `JS bundle: ${scores.bundleJs}MB — Hyva has helped`,
-      currentBody: `You're already on Hyva, so RequireJS and KnockoutJS are gone. Your ${scores.bundleJs}MB is better than a typical Luma site, but there's still room — third-party scripts (analytics, chat, reviews) accumulate over time and can undo the gains.`,
-      fixH: 'Regular JS audit keeps the wins',
+      currentBody: `You're already on Hyva, so Magento's legacy JavaScript layer is gone. Your ${scores.bundleJs}MB is better than a typical standard-theme Magento site, but there's still room — third-party scripts (analytics, chat, reviews) accumulate over time and can undo the gains.`,
+      fixH: 'Regular JS audit keeps the gains',
       fixBody: `We run a quarterly script audit as part of ongoing retainers — removing duplicates, deferring non-critical tags, consolidating tracking through GTM server-side.`,
-      impact: `Protect your ${(4.2 - bundle).toFixed(1)}MB advantage over Luma`
+      impact: `Protect your ${(4.2 - bundle).toFixed(1)}MB advantage`
     });
   } else if (bundleHeavy) {
     const customName  = platform && platform.customThemeName;
-    const themeLabel  = (platform && platform.theme === 'Custom')
-      ? (customName ? `${customName} theme` : 'custom Magento theme')
-      : 'Magento Luma';
+    const hasRjs      = platform && platform.signals && platform.signals.hasRequireJs;
     const themeReason = (platform && platform.theme === 'Custom')
-      ? customName
-        ? `${customName} is built on the Magento Luma or Blank frontend stack and still ships <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong> on every page. The theme layer changes the look — the JS architecture underneath stays the same. The browser downloads and executes all ${scores.bundleJs}MB before any interaction is possible.`
-        : `Most custom Magento themes inherit the Luma or Blank frontend stack and still ship <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong>. Unless yours was purpose-built to remove them, the browser is downloading and executing all ${scores.bundleJs}MB before any interaction is possible.`
-      : `Magento Luma ships <strong>RequireJS, KnockoutJS, jQuery, and Underscore</strong> on every page — even when the page doesn't need them. The browser must download, parse, and execute all ${scores.bundleJs}MB before any interaction is possible. This is structural, not something you can tune away.`;
+      ? hasRjs
+        ? `${customName ? customName + ' theme' : 'Your custom theme'} is loading ${scores.bundleJs}MB of JavaScript before the page can interact. Magento's legacy JavaScript framework is still running — the visual design has changed but the underlying page-weight architecture hasn't. The browser has to download and execute all of it before a visitor can click anything.`
+        : `Your custom frontend is loading ${scores.bundleJs}MB of JavaScript. That's significantly above the threshold where load time starts affecting conversions, regardless of the underlying stack.`
+      : `Your Magento site is loading ${scores.bundleJs}MB of JavaScript before the page can interact. Magento's standard frontend ships its full JavaScript library on every page — even when the page doesn't need it. The browser has to download and execute all of it before a visitor can click anything. This is structural, not something that can be tuned away without changing the frontend.`;
+    const auditNote = bundle > 3 ? ` At this size, a JavaScript audit is worth running first — mapping which scripts are core, which are third-party, and what can be deferred or removed. We include this as a scoped piece of work before any migration planning.` : '';
     findings.push({
       severity: 'high',
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
       currentH: `JavaScript bundle: ${scores.bundleJs}MB`,
-      currentBody: themeReason,
-      fixH: 'Hyva ships ~280KB of Alpine.js + Tailwind',
-      fixBody: `Hyva replaces RequireJS/KnockoutJS entirely with <strong>Alpine.js</strong> and drops jQuery. Same Magento back-end, same catalogue — ~85% smaller JS payload. Pages become interactive seconds earlier.`,
+      currentBody: themeReason + auditNote,
+      fixH: 'Hyva ships ~280KB — a fraction of the current weight',
+      fixBody: `Hyva replaces Magento's legacy JavaScript layer with a much lighter framework. Same Magento back-end, same catalogue — around 85% smaller JS payload. Pages become interactive seconds earlier.`,
       impact: `~${(bundle - 0.28).toFixed(1)}MB lighter per page`
     });
   } else {
     const themeContext = (platform && platform.theme === 'Custom')
-      ? `Your ${scores.bundleJs}MB is reasonable — your custom theme has likely had some optimisation work. But if it's built on Luma or Blank, RequireJS is still under the hood and the overhead can't be removed without switching the frontend stack.`
-      : `Your ${scores.bundleJs}MB is lighter than many Luma sites — you've likely applied merging and minification. But Luma's RequireJS architecture means you're working against the framework, not with it. The overhead can't be removed without changing the frontend stack.`;
+      ? `Your ${scores.bundleJs}MB is reasonable — your custom theme has likely had some optimisation work. If it's still running Magento's standard JavaScript framework underneath, the overhead can't be fully removed without switching the frontend stack.`
+      : `Your ${scores.bundleJs}MB is lighter than many Magento sites — you've likely applied merging and minification. But the standard Magento frontend architecture means you're working against the framework to keep it down. The overhead can't be removed without changing the frontend stack.`;
     findings.push({
       severity: 'mid',
       tagNow: 'IMPROVEMENT AVAILABLE',
       tagFix: 'HYVA FIXES IT',
       currentH: `JavaScript bundle: ${scores.bundleJs}MB`,
       currentBody: themeContext,
-      fixH: 'Hyva ships ~280KB of Alpine.js + Tailwind',
-      fixBody: `Hyva's Alpine.js replaces the entire RequireJS/KnockoutJS layer. Your optimisation work transfers — Hyva just starts from a much smaller baseline.`,
+      fixH: 'Hyva ships ~280KB — a fraction of the current weight',
+      fixBody: `Hyva's lightweight framework replaces the standard Magento JavaScript layer. Your optimisation work transfers — Hyva just starts from a much smaller baseline.`,
       impact: `~${(bundle - 0.28).toFixed(1)}MB lighter per page`
     });
   }
@@ -2286,9 +2296,9 @@ function buildFindings(scores, platform) {
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
       currentH: `Main content takes ${scores.lcp}s to appear`,
-      currentBody: `${scores.lcp}s is ${lcpLabel}. Google uses this as a ranking signal and marks anything above 2.5s as "Poor". The root cause on Luma is JavaScript: the browser can't show your main content until RequireJS, KnockoutJS, and all their dependencies have loaded and run — a chain that takes ${(lcp * 0.6).toFixed(1)}–${(lcp * 0.8).toFixed(1)}s on mobile.`,
+      currentBody: `${scores.lcp}s is ${lcpLabel}. Google uses this as a ranking signal and marks anything above 2.5s as "Poor". The root cause on standard Magento themes is JavaScript: the browser can't show your main content until Magento's full JavaScript layer has loaded and run — a chain that typically takes ${(lcp * 0.6).toFixed(1)}–${(lcp * 0.8).toFixed(1)}s on mobile.`,
       fixH: 'Hyva sites average 1.6s — content appears immediately',
-      fixBody: `No RequireJS bootstrap, no KnockoutJS startup, server-side rendering. The page starts showing content right away. Same product catalogue, same promotions — just appearing in a fraction of the time.`,
+      fixBody: `Hyva uses server-side rendering and a lightweight JavaScript framework. The page starts showing content right away, without waiting for a full JavaScript layer to initialise. Same product catalogue, same promotions — just appearing in a fraction of the time.`,
       impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to visible content`
     });
   } else {
@@ -2539,9 +2549,9 @@ function buildFindings(scores, platform) {
       tagNow: 'IMPROVEMENT AVAILABLE',
       tagFix: 'WE CAN HELP',
       currentH: 'No dedicated site search tool detected',
-      currentBody: `We didn't find a third-party search tool (Klevu, Algolia, Searchspring or similar) on your site. Magento's native search handles basic queries but struggles with typos, synonyms, and the kind of trade-specific searches — part numbers, product codes, spec-based lookups — that B2B buyers use. Poor search is one of the most direct causes of lost trade orders.`,
+      currentBody: `We didn't find a dedicated search tool on your site. Magento's native search handles basic queries but struggles with typos, synonyms, and the kind of trade-specific searches — part numbers, product codes, spec-based lookups — that B2B buyers use. Poor search is one of the most direct causes of lost trade orders.`,
       fixH: 'Intelligent search built for trade catalogues',
-      fixBody: `We integrate search tools like Klevu or Algolia that handle synonym management, part-number matching, and relevance tuning. Fully compatible with Hyva. B2B buyers who use search convert at significantly higher rates than those who browse — removing friction here has a direct revenue impact.`,
+      fixBody: `Scandiweb Search is built for trade catalogues — synonym management, part-number matching, and relevance tuning out of the box. Fully compatible with Hyva. B2B buyers who use search convert at significantly higher rates than those who browse — removing friction here has a direct revenue impact.`,
       impact: 'Higher search conversion, fewer abandoned sessions'
     });
   }
@@ -2955,18 +2965,49 @@ function buildPreviewInsights(platform) {
   const isHyva = platform?.theme === 'Hyva';
   const cards = [];
 
-  if (!isHyva) {
+  const theme = platform?.theme;
+  const customName = platform?.customThemeName;
+
+  if (theme === 'Hyva') {
+    cards.push({
+      tag: 'Frontend theme',
+      h: 'You\'re already ahead of 90% of Magento merchants.',
+      body: 'Hyva detected. The speed foundation is there — the remaining gains are in hosting, SEO/AEO, and conversion rate. Full scores are loading now.',
+      cta: 'Scandiweb → Hyva Platinum delivery partner'
+    });
+  } else if (theme === 'Luma') {
     cards.push({
       tag: 'Frontend theme',
       h: 'Luma was built for desktop in 2015.',
       body: 'On mobile — where 60% of B2B buyers now research suppliers — Luma sites typically score 28–45 on Google PageSpeed. Hyva sites built by Scandiweb average 91/100. That gap costs you leads every day.',
       cta: 'Scandiweb → Hyva migration in 6–12 weeks, no data loss'
     });
+  } else if (theme === 'Custom' && sig.isHeadless) {
+    cards.push({
+      tag: 'Frontend theme',
+      h: 'Headless or PWA frontend detected.',
+      body: 'Your site looks to be using a headless or PWA architecture on top of Magento. That\'s a different conversation from a standard Luma migration — the opportunities and risks are different. Full scores loading now will show where the performance gaps actually are.',
+      cta: 'Scandiweb → headless, PWA, and Hyva Magento work since 2012'
+    });
+  } else if (theme === 'Custom' && sig.hasRequireJs) {
+    cards.push({
+      tag: 'Frontend theme',
+      h: `${customName ? customName + ' theme' : 'Custom theme'} — Magento\'s JavaScript layer is still running.`,
+      body: 'The design has been customised but Magento\'s core JavaScript framework is still loading on every page. Performance characteristics are similar to a standard Magento frontend — mobile PageSpeed on these sites typically sits between 30–50. Hyva replaces that JS layer entirely, not just the look.',
+      cta: 'Scandiweb → Hyva migration, your data and integrations carry over'
+    });
+  } else if (theme === 'Custom') {
+    cards.push({
+      tag: 'Frontend theme',
+      h: `${customName ? customName + ' theme' : 'Custom Magento frontend'} detected.`,
+      body: 'Not a standard Luma build, and not Hyva. Full scores loading now will tell us where the performance gaps are — the right path forward depends on what the build is actually doing.',
+      cta: 'Scandiweb → Magento frontend specialists, Hyva Platinum partner'
+    });
   } else {
     cards.push({
       tag: 'Frontend theme',
-      h: 'You\'re already ahead of 90% of Magento merchants.',
-      body: 'Hyva detected. The speed foundation is there — the remaining gains are in hosting, SEO/AEO, and conversion rate. Full scores are loading now.',
+      h: 'Scanning your Magento frontend now.',
+      body: 'Full scores loading. We\'ll have a clear picture of where the performance gaps are once Google\'s audit completes.',
       cta: 'Scandiweb → Hyva Platinum delivery partner'
     });
   }
@@ -2976,7 +3017,7 @@ function buildPreviewInsights(platform) {
       tag: 'Hosting',
       h: 'No CDN detected — every visitor hits your origin server.',
       body: 'A buyer in Manchester and one in Edinburgh are both waiting for the same single server to respond. Readymage serves from the edge globally, and auto-scales for BFCM without you touching anything.',
-      cta: 'Scandiweb → Readymage: pay-per-use, no idle instance bills'
+      cta: 'Scandiweb → Readymage: auto-scaling Magento hosting'
     });
   } else {
     cards.push({
@@ -2990,7 +3031,7 @@ function buildPreviewInsights(platform) {
   cards.push({
     tag: 'Conversion',
     h: 'Every extra second on mobile costs you roughly 7–10% of conversions.',
-    body: 'Google\'s own data, confirmed across B2B benchmarks. For a site turning over £2M/yr, a 2-second improvement in mobile load is worth £140k–£200k in recoverable revenue — before touching a single ad or email.',
+    body: `Google's own data, confirmed across B2B benchmarks. For a site turning over ${V.currency}2M/yr, a 2-second improvement in mobile load is worth ${V.currency}140k–${V.currency}200k in recoverable revenue — before touching a single ad or email.`,
     cta: 'Scandiweb → CRO programme tied to trade KPIs, not generic ecommerce metrics'
   });
 
@@ -3019,9 +3060,9 @@ function buildPreviewInsights(platform) {
 
   cards.push({
     tag: 'Operations',
-    h: 'Four vendors, four invoices, nobody accountable for revenue.',
-    body: 'Dev agency, hosting provider, SEO shop, PPC freelancer — the average merchant we audit has all four. No joined-up view, no single number to hold anyone to. Scandiweb runs all seven services under one team with one revenue target.',
-    cta: 'Scandiweb → one team, one contact, one number'
+    h: 'Multiple suppliers means no single view of what\'s driving revenue.',
+    body: 'Dev, hosting, SEO, and PPC managed separately means no one team can see the full picture. When something changes in organic rankings, it\'s hard to know if it\'s a dev change, a content issue, or a technical one. Scandiweb runs all of this under one team.',
+    cta: 'Scandiweb → one team across dev, hosting, SEO, PPC, and CRO'
   });
 
   cards.push({
@@ -3108,9 +3149,9 @@ function buildPreviewInsights(platform) {
 
   cards.push({
     tag: 'Readymage hosting',
-    h: 'You shouldn\'t be paying for servers you don\'t use in January.',
-    body: 'Fixed-instance hosting means you overpay most of the year and still risk going down at peak. Readymage auto-scales: spin up for BFCM, scale back in Q1. You pay for actual usage, and the infrastructure is tuned specifically for Magento — not generic cloud VMs.',
-    cta: 'Scandiweb → Readymage: auto-scaling, pay-per-use Magento hosting'
+    h: 'Traffic spikes at peak — your hosting needs to scale with it.',
+    body: 'Fixed-capacity hosting queues requests when traffic spikes, adding seconds to load time right when it matters most. Readymage auto-scales with demand — BFCM, end-of-month order rushes, sale events — without manual intervention or capacity planning.',
+    cta: 'Scandiweb → Readymage: auto-scaling Magento hosting'
   });
 
   cards.push({
@@ -3154,7 +3195,7 @@ function buildPreviewInsights(platform) {
       tag: 'Site search',
       h: 'No dedicated search tool detected.',
       body: 'Magento\'s native search handles simple queries but falls over on part numbers, product codes, and trade-specific lookups. B2B buyers who use site search convert at 3–5× the rate of those who browse — and they abandon faster when search fails them.',
-      cta: 'Scandiweb → Klevu or Algolia integration, tuned for trade catalogues'
+      cta: 'Scandiweb → Scandiweb Search, built for trade catalogues'
     });
   }
 
