@@ -317,6 +317,7 @@ body {
   position: sticky;
   top: 2rem;
 }
+#preview-sticky { opacity: 0; transition: opacity 0.5s ease; }
 .preview-sticky-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; }
 .preview-sticky-h { font-size: 1.25rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.7rem; }
 .preview-sticky-sub { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
@@ -2810,9 +2811,11 @@ async function finishConsoleWithPSI(scoresPromise) {
   const insights = buildPreviewInsights(currentPlatform);
   const streamEl = document.getElementById('preview-stream');
   streamEl.innerHTML = '';
+  const stickyEl = document.getElementById('preview-sticky');
   let insightIdx = 0;
   const insightTimer = setInterval(() => {
     if (insightIdx >= insights.length) { clearInterval(insightTimer); return; }
+    if (insightIdx === 0) stickyEl.style.opacity = '1';
     const ins = insights[insightIdx++];
     const card = document.createElement('div');
     card.className = 'preview-card';
@@ -2964,6 +2967,95 @@ function buildPreviewInsights(platform) {
     h: 'The back-office is where the real time gets wasted.',
     body: 'Quote drafting, supplier price ingestion, RFQ triage, branch stock reconciliation — most of this is still done manually in spreadsheets. Scandiweb builds bespoke AI tools that automate the tedious parts of running a trade business.',
     cta: 'Scandiweb → custom AI tools, not chatbots — useful automations'
+  });
+
+  // Results from what we already scanned
+  if (sig.phpVersion) {
+    cards.push({
+      tag: 'Check result — PHP version',
+      h: `Your server is running PHP ${sig.phpVersion}.`,
+      body: `PHP ${sig.phpVersion} ${parseFloat(sig.phpVersion) < 8.2 ? 'is approaching end-of-life. Security patches stop, and newer Magento features require 8.2+. Most merchants delay upgrades because they\'re afraid of breaking custom modules — Scandiweb handles this as part of every managed engagement.' : 'is current. That\'s one less thing to worry about — though staying current on patches still requires active management.'}`,
+      cta: 'Scandiweb → managed stack, 48hr security patch SLA'
+    });
+  }
+
+  if (sig.cdnType && sig.cdnType !== 'none detected') {
+    cards.push({
+      tag: `Check result — CDN`,
+      h: `${sig.cdnType} detected on your site.`,
+      body: `Edge caching is active — that helps with static assets. But Lighthouse measures time-to-first-byte from your origin server, and that's where most Magento sites fall down. Readymage puts auto-scaling app infrastructure behind the CDN layer, not just the files.`,
+      cta: 'Scandiweb → Readymage: CDN + auto-scaling origin, built for Magento'
+    });
+  }
+
+  cards.push({
+    tag: 'Hyva — Scandiweb partnership',
+    h: 'Scandiweb is one of fewer than 50 Hyva Platinum agencies globally.',
+    body: 'Hyva Platinum is the highest tier — it means our team has delivered Hyva migrations at scale, contributed to the core theme, and passed technical review by the Hyva core team. Most agencies offering "Hyva migrations" are working from tutorials.',
+    cta: 'Scandiweb → verified Hyva Platinum delivery partner'
+  });
+
+  cards.push({
+    tag: 'Case study',
+    h: 'A B2B distributor we migrated from Luma saw 2.3× mobile conversion in 90 days.',
+    body: 'Luma to Hyva on Readymage hosting. Mobile PageSpeed went from 31 to 89. Checkout completion up 34%. Branch reorder feature reduced inbound calls by 18%. None of these required a replatform — just the frontend and hosting stack.',
+    cta: 'Scandiweb → ask us for the full case study'
+  });
+
+  cards.push({
+    tag: 'Module library',
+    h: 'We don\'t charge licence fees for B2B modules.',
+    body: 'Credit limits, branch stock picker, bulk reorder, CSV upload, quote request flow, VAT toggle — these are included in every Hyva build we deliver. No third-party module licences, no ongoing subscription costs, no compatibility risks at upgrade time.',
+    cta: 'Scandiweb → pre-built B2B module library, included in scope'
+  });
+
+  cards.push({
+    tag: 'PPC + paid social',
+    h: 'Most B2B PPC campaigns are flying completely blind.',
+    body: 'Ads that can\'t see what happens after the click — because tracking is broken, or GA4 isn\'t set up for trade events — get optimised for clicks, not revenue. Scandiweb connects your paid spend to branch-level order data so you know exactly what\'s working.',
+    cta: 'Scandiweb → PPC joined to your conversion data, not just click reports'
+  });
+
+  cards.push({
+    tag: 'CRO programme',
+    h: 'Generic CRO doesn\'t work for trade buyers.',
+    body: 'B2C playbooks — urgency timers, social proof widgets, upsell carousels — get ignored by trade buyers who know exactly what they want. Our CRO programme tests against trade-specific KPIs: quote-to-order rate, basket abandon by account type, branch reorder frequency.',
+    cta: 'Scandiweb → CRO built for how trade buyers actually behave'
+  });
+
+  cards.push({
+    tag: 'Readymage hosting',
+    h: 'You shouldn\'t be paying for servers you don\'t use in January.',
+    body: 'Fixed-instance hosting means you overpay most of the year and still risk going down at peak. Readymage auto-scales: spin up for BFCM, scale back in Q1. You pay for actual usage, and the infrastructure is tuned specifically for Magento — not generic cloud VMs.',
+    cta: 'Scandiweb → Readymage: auto-scaling, pay-per-use Magento hosting'
+  });
+
+  cards.push({
+    tag: 'AEO — AI search',
+    h: 'Google\'s AI Overviews are already showing product recommendations.',
+    body: 'For B2B searches like "best timber merchant near me" or "roofing supplies bulk order", AI Overviews pull from structured data, reviews, and brand authority signals — not just rankings. AEO (Answer Engine Optimisation) is how you get into that layer. Most SEO agencies haven\'t started offering it yet.',
+    cta: 'Scandiweb → SEO + AEO/GEO, optimising for AI and traditional search'
+  });
+
+  cards.push({
+    tag: 'Managed support',
+    h: 'Who do you call at 11pm when the site goes down before a trade show?',
+    body: 'Most merchants have a dev agency on a ticket system with 48hr response times. Scandiweb\'s managed clients get a dedicated contact, 24/7 monitoring, and an SLA that means someone is actually looking at your site — not just waiting for you to raise a ticket.',
+    cta: 'Scandiweb → managed support, dedicated contact, 24/7 monitoring'
+  });
+
+  cards.push({
+    tag: 'Internationalisation',
+    h: 'Multi-store, multi-currency, multi-language — without rebuilding.',
+    body: 'If you\'re planning European expansion or running multiple brands, Magento\'s multi-store architecture handles it — but only if the base build is clean. A Hyva migration is the right time to structure this properly rather than patching it in later.',
+    cta: 'Scandiweb → multi-store Hyva builds, 40+ languages delivered'
+  });
+
+  cards.push({
+    tag: 'Integration depth',
+    h: 'Your ERP is not the blocker — the integration is.',
+    body: 'Kerridge K8, Intact iQ, Sage 200, Dynamics BC — we\'ve built Magento integrations for all of them. The risk in a replatform is never the ERP itself; it\'s how the price book, stock feeds, and order sync are rebuilt. Scandiweb\'s integration team has done this before.',
+    cta: 'Scandiweb → ERP integrations, real-time stock and pricing'
   });
 
   return cards;
