@@ -320,7 +320,10 @@ body {
 #preview-sticky { opacity: 0; transition: opacity 0.5s ease; }
 .preview-sticky-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; }
 .preview-sticky-h { font-size: 1.25rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.7rem; }
-.preview-sticky-sub { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+.preview-sticky-sub { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.2rem; }
+.psi-progress-wrap { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin-bottom: 0.5rem; }
+.psi-progress-bar { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; transition: width 0.6s ease; }
+.psi-progress-label { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.06em; }
 #preview-stream { flex: 1; min-width: 0; }
 .preview-card {
   border-left: 3px solid var(--accent);
@@ -332,7 +335,7 @@ body {
 }
 .preview-card-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
 .preview-card-h { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.55rem; }
-.preview-card-body { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+.preview-card-body { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65; }
 .preview-card-cta { margin-top: 0.9rem; font-size: 0.78rem; font-weight: 600; color: var(--accent); letter-spacing: 0.03em; }
 
 .console-bar {
@@ -1400,6 +1403,10 @@ body {
         <div class="preview-sticky-tag">// Google Lighthouse</div>
         <div class="preview-sticky-h">Whilst we wait for Google to score your site…</div>
         <div class="preview-sticky-sub">Here's what we already know from scanning your page.</div>
+        <div class="psi-progress-wrap">
+          <div class="psi-progress-bar" id="psi-progress-fill"></div>
+        </div>
+        <div class="psi-progress-label" id="psi-progress-label">Running Lighthouse audit…</div>
       </div>
       <div id="preview-stream"></div>
     </div>
@@ -1797,6 +1804,7 @@ const V = VERTICALS[vParam] || VERTICALS['smb'];
 let currentPlatform = { isMagento: null, theme: 'unknown', themeDisplay: '', error: null };
 let earlyPsiUrl = '';
 let earlyPsiPromise = null;
+let psiStartTime = 0;
 
 const PROXY = 'https://merchantminisite.samuel-goodey.workers.dev';
 
@@ -2732,7 +2740,7 @@ async function startAudit(url) {
   // Reuse pre-fetched PSI promise if user typed this URL before clicking Run
   const scoresPromise = (earlyPsiUrl === currentUrl && earlyPsiPromise)
     ? earlyPsiPromise
-    : fetchRealScores(currentUrl);
+    : (psiStartTime = Date.now(), fetchRealScores(currentUrl));
   earlyPsiUrl = '';
   earlyPsiPromise = null;
   const platform = await detectPlatform(currentUrl);
@@ -2807,6 +2815,20 @@ async function finishConsoleWithPSI(scoresPromise) {
 
   document.getElementById('console-bar-fill').style.width = '100%';
 
+  // Progress bar — exponential curve asymptoting at 90%, snaps to 100% on resolve
+  const progressFill  = document.getElementById('psi-progress-fill');
+  const progressLabel = document.getElementById('psi-progress-label');
+  const progressTimer = setInterval(() => {
+    if (!progressFill) return;
+    const elapsed = (Date.now() - psiStartTime) / 1000;
+    const pct     = 90 * (1 - Math.exp(-elapsed / 22));
+    progressFill.style.width = pct.toFixed(1) + '%';
+    if (progressLabel) progressLabel.textContent = elapsed < 10 ? 'Starting Lighthouse…'
+      : elapsed < 20 ? 'Running performance audit…'
+      : elapsed < 30 ? 'Checking SEO and accessibility…'
+      : 'Almost there…';
+  }, 600);
+
   // Stream insight cards while PSI loads — keeps user engaged on this screen
   const insights = buildPreviewInsights(currentPlatform);
   const streamEl = document.getElementById('preview-stream');
@@ -2827,12 +2849,15 @@ async function finishConsoleWithPSI(scoresPromise) {
     `;
     streamEl.appendChild(card);
     card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 3000);
+  }, 4000);
 
   // Wait for PSI — then show results with live data straight away
   const scores = await scoresPromise;
   clearInterval(ticker);
   clearInterval(insightTimer);
+  clearInterval(progressTimer);
+  if (progressFill) progressFill.style.width = '100%';
+  if (progressLabel) progressLabel.textContent = 'Complete.';
 
   const markerEl = document.getElementById('psi-marker');
   const textEl   = document.getElementById('psi-text');
@@ -3198,6 +3223,7 @@ document.getElementById('url-input').addEventListener('input', () => {
     const url = normalizeUrl(raw);
     if (url === earlyPsiUrl) return;
     earlyPsiUrl = url;
+    psiStartTime = Date.now();
     earlyPsiPromise = fetchRealScores(url);
   }, 800);
 });
