@@ -303,7 +303,24 @@ body {
 @keyframes scorePulse { 0%,100% { opacity: 0.4 } 50% { opacity: 0.75 } }
 .score-loading { animation: scorePulse 1.4s ease-in-out infinite; }
 @keyframes previewIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
-#preview-stream { max-width: 720px; margin: 2.5rem auto 0; padding: 0 1rem; }
+#preview-container {
+  display: flex;
+  gap: 3rem;
+  max-width: 1100px;
+  margin: 3rem auto 0;
+  padding: 0 1rem;
+  align-items: flex-start;
+}
+#preview-sticky {
+  width: 260px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 2rem;
+}
+.preview-sticky-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; }
+.preview-sticky-h { font-size: 1.25rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.7rem; }
+.preview-sticky-sub { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+#preview-stream { flex: 1; min-width: 0; }
 .preview-card {
   border-left: 3px solid var(--accent);
   padding: 1.4rem 1.8rem;
@@ -1377,7 +1394,14 @@ body {
       <div id="console-lines"></div>
       <div class="console-bar"><div class="console-bar-fill" id="console-bar-fill"></div></div>
     </div>
-    <div id="preview-stream"></div>
+    <div id="preview-container">
+      <div id="preview-sticky">
+        <div class="preview-sticky-tag">// Google Lighthouse</div>
+        <div class="preview-sticky-h">Whilst we wait for Google to score your site…</div>
+        <div class="preview-sticky-sub">Here's what we already know from scanning your page.</div>
+      </div>
+      <div id="preview-stream"></div>
+    </div>
   </section>
 
   <!-- ========== STAGE 2b — NOT MAGENTO ERROR ========== -->
@@ -2800,7 +2824,7 @@ async function finishConsoleWithPSI(scoresPromise) {
     `;
     streamEl.appendChild(card);
     card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 3500);
+  }, 3000);
 
   // Wait for PSI — then show results with live data straight away
   const scores = await scoresPromise;
@@ -2912,6 +2936,34 @@ function buildPreviewInsights(platform) {
     h: 'Four vendors, four invoices, nobody accountable for revenue.',
     body: 'Dev agency, hosting provider, SEO shop, PPC freelancer — the average merchant we audit has all four. No joined-up view, no single number to hold anyone to. Scandiweb runs all seven services under one team with one revenue target.',
     cta: 'Scandiweb → one team, one contact, one number'
+  });
+
+  cards.push({
+    tag: 'B2B mobile',
+    h: '60% of B2B buyers research on mobile before ordering at the desk.',
+    body: 'If your mobile site is slow or hard to navigate, you lose the consideration phase before the buyer even gets to checkout. A sub-2-second mobile load isn\'t a nice-to-have for trade — it\'s where the shortlist decision is made.',
+    cta: 'Scandiweb → Hyva mobile-first builds, avg 91/100 on PageSpeed'
+  });
+
+  cards.push({
+    tag: 'Checkout',
+    h: 'B2B checkout abandonment averages 68% on Luma sites.',
+    body: 'The main culprits: slow page transitions, missing trade features (credit limit, VAT toggle, site addresses), and no quick-reorder path. Scandiweb\'s Hyva builds include all of these as standard — no third-party modules, no licence fees.',
+    cta: 'Scandiweb → trade checkout built for how merchants actually buy'
+  });
+
+  cards.push({
+    tag: 'Security',
+    h: 'Every month on an unpatched Magento is a risk.',
+    body: 'Adobe releases security patches quarterly. Most merchants on legacy hosting apply them weeks late — or miss them entirely. Scandiweb\'s managed stack applies patches within 48 hours of release, with zero-downtime deployments.',
+    cta: 'Scandiweb → managed updates, 48hr patch SLA'
+  });
+
+  cards.push({
+    tag: 'Custom AI',
+    h: 'The back-office is where the real time gets wasted.',
+    body: 'Quote drafting, supplier price ingestion, RFQ triage, branch stock reconciliation — most of this is still done manually in spreadsheets. Scandiweb builds bespoke AI tools that automate the tedious parts of running a trade business.',
+    cta: 'Scandiweb → custom AI tools, not chatbots — useful automations'
   });
 
   return cards;
