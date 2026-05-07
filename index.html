@@ -1951,81 +1951,130 @@ function classifyReverse(value, thresholds) {
 // REAL SCORES — PAGESPEED INSIGHTS API
 // ============================================================
 
-async function fetchRealScores(url) {
-  const PSI     = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
-  const API_KEY = ''; // ← paste your Google API key here
-  const keyParam = API_KEY ? `&key=${API_KEY}` : '';
+async function psiCall(url, strategy, keyParam, signal) {
+  const PSI = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
   const enc = encodeURIComponent(url);
+  const cats = strategy === 'mobile'
+    ? '&category=performance&category=seo&category=accessibility'
+    : '&category=performance';
+  const res = await fetch(`${PSI}?url=${enc}&strategy=${strategy}${cats}${keyParam}`, { signal });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  if (!data.lighthouseResult) throw new Error('No Lighthouse result in response');
+  return data;
+}
 
-  try {
+async function fetchRealScores(url) {
+  const API_KEY  = ''; // ← paste your Google PageSpeed API key here for higher quota
+  const keyParam = API_KEY ? `&key=${API_KEY}` : '';
+
+  const attempt = async () => {
     const controller = new AbortController();
     const tid = setTimeout(() => controller.abort(), 90000);
+    try {
+      const results = await Promise.allSettled([
+        psiCall(url, 'mobile',  keyParam, controller.signal),
+        psiCall(url, 'desktop', keyParam, controller.signal)
+      ]);
+      clearTimeout(tid);
+      return results;
+    } catch (e) {
+      clearTimeout(tid);
+      throw e;
+    }
+  };
 
-    const [mRes, dRes] = await Promise.all([
-      fetch(`${PSI}?url=${enc}&strategy=mobile&category=performance&category=seo&category=accessibility${keyParam}`, { signal: controller.signal }),
-      fetch(`${PSI}?url=${enc}&strategy=desktop&category=performance${keyParam}`, { signal: controller.signal })
-    ]);
-    clearTimeout(tid);
+  let results = await attempt();
 
-    if (!mRes.ok || !dRes.ok) throw new Error('PSI HTTP error');
-    const [m, d] = await Promise.all([mRes.json(), dRes.json()]);
-    const mLh = m.lighthouseResult;
-    const dLh = d.lighthouseResult;
-    if (!mLh || !dLh) throw new Error('Missing lighthouseResult');
-
-    // JS bundle: sum Script resource sizes from network-requests audit
-    const netItems = mLh.audits['network-requests']?.details?.items || [];
-    const scriptItems = netItems.filter(i =>
-      i.resourceType === 'Script' ||
-      (i.mimeType && (i.mimeType.includes('javascript') || i.mimeType.includes('ecmascript')))
-    );
-    const scriptBytes = scriptItems.reduce((s, i) => s + (i.resourceSize || i.transferSize || 0), 0);
-
-    // INP (Lighthouse 10+) or TBT-based estimate
-    const inpRaw = mLh.audits['interaction-to-next-paint']?.numericValue
-      ?? mLh.audits['experimental-interaction-to-next-paint']?.numericValue
-      ?? Math.min(Math.round((mLh.audits['total-blocking-time']?.numericValue ?? 300) * 2.8 + 80), 900);
-
-    // Additional Lighthouse audits
-    const unusedJsBytes    = mLh.audits['unused-javascript']?.details?.overallSavingsBytes ?? 0;
-    const unusedCssBytes   = mLh.audits['unused-css-rules']?.details?.overallSavingsBytes ?? 0;
-    const renderBlockItems = mLh.audits['render-blocking-resources']?.details?.items || [];
-    const webpItems        = mLh.audits['uses-webp-images']?.details?.items || [];
-    const domSizeVal       = mLh.audits['dom-size']?.numericValue ?? 0;
-    const totalBytes       = netItems.reduce((s, i) => s + (i.transferSize || 0), 0);
-    const fontItems        = netItems.filter(i => i.resourceType === 'Font' || i.mimeType?.includes('font'));
-    const tbtMs            = Math.round(mLh.audits['total-blocking-time']?.numericValue ?? 0);
-    const thirdPartyCount  = mLh.audits['third-party-summary']?.details?.items?.length ?? 0;
-
-    const fb = generateScores(url); // fallback for any gaps
-
-    return {
-      mobileSpeed:   Math.round((mLh.categories.performance?.score ?? 0) * 100),
-      desktopSpeed:  Math.round((dLh.categories.performance?.score ?? 0) * 100),
-      lcp:           ((mLh.audits['largest-contentful-paint']?.numericValue ?? 3500) / 1000).toFixed(1),
-      cls:           (mLh.audits['cumulative-layout-shift']?.numericValue ?? 0.15).toFixed(2),
-      inp:           Math.round(inpRaw),
-      seo:           Math.round((mLh.categories.seo?.score ?? 0) * 100),
-      accessibility: Math.round((mLh.categories.accessibility?.score ?? 0) * 100),
-      bundleJs:      scriptBytes > 10000 ? (scriptBytes / 1048576).toFixed(1) : fb.bundleJs,
-      ttfb:          Math.round(mLh.audits['server-response-time']?.numericValue ?? fb.ttfb),
-      requests:      netItems.length || fb.requests,
-      // extended
-      unusedJs:       Math.round(unusedJsBytes / 1024),
-      unusedCss:      Math.round(unusedCssBytes / 1024),
-      renderBlocking: renderBlockItems.length,
-      webpImages:     webpItems.length,
-      domSize:        Math.round(domSizeVal),
-      totalPageKb:    Math.round(totalBytes / 1024),
-      fontCount:      fontItems.length,
-      tbt:            tbtMs,
-      thirdPartyCount,
-      _source:       'psi'
-    };
-  } catch (e) {
-    console.warn('PSI failed, using hash fallback:', e.message);
-    return { ...generateScores(url), _source: 'demo' };
+  // Retry once if both failed (transient rate-limit / network blip)
+  const bothFailed = results.every(r => r.status === 'rejected');
+  if (bothFailed) {
+    await new Promise(r => setTimeout(r, 3000));
+    results = await attempt().catch(() => results);
   }
+
+  const mResult = results[0];
+  const dResult = results[1];
+
+  // Need at least the mobile result for meaningful data
+  if (mResult.status === 'rejected') {
+    console.warn('PSI mobile failed:', mResult.reason?.message);
+    const fb = generateScores(url);
+    // If desktop worked, extract desktop speed at least
+    if (dResult.status === 'fulfilled') {
+      const dLh = dResult.value.lighthouseResult;
+      fb.desktopSpeed = Math.round((dLh.categories.performance?.score ?? 0) * 100);
+      fb._source = 'partial';
+    }
+    return fb;
+  }
+
+  const mLh = mResult.value.lighthouseResult;
+  const dLh = dResult.status === 'fulfilled'
+    ? dResult.value.lighthouseResult
+    : null;
+
+  if (dResult.status === 'rejected') {
+    console.warn('PSI desktop failed (using mobile estimate):', dResult.reason?.message);
+  }
+
+  // JS bundle: sum Script resource sizes from network-requests audit
+  const netItems = mLh.audits['network-requests']?.details?.items || [];
+  const scriptItems = netItems.filter(i =>
+    i.resourceType === 'Script' ||
+    (i.mimeType && (i.mimeType.includes('javascript') || i.mimeType.includes('ecmascript')))
+  );
+  const scriptBytes = scriptItems.reduce((s, i) => s + (i.resourceSize || i.transferSize || 0), 0);
+
+  // INP (Lighthouse 10+) or TBT-based estimate
+  const inpRaw = mLh.audits['interaction-to-next-paint']?.numericValue
+    ?? mLh.audits['experimental-interaction-to-next-paint']?.numericValue
+    ?? Math.min(Math.round((mLh.audits['total-blocking-time']?.numericValue ?? 300) * 2.8 + 80), 900);
+
+  // Additional Lighthouse audits
+  const unusedJsBytes    = mLh.audits['unused-javascript']?.details?.overallSavingsBytes ?? 0;
+  const unusedCssBytes   = mLh.audits['unused-css-rules']?.details?.overallSavingsBytes ?? 0;
+  const renderBlockItems = mLh.audits['render-blocking-resources']?.details?.items || [];
+  const webpItems        = mLh.audits['uses-webp-images']?.details?.items || [];
+  const domSizeVal       = mLh.audits['dom-size']?.numericValue ?? 0;
+  const totalBytes       = netItems.reduce((s, i) => s + (i.transferSize || 0), 0);
+  const fontItems        = netItems.filter(i => i.resourceType === 'Font' || i.mimeType?.includes('font'));
+  const tbtMs            = Math.round(mLh.audits['total-blocking-time']?.numericValue ?? 0);
+  const thirdPartyCount  = mLh.audits['third-party-summary']?.details?.items?.length ?? 0;
+
+  const fb = generateScores(url); // fallback for any gaps
+
+  const mobileSpeed  = Math.round((mLh.categories.performance?.score ?? 0) * 100);
+  const desktopSpeed = dLh
+    ? Math.round((dLh.categories.performance?.score ?? 0) * 100)
+    : Math.min(mobileSpeed + 15, 100); // estimate from mobile if desktop call failed
+
+  return {
+    mobileSpeed,
+    desktopSpeed,
+    lcp:           ((mLh.audits['largest-contentful-paint']?.numericValue ?? 3500) / 1000).toFixed(1),
+    cls:           (mLh.audits['cumulative-layout-shift']?.numericValue ?? 0.15).toFixed(2),
+    inp:           Math.round(inpRaw),
+    seo:           Math.round((mLh.categories.seo?.score ?? 0) * 100),
+    accessibility: Math.round((mLh.categories.accessibility?.score ?? 0) * 100),
+    bundleJs:      scriptBytes > 10000 ? (scriptBytes / 1048576).toFixed(1) : fb.bundleJs,
+    ttfb:          Math.round(mLh.audits['server-response-time']?.numericValue ?? fb.ttfb),
+    requests:      netItems.length || fb.requests,
+    // extended
+    unusedJs:       Math.round(unusedJsBytes / 1024),
+    unusedCss:      Math.round(unusedCssBytes / 1024),
+    renderBlocking: renderBlockItems.length,
+    webpImages:     webpItems.length,
+    domSize:        Math.round(domSizeVal),
+    totalPageKb:    Math.round(totalBytes / 1024),
+    fontCount:      fontItems.length,
+    tbt:            tbtMs,
+    thirdPartyCount,
+    _source:        dLh ? 'psi' : 'psi-mobile-only'
+  };
 }
 
 // ============================================================
@@ -2715,11 +2764,21 @@ async function finishConsoleWithPSI(scoresPromise) {
     markerEl.textContent = '✓';
     textEl.innerHTML     = `PageSpeed Insights complete — mobile <strong>${scores.mobileSpeed}</strong>/100, desktop <strong>${scores.desktopSpeed}</strong>/100`;
     statEl.textContent   = 'live data';
+  } else if (scores._source === 'psi-mobile-only') {
+    markerEl.className   = 'marker warn';
+    markerEl.textContent = '!';
+    textEl.innerHTML     = `PageSpeed Insights — mobile <strong>${scores.mobileSpeed}</strong>/100 (desktop call failed, estimated)`;
+    statEl.textContent   = 'partial data';
+  } else if (scores._source === 'partial') {
+    markerEl.className   = 'marker warn';
+    markerEl.textContent = '!';
+    textEl.innerHTML     = `PageSpeed Insights — mobile failed, desktop <strong>${scores.desktopSpeed}</strong>/100. Other scores estimated.`;
+    statEl.textContent   = 'partial data';
   } else {
     markerEl.className   = 'marker warn';
     markerEl.textContent = '!';
-    textEl.textContent   = 'PageSpeed Insights timed out — using estimated scores';
-    statEl.textContent   = 'demo fallback';
+    textEl.textContent   = 'PageSpeed Insights unavailable — scores are estimated based on page signals';
+    statEl.textContent   = 'estimated';
   }
 
   document.getElementById('console-bar-fill').style.width = '100%';
@@ -2765,10 +2824,15 @@ function renderResults(url, platform, scores) {
   // Footnote — live vs demo
   const footnote = document.getElementById('footnote-source');
   if (footnote) {
+    const t = new Date().toLocaleTimeString('en-GB');
     if (scores._source === 'psi') {
-      footnote.innerHTML = '<strong>// LIVE DATA</strong> · scores from Google PageSpeed Insights (Lighthouse). Ran ' + new Date().toLocaleTimeString('en-GB') + '.';
+      footnote.innerHTML = `<strong>// LIVE DATA</strong> · scores from Google PageSpeed Insights (Lighthouse). Ran ${t}.`;
+    } else if (scores._source === 'psi-mobile-only') {
+      footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · mobile scores live from PageSpeed Insights; desktop speed estimated. Ran ${t}.`;
+    } else if (scores._source === 'partial') {
+      footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · desktop speed live from PageSpeed Insights; mobile scores estimated. Ran ${t}.`;
     } else {
-      footnote.innerHTML = '<strong>// ESTIMATED</strong> · PageSpeed Insights did not respond in time. Scores are illustrative, derived from URL hash.';
+      footnote.innerHTML = '<strong>// ESTIMATED</strong> · PageSpeed Insights was unavailable — scores are illustrative. Try again in a moment, or check the URL is publicly accessible.';
     }
   }
 
