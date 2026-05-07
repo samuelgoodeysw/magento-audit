@@ -2760,6 +2760,8 @@ async function startAudit(url) {
   document.getElementById('running-url').textContent = currentUrl;
   document.getElementById('console-lines').innerHTML = '';
   document.getElementById('console-bar-fill').style.width = '0%';
+  document.getElementById('preview-stream').innerHTML = '';
+  document.getElementById('preview-sticky').style.opacity = '0';
   showStage('running');
 
   const lines = buildConsoleLines(currentUrl, platform);
