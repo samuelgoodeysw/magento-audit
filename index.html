@@ -2069,8 +2069,8 @@ function buildConsoleLines(url, platform) {
   lines.push(
     { text: `Running Lighthouse — mobile performance…`, status: 'done', stat: 'complete' },
     { text: `Running Lighthouse — desktop performance…`, status: 'done', stat: 'complete' },
-    { text: `Capturing Core Web Vitals (LCP, CLS, INP)…`, status: platform.theme === 'Hyva' ? 'warn' : 'fail', stat: platform.theme === 'Hyva' ? '1–2 of 3 fail' : '3 of 3 fail' },
-    { text: `Unused JS/CSS, DOM size, render-blocking resources…`, status: 'done', stat: 'scanned' },
+    { text: `Checking page speed, load time, and visual stability…`, status: platform.theme === 'Hyva' ? 'warn' : 'fail', stat: platform.theme === 'Hyva' ? 'issues found' : 'issues found' },
+    { text: `Scanning for unused code, page complexity, load blockers…`, status: 'done', stat: 'scanned' },
     { text: `Comparing against Hyva + Readymage benchmarks (n=50)…`, status: 'done', stat: 'OK' },
     { text: `Audit complete. Generating report…`, status: 'done', stat: 'OK' }
   );
@@ -2136,21 +2136,21 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 2. LCP ──────────────────────────────────────────────────────
+  // ── 2. Page load time (LCP) ─────────────────────────────────────
   const lcp = parseFloat(scores.lcp);
   const lcpFail = lcp > 2.5;
-  const lcpLabel = lcp > 4.5 ? 'critically slow' : lcp > 3.5 ? 'well below Google\'s threshold' : lcp > 2.5 ? 'in the "Needs Improvement" zone' : 'just within acceptable range';
+  const lcpLabel = lcp > 4.5 ? 'critically slow' : lcp > 3.5 ? 'well below Google\'s target' : lcp > 2.5 ? 'in Google\'s "Needs Improvement" zone' : 'just within acceptable range';
   if (onHyva) {
     findings.push({
       severity: lcp > 2.5 ? 'mid' : 'mid',
       tagNow: lcp > 2.5 ? 'NEEDS WORK' : 'GOOD — PROTECT IT',
       tagFix: 'READYMAGE HELPS',
-      currentH: `Largest Contentful Paint: ${scores.lcp}s`,
+      currentH: `Main content appears in ${scores.lcp}s`,
       currentBody: lcp > 2.5
-        ? `Even on Hyva, your LCP of ${scores.lcp}s is ${lcpLabel}. Hyva removes JS render-blocking, but slow server response (TTFB) and unoptimised hero images can still drag LCP. Check image formats, lazy-load strategy, and hosting performance.`
-        : `Your LCP of ${scores.lcp}s is good — Hyva is doing its job. The risk is regression: adding third-party widgets, unoptimised image uploads, or moving to slower hosting can erode this quickly.`,
-      fixH: 'Readymage keeps TTFB low under load',
-      fixBody: `Auto-scaling hosting means your LCP doesn't spike during trade rush hours. Fixed-instance hosting often queues Magento PHP workers at peak, adding seconds to LCP even on a well-built frontend.`,
+        ? `Even on Hyva, your main content takes ${scores.lcp}s to appear — ${lcpLabel}. Hyva removes JS delays, but a slow server and unoptimised hero images can still drag this down. Check image formats, lazy-load strategy, and hosting performance.`
+        : `Your main content appears in ${scores.lcp}s — Hyva is doing its job. The risk is regression: adding third-party widgets, unoptimised image uploads, or moving to slower hosting can erode this quickly.`,
+      fixH: 'Readymage keeps server response fast under load',
+      fixBody: `Auto-scaling hosting means your page load time doesn't spike during busy periods. Fixed-instance hosting often queues requests at peak, adding seconds to load time even on a well-built frontend.`,
       impact: lcp > 2.5 ? `${((lcp - 1.6) * 1000).toFixed(0)}ms to hit Hyva average` : 'Protect your current advantage'
     });
   } else if (lcpFail) {
@@ -2158,26 +2158,26 @@ function buildFindings(scores, platform) {
       severity: 'high',
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
-      currentH: `Largest Contentful Paint: ${scores.lcp}s`,
-      currentBody: `Your LCP of ${scores.lcp}s is ${lcpLabel}. Google marks anything above 2.5s as "Poor" and uses it as a ranking signal. The root cause on Luma is JavaScript render-blocking: the browser can't paint your main content until RequireJS, KnockoutJS, and all their dependencies have loaded and executed — a chain that takes ${(lcp * 0.6).toFixed(1)}–${(lcp * 0.8).toFixed(1)}s on mobile.`,
-      fixH: 'Hyva sites average 1.6s LCP',
-      fixBody: `No RequireJS bootstrap, no KnockoutJS initialisation, server-side templates. The page starts rendering immediately. Same product catalogue, same promotions — just rendered in a fraction of the time.`,
-      impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to largest paint`
+      currentH: `Main content takes ${scores.lcp}s to appear`,
+      currentBody: `${scores.lcp}s is ${lcpLabel}. Google uses this as a ranking signal and marks anything above 2.5s as "Poor". The root cause on Luma is JavaScript: the browser can't show your main content until RequireJS, KnockoutJS, and all their dependencies have loaded and run — a chain that takes ${(lcp * 0.6).toFixed(1)}–${(lcp * 0.8).toFixed(1)}s on mobile.`,
+      fixH: 'Hyva sites average 1.6s — content appears immediately',
+      fixBody: `No RequireJS bootstrap, no KnockoutJS startup, server-side rendering. The page starts showing content right away. Same product catalogue, same promotions — just appearing in a fraction of the time.`,
+      impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to visible content`
     });
   } else {
     findings.push({
       severity: 'mid',
       tagNow: 'IMPROVEMENT AVAILABLE',
       tagFix: 'HYVA FIXES IT',
-      currentH: `Largest Contentful Paint: ${scores.lcp}s`,
-      currentBody: `Your LCP of ${scores.lcp}s is just within Google's "Good" threshold (under 2.5s) — you're doing better than most Luma sites we audit. The JS render-blocking is still there, but it's not crossing the line. Moving to Hyva removes the structural cause entirely and takes this well below 2s.`,
-      fixH: 'Hyva sites average 1.6s LCP',
-      fixBody: `Even starting from a decent LCP, Hyva's lighter frontend creates headroom — new features and third-party scripts have less impact on a faster baseline.`,
-      impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to largest paint`
+      currentH: `Main content appears in ${scores.lcp}s`,
+      currentBody: `${scores.lcp}s is just within Google's "Good" range (under 2.5s) — better than most Luma sites we audit. The JavaScript delays are still there, but not crossing the threshold. Moving to Hyva removes the structural cause entirely and takes this well below 2s.`,
+      fixH: 'Hyva sites average 1.6s',
+      fixBody: `Even starting from a decent load time, Hyva's lighter frontend creates headroom — new features and third-party scripts have less impact on a faster baseline.`,
+      impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to visible content`
     });
   }
 
-  // ── 3. CLS ──────────────────────────────────────────────────────
+  // ── 3. Visual stability (CLS) ───────────────────────────────────
   const cls = parseFloat(scores.cls);
   const clsFail = cls > 0.1;
   if (onHyva) {
@@ -2185,39 +2185,39 @@ function buildFindings(scores, platform) {
       severity: cls > 0.1 ? 'mid' : 'mid',
       tagNow: cls > 0.1 ? 'NEEDS WORK' : 'GOOD',
       tagFix: 'MAINTAIN IT',
-      currentH: `Cumulative Layout Shift: ${scores.cls}`,
+      currentH: cls > 0.1 ? `Your page jumps around as it loads (score: ${scores.cls})` : `Page layout is stable as it loads (score: ${scores.cls})`,
       currentBody: cls > 0.1
-        ? `Your CLS of ${scores.cls} is above Google's "Good" threshold even on Hyva. This is usually caused by third-party widgets injected after page load — reviews, chat, personalisation banners — or hero images without explicit dimensions.`
-        : `Your CLS of ${scores.cls} is within Google's "Good" range. Hyva's server-side templates are doing their job. Watch for regression when adding third-party scripts — they're the most common source of layout shift on otherwise stable Hyva sites.`,
-      fixH: cls > 0.1 ? 'Audit late-injected widgets' : 'Protect with a CLS monitoring policy',
-      fixBody: `We include CLS regression monitoring in ongoing retainers — flagging third-party injections before they appear in Google Search Console data.`,
-      impact: 'Stable rankings, better UX'
+        ? `Your page visibly shifts and jumps while loading — elements move after they appear. Even on Hyva, this usually comes from third-party widgets added after the page renders (reviews, chat, banners) or images without fixed dimensions. Google penalises this in rankings.`
+        : `Your page loads without jumping around — Hyva's server-side rendering is doing its job. The main risk is adding third-party scripts that inject content after the page appears; they're the most common cause of layout shift on otherwise stable Hyva sites.`,
+      fixH: cls > 0.1 ? 'Audit late-loading widgets' : 'Protect with regression monitoring',
+      fixBody: `We include layout stability monitoring in ongoing retainers — catching issues before they show up as ranking drops in Google Search Console.`,
+      impact: 'Stable page, better rankings'
     });
   } else if (clsFail) {
     findings.push({
       severity: 'high',
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
-      currentH: `Cumulative Layout Shift: ${scores.cls}`,
-      currentBody: `Your CLS of ${scores.cls} is in the "Poor" zone — your page visibly shifts as it loads. The typical causes on Luma are client-side widget injection (Magento initialises many components in JS after the initial HTML paint), images without declared dimensions, and banner carousels that reserve space only after JS loads. Google penalises this directly in rankings.`,
-      fixH: 'Hyva sites average 0.04 CLS',
-      fixBody: `Hyva renders components server-side with correct dimensions baked in. No post-paint injections. Layout settles on first render, not after several rounds of JS execution.`,
-      impact: 'Smoother UX, better Core Web Vitals ranking'
+      currentH: `Your page jumps around as it loads (score: ${scores.cls})`,
+      currentBody: `Your page visibly shifts and moves while loading — elements appear, then jump to different positions. Google marks this as "Poor" and penalises it in rankings. On Luma, the cause is structural: Magento initialises many components in JavaScript after the initial page paint, so images, banners and carousels settle into their final positions several seconds after first appearing.`,
+      fixH: 'Hyva pages settle immediately on first render',
+      fixBody: `Hyva renders all components server-side with correct dimensions already set. Nothing injects or shifts after paint. The page is stable on arrival, not after several rounds of JavaScript running.`,
+      impact: 'Smoother experience, better rankings'
     });
   } else {
     findings.push({
       severity: 'mid',
       tagNow: 'IMPROVEMENT AVAILABLE',
       tagFix: 'HYVA FIXES IT',
-      currentH: `Cumulative Layout Shift: ${scores.cls}`,
-      currentBody: `Your CLS of ${scores.cls} is within Google's "Good" range — you've avoided the worst of Luma's layout-shift tendencies, possibly through careful image handling or custom JS fixes. Hyva achieves the same result structurally, without requiring ongoing maintenance.`,
-      fixH: 'Hyva sites average 0.04 CLS',
-      fixBody: `Hyva's server-side rendering eliminates the structural cause. No JS-deferred component injection means no layout shift by default, not by configuration.`,
-      impact: 'No ongoing CLS maintenance required'
+      currentH: `Page layout is stable as it loads (score: ${scores.cls})`,
+      currentBody: `Your page avoids the worst jumping and shifting — you've likely put work into image handling or custom JS fixes. Hyva achieves the same result by design rather than by patching, so it's stable by default and doesn't need ongoing maintenance to stay that way.`,
+      fixH: 'Hyva pages are stable by default, not by configuration',
+      fixBody: `Hyva's server-side rendering means there's no JS-deferred content injection to cause shifts. The layout is correct on first render — no patches required.`,
+      impact: 'No ongoing maintenance to stay stable'
     });
   }
 
-  // ── 4. TTFB ─────────────────────────────────────────────────────
+  // ── 4. Server response time (TTFB) ──────────────────────────────
   const ttfb = scores.ttfb;
   const ttfbSlow = ttfb > 600;
   const ttfbLabel = ttfb > 900 ? 'critically slow' : ttfb > 600 ? 'slow' : ttfb > 400 ? 'acceptable' : 'good';
@@ -2225,12 +2225,12 @@ function buildFindings(scores, platform) {
     severity: ttfbSlow ? (onHyva ? 'high' : 'mid') : 'mid',
     tagNow: ttfbSlow ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
     tagFix: 'READYMAGE FIXES IT',
-    currentH: `Time to First Byte: ${scores.ttfb}ms`,
+    currentH: `Your server takes ${scores.ttfb}ms to respond`,
     currentBody: ttfbSlow
-      ? `Your server takes <strong>${ttfb}ms</strong> to start sending a response — that's ${ttfbLabel}. Every other metric starts counting from here. The cause is almost always hosting: fixed-instance servers queue Magento's PHP bootstrap under load. You're ${onHyva ? 'on Hyva so the frontend is fast' : 'paying for a fast frontend'} but the server is adding latency before the first byte arrives.`
-      : `Your TTFB of ${ttfb}ms is ${ttfbLabel} — your hosting is performing reasonably well. Readymage's auto-scaling architecture typically brings this to 160–200ms and eliminates the spike pattern you see under traffic load, with no fixed instance costs.`,
-    fixH: 'Readymage averages 160–200ms TTFB',
-    fixBody: `Auto-scaling Magento hosting: workers spin up when traffic spikes and down when it drops. No queuing at peak, no idle spend in quiet periods. Purpose-built for Magento's PHP architecture.`,
+      ? `Your server takes <strong>${ttfb}ms</strong> before it starts sending anything to the browser — that's ${ttfbLabel}. Every other speed measurement starts from here. The cause is almost always hosting: shared or fixed-size servers queue Magento's requests under load. ${onHyva ? 'You\'re on Hyva so the frontend is fast' : 'Your frontend may be fast'} — but the server adds delay before a single pixel appears.`
+      : `Your server responds in ${ttfb}ms — ${ttfbLabel}. Readymage's auto-scaling architecture typically brings this to 160–200ms and removes the slowdown spike you see under traffic load, with no fixed server costs.`,
+    fixH: 'Readymage averages 160–200ms server response',
+    fixBody: `Auto-scaling Magento hosting: capacity spins up when visitors arrive and down when they leave. No queuing at peak, no idle spend in quiet periods. Built specifically for Magento's architecture.`,
     impact: `${ttfb - 180}ms faster server response`
   });
 
@@ -2242,13 +2242,13 @@ function buildFindings(scores, platform) {
       severity: reqHigh ? 'mid' : 'mid',
       tagNow: reqHigh ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
       tagFix: 'HYVA FIXES IT',
-      currentH: `${req} HTTP requests on the homepage`,
+      currentH: `${req} separate files downloaded to load one page`,
       currentBody: reqHigh
-        ? `${req} round-trips is well above benchmark. Magento Luma's module system generates individual CSS, JS, font, and image requests for every module — even with merging enabled, these accumulate fast. On mobile networks each round-trip adds latency that multiplies.`
-        : `${req} requests is above the 50-request target but not the worst we see. Most come from Luma's module system and third-party tracking. Hyva eliminates the module-system overhead at source — the remainder is usually addressable in the build.`,
-      fixH: 'Hyva builds typically ship 30–50 requests',
-      fixBody: `Bundled and minified from the ground up. Critical CSS inlined. Fonts subset and self-hosted. Tracking consolidated through server-side GTM. The reduction is structural, not just configuration.`,
-      impact: `${req - 40} fewer round-trips per page load`
+        ? `Your homepage makes ${req} separate requests to the browser — each one adds wait time before the page is ready. Magento's module system generates individual CSS, JS, font, and image files for each module, and even with merging turned on these accumulate quickly. On mobile the effect multiplies.`
+        : `${req} requests is above the 50-file target but not the worst we see. Most come from Magento's module system and third-party tracking scripts. Hyva eliminates the module overhead at source — the rest is fixed in the build.`,
+      fixH: 'Hyva builds typically load 30–50 files',
+      fixBody: `Everything bundled and minified from the ground up. Critical styles inlined. Fonts self-hosted. Tracking consolidated through server-side GTM. The reduction is structural — not something you can get from config tuning alone.`,
+      impact: `${req - 40} fewer files per page load`
     });
   }
 
@@ -2259,13 +2259,13 @@ function buildFindings(scores, platform) {
     severity: 'mid',
     tagNow: seoWeak ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
     tagFix: 'WE FIX IT',
-    currentH: `SEO score: ${seo}/100`,
+    currentH: `SEO health: ${seo}/100`,
     currentBody: seoWeak
-      ? `A score of ${seo}/100 indicates real gaps. Common findings on ${onHyva ? 'Hyva' : 'Luma'} sites: missing or incomplete product schema (Product, Offer, Review markup), ${!onHyva ? 'slow page speed hurting Core Web Vitals rankings, ' : ''}weak internal linking structure, thin category pages, and no optimisation for AI search surfaces (ChatGPT, Perplexity, Google AI Overviews).`
-      : `Your SEO score of ${seo}/100 is solid — there's clearly been investment here. The gap most merchants miss, regardless of technical score, is AEO/GEO: getting products surfaced inside AI-generated answers. That layer doesn't show in Lighthouse and most agencies aren't doing it yet.`,
-    fixH: 'Production-grade SEO + AEO/GEO',
-    fixBody: `Full structured data (Product, Offer, Review, Organization, BreadcrumbList), branch-level local SEO, ${!onHyva ? 'faster pages from Hyva improving CWV rankings, ' : ''}and AI-search optimisation for ChatGPT/Perplexity/Gemini. Most agencies aren't doing the AEO layer yet.`,
-    impact: 'Higher organic rankings + AI search presence'
+      ? `${seo}/100 means real gaps in how search engines read your site. Common issues: missing product schema (so Google can't show prices and ratings inline in results), ${!onHyva ? 'slow page speed which Google uses as a ranking signal, ' : ''}weak internal linking, thin category pages, and no optimisation for AI search surfaces like ChatGPT, Perplexity, and Google AI Overviews.`
+      : `${seo}/100 is solid — there's clearly been investment here. The gap most sites miss regardless of score is AI search: getting products surfaced inside AI-generated answers. That layer doesn't show in standard SEO audits and most agencies aren't doing it yet.`,
+    fixH: 'Full SEO + visibility inside AI search results',
+    fixBody: `Complete product schema so Google shows prices and ratings inline, local SEO for multi-location sites, ${!onHyva ? 'faster pages from Hyva improving rankings, ' : ''}and optimisation for ChatGPT/Perplexity/Gemini. Most agencies are only covering the first part.`,
+    impact: 'Higher organic rankings + visibility in AI results'
   });
 
   // ── 7. Accessibility ────────────────────────────────────────────
@@ -2277,11 +2277,11 @@ function buildFindings(scores, platform) {
     tagFix: 'WE FIX IT',
     currentH: `Accessibility: ${acc}/100`,
     currentBody: accWeak
-      ? `${acc}/100 means real barriers for users with assistive technology. Common issues: missing image alt text, poor colour contrast on CTAs, unlabelled form fields, inconsistent heading hierarchy. Beyond legal exposure (EAA enforcement from 2025), accessibility gaps directly reduce conversion — cleaner DOM and better labels help all users.`
-      : `${acc}/100 is above average for a ${onHyva ? 'Hyva' : 'Luma'} site — you've put work in. Getting to WCAG 2.2 AA compliance from here is mostly systematic: a structured audit, screen-reader testing, and a few targeted fixes. We ship Hyva builds at 95+ as standard.`,
-    fixH: 'WCAG 2.2 AA as standard',
-    fixBody: `${onHyva ? 'Your Hyva theme is a solid base.' : 'Hyva is built accessible by default.'} Our delivery adds a manual audit, screen-reader testing, contrast and heading remediation. Ships at 95+ on Lighthouse accessibility.`,
-    impact: 'Compliant + measurable conversion uplift'
+      ? `${acc}/100 means real barriers for some users. Common issues: missing image descriptions, poor text contrast on buttons, unlabelled form fields, broken tab order. From June 2025, the European Accessibility Act requires ecommerce sites to meet WCAG 2.2 AA — gaps now carry legal exposure. Accessibility improvements also lift conversion for all users, not just those using assistive tech.`
+      : `${acc}/100 is above average — you've put work in here. Getting to full WCAG 2.2 AA compliance from this point is mostly systematic: a structured audit, screen-reader testing, and targeted fixes. We ship Hyva builds at 95+ as standard.`,
+    fixH: 'WCAG 2.2 AA compliance as standard',
+    fixBody: `${onHyva ? 'Your Hyva theme is a solid base.' : 'Hyva is built accessible by default.'} We add a manual audit, screen-reader testing, contrast and heading fixes. Delivered at 95+ and documented for compliance purposes.`,
+    impact: 'Legally compliant + measurable conversion uplift'
   });
 
   const sig = platform ? platform.signals : null;
@@ -2292,39 +2292,39 @@ function buildFindings(scores, platform) {
       severity: scores.unusedJs > 600 ? 'high' : 'mid',
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
-      currentH: `${scores.unusedJs}KB of JavaScript loaded but never executed`,
-      currentBody: `Lighthouse found <strong>${scores.unusedJs}KB</strong> of JavaScript that downloads and parses on every page load, then sits idle. This is structural on ${onHyva ? 'Magento' : 'Luma'}: RequireJS speculatively loads module dependencies whether the current page needs them or not. Every visitor pays the cost — including mobile users on slower connections.`,
-      fixH: 'Hyva ships only what each page actually needs',
-      fixBody: `Hyva replaces RequireJS with a build-time bundler. JS is compiled per-page — unused modules never ship. No speculative loading, no dead weight. The ${scores.unusedJs}KB disappears at the build step, not through config tuning.`,
+      currentH: `${scores.unusedJs}KB of JavaScript downloaded but never used`,
+      currentBody: `Every time someone visits your site, their browser downloads <strong>${scores.unusedJs}KB</strong> of JavaScript that the page never actually uses — it just sits there. This is how ${onHyva ? 'Magento' : 'Luma\'s'} module system works: it loads code for every possible feature on every page, whether that page needs it or not. Every visitor pays the download cost — especially noticeable on mobile.`,
+      fixH: 'Hyva only ships the code each page actually needs',
+      fixBody: `Hyva compiles JavaScript per-page at build time — if a feature isn't used on that page, its code never ships. No speculative loading, no dead weight downloaded. The ${scores.unusedJs}KB is eliminated at the build step.`,
       impact: `${scores.unusedJs}KB removed from every page load`
     });
   }
 
-  // ── 9. DOM size ─────────────────────────────────────────────
+  // ── 9. Page complexity (DOM size) ───────────────────────────
   if (scores._source === 'psi' && scores.domSize > 1500) {
     findings.push({
       severity: scores.domSize > 3000 ? 'high' : 'mid',
       tagNow: scores.domSize > 3000 ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
       tagFix: 'HYVA FIXES IT',
-      currentH: `DOM size: ${scores.domSize.toLocaleString()} elements`,
-      currentBody: `Your page has <strong>${scores.domSize.toLocaleString()} DOM nodes</strong> — Google flags anything over 1,500. Yours is ${(scores.domSize / 1500).toFixed(1)}× that threshold. A bloated DOM slows every layout recalculation, style update, and user interaction. Luma inflates the DOM with nested component wrappers, hidden tab containers, and invisible widget placeholders even when they're not used on the current page.`,
-      fixH: 'Hyva sites average 400–600 DOM nodes',
-      fixBody: `Hyva's Alpine.js uses lightweight directives directly on existing HTML elements — no wrapper divs, no invisible containers, no KnockoutJS component nesting. The DOM shrinks to what's actually visible on screen.`,
-      impact: `~${Math.round((scores.domSize - 500) / scores.domSize * 100)}% reduction in DOM size`
+      currentH: `Page has ${scores.domSize.toLocaleString()} elements — ${(scores.domSize / 1500).toFixed(1)}× Google's limit`,
+      currentBody: `Your page contains <strong>${scores.domSize.toLocaleString()} individual elements</strong> — Google flags anything over 1,500. The more elements a page has, the slower every click, scroll, and visual update becomes. Luma packs pages with hidden containers, invisible placeholders, and nested wrappers for components that may not even be visible on the current page.`,
+      fixH: 'Hyva pages average 400–600 elements',
+      fixBody: `Hyva builds pages with only what's visible on screen. No hidden containers, no invisible placeholders, no deeply nested wrappers. The page is leaner, responds faster to interaction, and browsers handle it with much less effort.`,
+      impact: `~${Math.round((scores.domSize - 500) / scores.domSize * 100)}% fewer page elements`
     });
   }
 
-  // ── 10. Render-blocking resources ───────────────────────────
+  // ── 10. Files blocking the page from showing ─────────────────
   if (scores._source === 'psi' && scores.renderBlocking > 2) {
     findings.push({
       severity: 'mid',
       tagNow: 'PROBLEM',
       tagFix: 'HYVA FIXES IT',
-      currentH: `${scores.renderBlocking} render-blocking resources`,
-      currentBody: `<strong>${scores.renderBlocking} CSS or JS files</strong> are loaded in a way that prevents the browser from painting anything until they've fully downloaded and executed. The user sees a blank screen longer than necessary. This is a known consequence of Magento's asset pipeline — critical and non-critical styles are bundled together and loaded synchronously before first render.`,
-      fixH: 'Hyva inlines critical CSS, defers everything else',
-      fixBody: `Hyva generates per-page critical CSS inlined directly in the <head> at build time. Non-critical styles load asynchronously after paint. The browser renders immediately — users see content before the full CSS bundle has even arrived.`,
-      impact: 'Faster first paint, direct LCP improvement'
+      currentH: `${scores.renderBlocking} files are delaying your page from appearing`,
+      currentBody: `<strong>${scores.renderBlocking} CSS or JavaScript files</strong> are loaded in a way that stops the browser from showing anything until they've fully downloaded. Visitors see a blank or partially styled page for longer than necessary. This is built into Magento's asset pipeline: critical and non-critical styles are bundled together and loaded before the page can render.`,
+      fixH: 'Hyva shows the page immediately, loads the rest after',
+      fixBody: `Hyva inlines the minimum styles needed to display above-the-fold content directly in the page. Everything else loads in the background after the page appears. Visitors see content right away — the rest catches up silently.`,
+      impact: 'Faster first appearance, faster load time overall'
     });
   }
 
@@ -2422,34 +2422,22 @@ function buildCompareRows(scores) {
       unit: '/100'
     },
     {
-      label: 'Desktop speed',
-      nowVal: scores.desktopSpeed, nowMax: 100, nowDisplay: scores.desktopSpeed,
-      hyvaVal: HYVA_BENCH.desktopSpeed, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.desktopSpeed,
-      unit: '/100'
-    },
-    {
-      label: 'LCP (lower=better)',
+      label: 'Page load time',
       nowVal: 100 - Math.min(parseFloat(scores.lcp) * 14, 95), nowMax: 100, nowDisplay: scores.lcp + 's',
       hyvaVal: 100 - HYVA_BENCH.lcp * 14, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.lcp + 's',
       unit: ''
     },
     {
-      label: 'JS bundle (lower=better)',
-      nowVal: 100 - Math.min(parseFloat(scores.bundleJs) * 22, 92), nowMax: 100, nowDisplay: scores.bundleJs + 'MB',
-      hyvaVal: 100 - HYVA_BENCH.bundleJs * 22, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.bundleJs + 'MB',
-      unit: ''
-    },
-    {
-      label: 'TTFB (lower=better)',
+      label: 'Server response',
       nowVal: 100 - Math.min(scores.ttfb / 12, 92), nowMax: 100, nowDisplay: scores.ttfb + 'ms',
       hyvaVal: 100 - HYVA_BENCH.ttfb / 12, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.ttfb + 'ms',
       unit: ''
     },
     {
-      label: 'HTTP requests',
-      nowVal: 100 - Math.min(scores.requests / 2.6, 92), nowMax: 100, nowDisplay: scores.requests,
-      hyvaVal: 100 - HYVA_BENCH.requests / 2.6, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.requests,
-      unit: ''
+      label: 'SEO health',
+      nowVal: scores.seo, nowMax: 100, nowDisplay: scores.seo,
+      hyvaVal: HYVA_BENCH.seo, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.seo,
+      unit: '/100'
     }
   ];
 }
@@ -2474,40 +2462,16 @@ function renderScoreGrid(scores) {
       delta: `+${HYVA_BENCH.desktopSpeed - scores.desktopSpeed}`
     },
     {
-      label: 'LCP', value: scores.lcp, unit: 's',
+      label: 'Page load time', value: scores.lcp, unit: 's',
       cls: classifyReverse(parseFloat(scores.lcp), [2.5, 4.0]),
       bench: `Hyva avg ${HYVA_BENCH.lcp}s`,
       delta: `−${(scores.lcp - HYVA_BENCH.lcp).toFixed(1)}s`
-    },
-    {
-      label: 'CLS', value: scores.cls, unit: '',
-      cls: classifyReverse(parseFloat(scores.cls), [0.1, 0.25]),
-      bench: `Hyva avg ${HYVA_BENCH.cls}`,
-      delta: `−${(scores.cls - HYVA_BENCH.cls).toFixed(2)}`
-    },
-    {
-      label: 'INP', value: scores.inp, unit: 'ms',
-      cls: classifyReverse(scores.inp, [200, 500]),
-      bench: `Hyva avg ${HYVA_BENCH.inp}ms`,
-      delta: `−${scores.inp - HYVA_BENCH.inp}ms`
     },
     {
       label: 'SEO health', value: scores.seo, unit: '/100',
       cls: classify(scores.seo, [60, 90]),
       bench: `Hyva avg ${HYVA_BENCH.seo}`,
       delta: `+${HYVA_BENCH.seo - scores.seo}`
-    },
-    {
-      label: 'Accessibility', value: scores.accessibility, unit: '/100',
-      cls: classify(scores.accessibility, [60, 90]),
-      bench: `Hyva avg ${HYVA_BENCH.accessibility}`,
-      delta: `+${HYVA_BENCH.accessibility - scores.accessibility}`
-    },
-    {
-      label: 'JS bundle', value: scores.bundleJs, unit: 'MB',
-      cls: classifyReverse(parseFloat(scores.bundleJs), [0.5, 1.5]),
-      bench: `Hyva avg ${HYVA_BENCH.bundleJs}MB`,
-      delta: `−${(scores.bundleJs - HYVA_BENCH.bundleJs).toFixed(1)}MB`
     }
   ];
 
