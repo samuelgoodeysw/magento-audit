@@ -3,28 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hyva Upgrade Audit — Scandiweb for Builders Merchants</title>
+<title>Magento Audit — Scandiweb for Builders Merchants</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Narrow:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-page: #F4F2EC;
+  /* Scandiweb corporate palette */
+  --bg-page: #f7f8fd;
   --bg-surface: #FFFFFF;
-  --bg-charcoal: #161616;
-  --bg-deep: #0A0A0A;
-  --bg-canvas: #FAFAF6;
-  --text-primary: #161616;
-  --text-secondary: #6B6B66;
-  --text-muted: #9A9A95;
-  --text-inverse: #F4F2EC;
-  --accent: #FFD60A;
-  --accent-dim: #C8B260;
-  --brick: #BC3F1F;
-  --sage: #5F7D4A;
-  --border: #1F1F1F;
-  --border-soft: #DCD9D0;
-  --grid-line: #EAE7DD;
+  --bg-charcoal: #10132C;
+  --bg-deep: #08091e;
+  --bg-canvas: #f0f2ff;
+  --text-primary: #10132C;
+  --text-secondary: #7E83A0;
+  --text-muted: #b0b5cc;
+  --text-inverse: #FFFFFF;
+  --accent: #3F4AAF;       /* blue — primary accent on light backgrounds */
+  --accent-dim: #FF5A31;   /* orange — warnings, small elements */
+  --brick: #FF5A31;        /* orange — error tags, problems */
+  --sage: #3F4AAF;         /* blue — positive states on light backgrounds */
+  --border: #10132C;
+  --border-soft: #DADCF1;
+  --grid-line: rgba(63, 74, 175, 0.06);
+}
+
+/* Green only valid on dark backgrounds per brand guidelines */
+.header,
+.stage-hero,
+.console,
+.compare-card,
+.error-banner {
+  --accent: #6EF76E;
+  --sage: #6EF76E;
+  --text-inverse: #FFFFFF;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1216,12 +1228,12 @@ body {
       <div class="brand-mark">SW</div>
       <div class="brand-text">
         <span class="brand-name">SCANDIWEB</span>
-        <span class="brand-sub">Trade · Hyva · Readymage</span>
+        <span class="brand-sub">Hyva · Readymage · SEO · AEO · PPC</span>
       </div>
     </div>
     <div class="title-block">
-      <span class="title-label">Hyva Upgrade Audit</span>
-      <span class="title-main">Already on Magento? See what you're losing.</span>
+      <span class="title-label">Magento Performance Audit</span>
+      <span class="title-main">Already on Magento? See what's possible.</span>
     </div>
     <div class="header-meta" id="header-meta">
       <span><strong>v0.1</strong> · builders-merchants</span>
@@ -1234,12 +1246,12 @@ body {
   <!-- ========== STAGE 1 — INPUT ========== -->
   <section class="stage active" id="stage-input">
     <div class="stage-hero">
-      <div class="hero-eyebrow">// FOR UK BUILDERS MERCHANTS ON MAGENTO 2</div>
-      <h1 class="hero-title">Magento gets faster, cheaper, and <em>better</em> on Hyva. Let's prove it on your site.</h1>
-      <p class="hero-sub">Drop your URL. We'll show you the speed, SEO, and hosting improvements you'd see if your site moved to Hyva + Readymage. No sign-up. No catch.</p>
+      <div class="hero-eyebrow">// FOR BUILDERS MERCHANTS ON MAGENTO 2</div>
+      <h1 class="hero-title">Your Magento site could be <em>faster, leaner, and converting more.</em> Let's prove it.</h1>
+      <p class="hero-sub">Drop your URL. We'll audit your speed, SEO, hosting, and conversion gaps — then show you exactly what changes with Scandiweb. Hyva frontend, Readymage hosting, AEO/SEO, PPC, CRO. No sign-up. No catch.</p>
 
       <form class="url-form" id="url-form" onsubmit="return false;">
-        <input class="url-input" id="url-input" type="text" placeholder="https://your-merchant-site.co.uk" autocomplete="off" spellcheck="false">
+        <input class="url-input" id="url-input" type="text" placeholder="https://your-merchant-site.com" autocomplete="off" spellcheck="false">
         <button class="url-submit" id="url-submit">Run audit →</button>
       </form>
 
@@ -1253,8 +1265,8 @@ body {
           <div class="trust-label">// We don't gate the report<br>You see what we see</div>
         </div>
         <div class="trust-item">
-          <div class="trust-num">Plat.</div>
-          <div class="trust-label">// Hyva Platinum + Adobe Gold partner<br>UK delivery team</div>
+          <div class="trust-num">Highly Accredited</div>
+          <div class="trust-label">// Hyva Platinum + Adobe Commerce Gold<br>Among the most decorated Magento partners globally</div>
         </div>
       </div>
     </div>
@@ -1339,7 +1351,7 @@ body {
         <div class="services-side-tag">SCANDIWEB — UNDER ONE ROOF</div>
         <div class="services-side-h">One team, one accountable contact, one revenue number.</div>
         <ul class="services-list good">
-          <li><strong>Hyva development</strong> — UK Hyva Platinum delivery team</li>
+          <li><strong>Hyva development</strong> — Hyva Platinum delivery team</li>
           <li><strong>Readymage hosting</strong> — autoscale, pay-per-use, no idle costs</li>
           <li><strong>SEO + AEO/GEO</strong> — including the new AI-search optimisation</li>
           <li><strong>PPC + paid social</strong> — joined to your conversion data, not flying blind</li>
@@ -1564,7 +1576,7 @@ body {
       <div class="field-row">
         <div class="field-group">
           <label class="field-label">Email <span class="req">*</span></label>
-          <input class="field-input" id="m-email" type="email" placeholder="you@company.co.uk">
+          <input class="field-input" id="m-email" type="email" placeholder="you@company.com">
         </div>
         <div class="field-group">
           <label class="field-label">Phone</label>
@@ -1997,7 +2009,7 @@ function buildFindings(scores, platform) {
     tagFix: 'WE FIX IT',
     currentH: `Accessibility: ${acc}/100`,
     currentBody: accWeak
-      ? `${acc}/100 means real barriers for users with assistive technology. Common issues: missing image alt text, poor colour contrast on CTAs, unlabelled form fields, inconsistent heading hierarchy. Beyond legal exposure (UK EAA enforcement from 2025), accessibility gaps directly reduce conversion — cleaner DOM and better labels help all users.`
+      ? `${acc}/100 means real barriers for users with assistive technology. Common issues: missing image alt text, poor colour contrast on CTAs, unlabelled form fields, inconsistent heading hierarchy. Beyond legal exposure (EAA enforcement from 2025), accessibility gaps directly reduce conversion — cleaner DOM and better labels help all users.`
       : `${acc}/100 is above average for a ${onHyva ? 'Hyva' : 'Luma'} site — you've put work in. Getting to WCAG 2.2 AA compliance from here is mostly systematic: a structured audit, screen-reader testing, and a few targeted fixes. We ship Hyva builds at 95+ as standard.`,
     fixH: 'WCAG 2.2 AA as standard',
     fixBody: `${onHyva ? 'Your Hyva theme is a solid base.' : 'Hyva is built accessible by default.'} Our delivery adds a manual audit, screen-reader testing, contrast and heading remediation. Ships at 95+ on Lighthouse accessibility.`,
