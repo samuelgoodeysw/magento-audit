@@ -1910,6 +1910,32 @@ async function detectPlatform(url) {
     const hasLiveChat     = /intercom|drift\.com|zendesk|tidio\.com|livechat|crisp\.chat|tawk\.to/i.test(html);
     const hasReviewWidget = /trustpilot|feefo|reviews\.io|judge\.me|yotpo|stamped\.io/i.test(html);
 
+    // ── HTML signals — third-party tools ──────────────────────
+    let searchTool = null;
+    if      (/klevu/i.test(html))                                searchTool = 'Klevu';
+    else if (/algolia/i.test(html))                              searchTool = 'Algolia';
+    else if (/searchspring/i.test(html))                         searchTool = 'Searchspring';
+    else if (/doofinder/i.test(html))                            searchTool = 'Doofinder';
+    else if (/bloomreach/i.test(html))                           searchTool = 'Bloomreach';
+
+    let emailTool = null;
+    if      (/klaviyo\.com|_learnq/i.test(html))                 emailTool = 'Klaviyo';
+    else if (/dotmailer\.com|dotdigital/i.test(html))            emailTool = 'Dotdigital';
+    else if (/mailchimp\.com|list-manage\.com/i.test(html))      emailTool = 'Mailchimp';
+
+    let heatmapTool = null;
+    if      (/hotjar\.com|hjSiteSettings/i.test(html))           heatmapTool = 'Hotjar';
+    else if (/clarity\.ms|microsoft.*clarity/i.test(html))       heatmapTool = 'Microsoft Clarity';
+    else if (/fullstory\.com|_fs_namespace/i.test(html))         heatmapTool = 'FullStory';
+
+    let abtestTool = null;
+    if      (/vwo\.com|_vwo_code/i.test(html))                   abtestTool = 'VWO';
+    else if (/optimizely\.com/i.test(html))                      abtestTool = 'Optimizely';
+
+    let loyaltyTool = null;
+    if      (/loyaltylion/i.test(html))                          loyaltyTool = 'LoyaltyLion';
+    else if (/smile\.io|sweetTooth/i.test(html))                 loyaltyTool = 'Smile.io';
+
     // ── HTML signals — SEO ────────────────────────────────────
     const hasStructuredData = /<script[^>]*type=["']application\/ld\+json/i.test(html);
     const hasMetaDesc = /<meta[^>]+name=["']description["'][^>]+content=["'][^"']{20,}/i.test(html) ||
@@ -1928,6 +1954,8 @@ async function detectPlatform(url) {
       hasGA4, hasUA, hasUAOnly: hasUA && !hasGA4, hasGTM, hasFBPixel: hasFBPx, hasCookieConsent,
       // ux
       hasLiveChat, hasReviewWidget,
+      // third-party tools
+      searchTool, emailTool, heatmapTool, abtestTool, loyaltyTool,
       // seo
       hasStructuredData, hasMetaDesc, hasOGTags, hasCanonical, h1Count,
     };
@@ -2501,6 +2529,34 @@ function buildFindings(scores, platform) {
       fixH: 'Consent-aware tracking via CMP + GTM consent mode',
       fixBody: `We implement a consent management platform (CookieYes or OneTrust) wired to GTM consent mode v2. Tracking fires only after opt-in. GA4 receives modelled conversion data for opted-out users so you don't lose insight. Compliance documented and auditable.`,
       impact: 'Regulatory compliance, no ICO exposure'
+    });
+  }
+
+  // ── 16. Site search ─────────────────────────────────────────
+  if (sig && !sig.searchTool) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'IMPROVEMENT AVAILABLE',
+      tagFix: 'WE CAN HELP',
+      currentH: 'No dedicated site search tool detected',
+      currentBody: `We didn't find a third-party search tool (Klevu, Algolia, Searchspring or similar) on your site. Magento's native search handles basic queries but struggles with typos, synonyms, and the kind of trade-specific searches — part numbers, product codes, spec-based lookups — that B2B buyers use. Poor search is one of the most direct causes of lost trade orders.`,
+      fixH: 'Intelligent search built for trade catalogues',
+      fixBody: `We integrate search tools like Klevu or Algolia that handle synonym management, part-number matching, and relevance tuning. Fully compatible with Hyva. B2B buyers who use search convert at significantly higher rates than those who browse — removing friction here has a direct revenue impact.`,
+      impact: 'Higher search conversion, fewer abandoned sessions'
+    });
+  }
+
+  // ── 17. Email automation ─────────────────────────────────────
+  if (sig && !sig.emailTool) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'IMPROVEMENT AVAILABLE',
+      tagFix: 'WE CAN HELP',
+      currentH: 'No email automation platform detected',
+      currentBody: `We didn't detect an email marketing or automation tool (Klaviyo, Dotdigital or similar) on your site. For B2B merchants, automated email is one of the highest-ROI channels: abandoned basket recovery, reorder reminders, account-specific promotions, and post-purchase sequences all run without ongoing manual effort once set up.`,
+      fixH: 'Email automation integrated with your Magento data',
+      fixBody: `We connect platforms like Klaviyo or Dotdigital directly to your Magento order, customer, and product data. Abandonment flows, reorder prompts, and segmented campaigns built around your actual buying patterns — not generic ecommerce templates.`,
+      impact: 'Incremental revenue from existing customer base'
     });
   }
 
@@ -3084,6 +3140,66 @@ function buildPreviewInsights(platform) {
     body: 'Kerridge K8, Intact iQ, Sage 200, Dynamics BC — we\'ve built Magento integrations for all of them. The risk in a replatform is never the ERP itself; it\'s how the price book, stock feeds, and order sync are rebuilt. Scandiweb\'s integration team has done this before.',
     cta: 'Scandiweb → ERP integrations, real-time stock and pricing'
   });
+
+  // ── Tech detection cards ─────────────────────────────────────
+  if (sig.searchTool) {
+    cards.push({
+      tag: `Check result — site search`,
+      h: `${sig.searchTool} detected on your site.`,
+      body: `${sig.searchTool} is a solid search platform — good to see it in place. The next layer is relevance tuning: synonym lists, part-number matching, and personalised results for trade account types. These aren't on by default and make a meaningful difference to conversion from search.`,
+      cta: `Scandiweb → ${sig.searchTool} configuration and ongoing relevance tuning`
+    });
+  } else {
+    cards.push({
+      tag: 'Site search',
+      h: 'No dedicated search tool detected.',
+      body: 'Magento\'s native search handles simple queries but falls over on part numbers, product codes, and trade-specific lookups. B2B buyers who use site search convert at 3–5× the rate of those who browse — and they abandon faster when search fails them.',
+      cta: 'Scandiweb → Klevu or Algolia integration, tuned for trade catalogues'
+    });
+  }
+
+  if (sig.emailTool) {
+    cards.push({
+      tag: `Check result — email automation`,
+      h: `${sig.emailTool} detected on your site.`,
+      body: `${sig.emailTool} is in place — the question is what it's connected to. Most setups we inherit are sending basic transactional emails but missing the high-value flows: abandoned basket recovery, reorder reminders, account-level win-back sequences, and post-purchase follow-ups tied to actual order data.`,
+      cta: `Scandiweb → ${sig.emailTool} flows built around your Magento order data`
+    });
+  } else {
+    cards.push({
+      tag: 'Email automation',
+      h: 'No email automation platform detected.',
+      body: 'For B2B merchants, automated email sequences are typically the highest-ROI channel after organic search. Abandoned basket recovery alone recovers 5–15% of lost orders. Without an automation platform, that revenue isn\'t coming back.',
+      cta: 'Scandiweb → Klaviyo or Dotdigital, connected to your Magento data'
+    });
+  }
+
+  if (sig.heatmapTool) {
+    cards.push({
+      tag: `Check result — session recording`,
+      h: `${sig.heatmapTool} detected on your site.`,
+      body: `${sig.heatmapTool} is running — that means you have session data to work from. The value is in what you do with it: identifying where trade buyers drop off, which product page elements get ignored, and where checkout friction appears. We use this data to prioritise CRO work rather than guessing.`,
+      cta: 'Scandiweb → CRO programme built from your actual session data'
+    });
+  }
+
+  if (sig.abtestTool) {
+    cards.push({
+      tag: `Check result — A/B testing`,
+      h: `${sig.abtestTool} detected on your site.`,
+      body: `${sig.abtestTool} is installed — good. The gap we usually find is that tests are running against generic ecommerce metrics rather than trade-specific ones. Testing \"add to basket\" uplift on a B2B site misses what actually matters: quote completion, reorder rate, basket size by account type.`,
+      cta: 'Scandiweb → A/B testing programme focused on trade KPIs'
+    });
+  }
+
+  if (sig.loyaltyTool) {
+    cards.push({
+      tag: `Check result — loyalty programme`,
+      h: `${sig.loyaltyTool} detected on your site.`,
+      body: `${sig.loyaltyTool} is in place. For B2B, loyalty mechanics work differently from consumer programmes — trade buyers respond to account-level benefits, preferential pricing tiers, and early access rather than points and vouchers. Worth reviewing whether the setup is tuned for trade buyer behaviour.`,
+      cta: 'Scandiweb → loyalty strategy review for B2B buying patterns'
+    });
+  }
 
   return cards;
 }
