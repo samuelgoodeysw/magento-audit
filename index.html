@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Magento Audit — Scandiweb for Builders Merchants</title>
+<title>Magento Audit — Scandiweb</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Narrow:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1236,7 +1236,7 @@ body {
       <span class="title-main">Already on Magento? See what's possible.</span>
     </div>
     <div class="header-meta" id="header-meta">
-      <span><strong>v0.1</strong> · builders-merchants</span>
+      <span><strong>v0.2</strong> · magento-audit</span>
     </div>
   </div>
 </header>
@@ -1246,7 +1246,7 @@ body {
   <!-- ========== STAGE 1 — INPUT ========== -->
   <section class="stage active" id="stage-input">
     <div class="stage-hero">
-      <div class="hero-eyebrow">// FOR BUILDERS MERCHANTS ON MAGENTO 2</div>
+      <div class="hero-eyebrow">// FOR MAGENTO 2 MERCHANTS</div>
       <h1 class="hero-title" id="hero-title">Your Magento site could be <em>faster, leaner, and converting more.</em> Let's prove it.</h1>
       <p class="hero-sub" id="hero-sub">Drop your URL. We'll audit your speed, SEO, hosting, and conversion gaps — then show you exactly what changes with Scandiweb. Hyva frontend, Readymage hosting, AEO/SEO, PPC, CRO. No sign-up. No catch.</p>
 
@@ -1601,7 +1601,7 @@ body {
 // ============================================================
 
 const VERTICALS = {
-  'builders-merchant': {
+  'smb': {
     pageTitle: 'Magento Audit — Scandiweb',
     heroTitle: 'Your Magento site could be <em>faster, leaner, and converting more.</em> Let\'s prove it.',
     heroSub: 'Drop your URL. We\'ll audit your speed, SEO, hosting, and conversion gaps — then show you exactly what changes with Scandiweb. Hyva frontend, Readymage hosting, AEO/SEO, PPC, CRO. No sign-up. No catch.',
@@ -1666,8 +1666,8 @@ const VERTICALS = {
   // To add a new vertical: 'auto-parts': { ... }, 'food-service': { ... }
 };
 
-const vParam = new URLSearchParams(location.search).get('v') || 'builders-merchant';
-const V = VERTICALS[vParam] || VERTICALS['builders-merchant'];
+const vParam = new URLSearchParams(location.search).get('v') || 'smb';
+const V = VERTICALS[vParam] || VERTICALS['smb'];
 
 // ============================================================
 // PLATFORM DETECTION
