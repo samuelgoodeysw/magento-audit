@@ -2837,7 +2837,10 @@ async function finishConsoleWithPSI(scoresPromise) {
   let insightIdx = 0;
   const insightTimer = setInterval(() => {
     if (insightIdx >= insights.length) { clearInterval(insightTimer); return; }
-    if (insightIdx === 0) stickyEl.style.opacity = '1';
+    if (insightIdx === 0) {
+      stickyEl.style.opacity = '1';
+      document.getElementById('preview-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     const ins = insights[insightIdx++];
     const card = document.createElement('div');
     card.className = 'preview-card';
@@ -2848,7 +2851,6 @@ async function finishConsoleWithPSI(scoresPromise) {
       <div class="preview-card-cta">${ins.cta} →</div>
     `;
     streamEl.appendChild(card);
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 4000);
 
   // Wait for PSI — then show results with live data straight away
