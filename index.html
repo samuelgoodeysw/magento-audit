@@ -2088,36 +2088,36 @@ function buildConsoleLines(url, platform) {
   ];
 
   if (platform.error === 'cors' || platform.error === 'timeout') {
-    lines.push({ text: `Platform check: browser CORS policy blocked read — using fingerprint fallback`, status: 'warn', stat: 'limited' });
-    lines.push({ text: `Platform fingerprint: <strong>Magento 2.4.x</strong> assumed (unverified)`, status: 'warn', stat: 'unverified' });
-    lines.push({ text: `Theme detection: CORS blocked — defaulting to <strong>Luma</strong>`, status: 'warn', stat: 'Luma assumed' });
+    lines.push({ text: `Platform check: page not readable — using fingerprint fallback`, status: 'warn', stat: 'limited' });
+    lines.push({ text: `Platform fingerprint: <strong>Magento 2.4.x</strong> assumed`, status: 'warn', stat: 'unverified' });
+    lines.push({ text: `Theme detection: could not read page — defaulting to <strong>Luma</strong>`, status: 'warn', stat: 'assumed' });
   } else if (platform.isMagento) {
     lines.push({ text: `Platform fingerprint: <strong>Magento 2.4.x</strong> confirmed`, status: 'done', stat: 'Magento 2' });
     if (platform.theme === 'Hyva') {
-      lines.push({ text: `Frontend theme: <strong>Hyva</strong> detected — speed comparison adjusted`, status: 'done', stat: 'Hyva ✓' });
+      lines.push({ text: `Frontend theme: <strong>Hyva</strong> detected`, status: 'done', stat: 'Hyva' });
     } else if (platform.theme === 'Luma') {
-      lines.push({ text: `Frontend theme: <strong>Luma</strong> — RequireJS + KnockoutJS stack confirmed`, status: 'fail', stat: 'Luma' });
+      lines.push({ text: `Frontend theme: <strong>Luma</strong> detected`, status: 'done', stat: 'Luma' });
     } else {
       const customLabel = platform.customThemeName || 'Custom';
-      lines.push({ text: `Frontend theme: <strong>${customLabel}</strong> — custom build on Magento frontend stack`, status: 'warn', stat: customLabel });
+      lines.push({ text: `Frontend theme: <strong>${customLabel}</strong> detected`, status: 'done', stat: customLabel });
     }
   }
 
   const sig = platform.signals;
   if (sig) {
     lines.push(
-      { text: `Scanning response headers — server, PHP version, cache…`, status: sig.phpEol ? 'fail' : 'done', stat: sig.phpVersion ? `PHP ${sig.phpVersion}` : sig.serverSoftware || 'OK' },
-      { text: `CDN / edge cache detection…`, status: sig.cdnType ? 'done' : 'warn', stat: sig.cdnType || 'none detected' },
-      { text: `Analytics stack — GA4, GTM, pixels…`, status: sig.hasGA4 ? 'done' : (sig.hasUAOnly ? 'fail' : 'warn'), stat: sig.hasGA4 ? 'GA4 ✓' : sig.hasUAOnly ? 'UA only — dead' : 'none found' },
-      { text: `Structured data and schema markup…`, status: sig.hasStructuredData ? 'done' : 'fail', stat: sig.hasStructuredData ? 'found' : 'none' },
-      { text: `Cookie consent / GDPR compliance…`, status: sig.hasCookieConsent ? 'done' : 'warn', stat: sig.hasCookieConsent ? 'found' : 'not detected' },
+      { text: `Scanning response headers — server, PHP version, cache…`, status: 'done', stat: sig.phpVersion ? `PHP ${sig.phpVersion}` : sig.serverSoftware || 'OK' },
+      { text: `CDN / edge cache detection…`, status: 'done', stat: sig.cdnType || 'none detected' },
+      { text: `Analytics stack — GA4, GTM, pixels…`, status: 'done', stat: sig.hasGA4 ? 'GA4 found' : sig.hasUAOnly ? 'UA only' : 'none found' },
+      { text: `Structured data and schema markup…`, status: 'done', stat: sig.hasStructuredData ? 'found' : 'none found' },
+      { text: `Cookie consent / GDPR compliance…`, status: 'done', stat: sig.hasCookieConsent ? 'found' : 'not detected' },
     );
   }
   lines.push(
     { text: `Running Lighthouse — mobile performance…`, status: 'done', stat: 'complete' },
     { text: `Running Lighthouse — desktop performance…`, status: 'done', stat: 'complete' },
-    { text: `Checking page speed, load time, and visual stability…`, status: platform.theme === 'Hyva' ? 'warn' : 'fail', stat: platform.theme === 'Hyva' ? 'issues found' : 'issues found' },
-    { text: `Scanning for unused code, page complexity, load blockers…`, status: 'done', stat: 'scanned' },
+    { text: `Checking page speed, load time, and visual stability…`, status: 'done', stat: 'complete' },
+    { text: `Scanning for unused code, page complexity, load blockers…`, status: 'done', stat: 'complete' },
     { text: `Comparing against Hyva + Readymage benchmarks (n=50)…`, status: 'done', stat: 'OK' },
     { text: `Audit complete. Generating report…`, status: 'done', stat: 'OK' }
   );
