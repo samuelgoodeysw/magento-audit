@@ -2780,15 +2780,9 @@ async function finishConsoleWithPSI(scoresPromise) {
     if (el) el.textContent = frames[f++ % frames.length];
   }, 400);
 
-  // Show results immediately with skeleton score cards — don't wait for PSI
   document.getElementById('console-bar-fill').style.width = '100%';
-  const loadingScores = Object.assign(generateScores(currentUrl), { _source: 'loading' });
-  setTimeout(() => {
-    renderResults(currentUrl, currentPlatform, loadingScores);
-    showStage('results');
-  }, 800);
 
-  // Stream insight cards while PSI loads
+  // Stream insight cards while PSI loads — keeps user engaged on this screen
   const insights = buildPreviewInsights(currentPlatform);
   const streamEl = document.getElementById('preview-stream');
   streamEl.innerHTML = '';
@@ -2805,12 +2799,13 @@ async function finishConsoleWithPSI(scoresPromise) {
       <div class="preview-card-cta">${ins.cta} →</div>
     `;
     streamEl.appendChild(card);
-    streamEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 3500);
 
-  // PSI resolves in background — patch live numbers into the visible report
+  // Wait for PSI — then show results with live data straight away
   const scores = await scoresPromise;
   clearInterval(ticker);
+  clearInterval(insightTimer);
 
   const markerEl = document.getElementById('psi-marker');
   const textEl   = document.getElementById('psi-text');
@@ -2839,7 +2834,10 @@ async function finishConsoleWithPSI(scoresPromise) {
     }
   }
 
-  patchLiveScores(scores);
+  setTimeout(() => {
+    renderResults(currentUrl, currentPlatform, scores);
+    showStage('results');
+  }, 600);
 }
 
 function buildPreviewInsights(platform) {
