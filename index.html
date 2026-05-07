@@ -1364,7 +1364,7 @@ body {
     <div class="stage-hero">
       <div class="hero-eyebrow">// FOR MAGENTO 2 MERCHANTS</div>
       <h1 class="hero-title" id="hero-title">Could your Magento site be <em>faster, leaner, and converting more?</em> Let's test it.</h1>
-      <p class="hero-sub" id="hero-sub">Drop your URL. We'll audit your speed, SEO, hosting, and conversion gaps — then show you exactly what changes with Scandiweb. Hyva frontend, Readymage hosting, AEO/SEO, PPC, CRO. No sign-up. No catch.</p>
+      <p class="hero-sub" id="hero-sub">Drop your URL. We run a live scan of your speed, SEO, hosting, and conversion gaps, then show you what a Scandiweb engagement on Hyva typically changes. No account needed.</p>
 
       <form class="url-form" id="url-form" onsubmit="return false;">
         <input class="url-input" id="url-input" type="text" placeholder="https://your-merchant-site.com" autocomplete="off" spellcheck="false">
@@ -1446,8 +1446,8 @@ body {
 
     <div class="score-grid" id="score-grid"></div>
 
-    <div class="section-title" data-num="01 / FINDINGS" id="findings-title">What's slowing your site down</div>
-    <p class="section-sub" id="findings-sub">The biggest issues — every one of them is what Hyva was built to fix. We've called out the impact in plain numbers.</p>
+    <div class="section-title" data-num="01 / FINDINGS" id="findings-title">What this scan surfaced</div>
+    <p class="section-sub" id="findings-sub">Potential areas to explore further, with context on what typically causes them and what changes with Hyva.</p>
     <div class="findings" id="findings"></div>
 
     <div class="section-title" data-num="02 / IF YOU MOVED">Same site, on Hyva + Readymage</div>
@@ -1648,7 +1648,7 @@ body {
     </div>
 
     <div class="cta-strip">
-      <div class="cta-text">Want the full audit + a no-pressure 30-min call to walk through it?</div>
+      <div class="cta-text">Want this report as a PDF, plus a call to talk through your goals?</div>
       <button class="cta-btn" id="open-cta">Get the full report →</button>
     </div>
 
@@ -1672,7 +1672,7 @@ body {
     </div>
     <div class="modal-body" id="modal-body">
       <div class="modal-summary">
-        We'll send the full Lighthouse + Ahrefs report on <strong id="modal-url">—</strong> within 1 working day, plus a 30-minute call to walk through the upgrade path and rough numbers.
+        We'll send you this report as a PDF for <strong id="modal-url">—</strong>, and set up a short call to understand your goals and see whether we're the right fit for your project.
       </div>
       <div class="field-row">
         <div class="field-group">
@@ -1717,7 +1717,7 @@ body {
       </div>
     </div>
     <div class="modal-foot">
-      <span class="foot-text">// Goes to Scandiweb sales — nowhere else</span>
+      <span class="foot-text">// Shared with Scandiweb only. Not passed on or sold.</span>
       <button class="btn-primary" id="modal-send">Send →</button>
     </div>
   </div>
@@ -1732,12 +1732,12 @@ const VERTICALS = {
   'smb': {
     pageTitle: 'Magento Audit — Scandiweb',
     heroTitle: 'Could your Magento site be <em>faster, leaner, and converting more?</em> Let\'s test it.',
-    heroSub: 'Drop your URL. We\'ll audit your speed, SEO, hosting, and conversion gaps — then show you exactly what changes with Scandiweb. Hyva frontend, Readymage hosting, AEO/SEO, PPC, CRO. No sign-up. No catch.',
+    heroSub: 'Drop your URL. We run a live scan of your speed, SEO, hosting, and conversion gaps, then show you what a Scandiweb engagement on Hyva typically changes. No account needed.',
     urlPlaceholder: 'https://your-merchant-site.com',
     compareLabel: 'On Hyva + Readymage',
-    compareSub: 'Side-by-side comparison. The Hyva column isn\'t theory — it\'s the average of 50+ Hyva sites we\'ve benchmarked, on Readymage\'s auto-scaling hosting.',
-    conversionStat: 'A 1-second improvement in mobile load typically lifts conversion 7–10% on B2B sites. Faster pages also rank better — Google has been weighting Core Web Vitals since 2021.',
-    fragmentationSub: 'Most merchants we audit have dev with one shop, hosting from another, SEO from a third, PPC scattered across freelancers — and analytics half-broken because nobody owns it.',
+    compareSub: 'Side-by-side comparison. The Hyva column is drawn from real benchmarks across 50+ live Hyva sites, all running on Readymage hosting.',
+    conversionStat: 'A 1-second improvement in mobile load typically lifts conversion 7-10% on B2B sites. Page speed also feeds directly into search rankings. Google has weighted Core Web Vitals since 2021.',
+    fragmentationSub: 'Most merchants we speak to run dev, hosting, SEO, and PPC through separate suppliers. Without a single team across all of it, it\'s harder to understand what\'s actually driving revenue.',
     reqFeaturesLabel: 'B2B FEATURES',
     reqFeaturesHeading: 'Tick anything you need.',
     notesCue: 'e.g. tied to Kerridge K8 — worried about the upgrade. Or BFCM is approaching and the site falls over at 200 concurrent. Or the board wants 30% online by 2027…',
@@ -1759,24 +1759,24 @@ const VERTICALS = {
     erpOptions: ['Intact iQ','Kerridge K8 / KCS','Merlin Business Software','Sage 200','Microsoft Dynamics 365 BC','NetSuite','Custom / in-house','Not sure yet','None'],
     deliveryOptions: ['Branch courier (own vans)','Third-party logistics (3PL)','Direct-from-supplier drop-ship','Click & collect only','Mixed model'],
     stackCards: [
-      { num:'01', h:'Hyva build',            tag:'DEV',        body:'Replatform without rebuilding. Your existing data, integrations and modules, on a frontend that loads in under 2 seconds.' },
+      { num:'01', h:'Hyva build',            tag:'DEV',        body:'Move to Hyva without rebuilding from scratch. Your data and core integrations carry over. We review your existing modules for compatibility and scope anything that needs rebuilding.' },
       { num:'02', h:'Readymage hosting',     tag:'HOSTING',    body:'Auto-scaling Magento hosting. Pay for what you use, scale up for BFCM, scale down in January. No fixed instance bills.' },
-      { num:'03', h:'SEO + AEO/GEO',         tag:'ORGANIC',    body:'Classic SEO plus the new layer — getting your products surfaced inside ChatGPT, Perplexity, Google AI Overviews. Most agencies aren\'t doing this yet.' },
-      { num:'04', h:'PPC &amp; paid',         tag:'PAID',       body:'Google Ads, Meta, LinkedIn — connected to your conversion data so we know which spend actually drives trade revenue, not just clicks.' },
-      { num:'05', h:'CRO + UX/UI',            tag:'CONVERSION', body:'Testing programme run against trade-specific KPIs — quote-to-order, basket abandon, branch reorder. Not generic ecommerce metrics.' },
-      { num:'06', h:'Analytics + reporting',  tag:'DATA',       body:'GA4 done properly. Server-side tracking. Branch-level revenue attribution. The dashboard your board actually wants.' },
-      { num:'07', h:'Custom AI tools',        tag:'AI DEV',     body:'Bespoke back-office automations — supplier price ingestion, branch stock reconciliation, quote drafting, RFQ triage. Not chatbots — useful tools.' },
+      { num:'03', h:'SEO + AEO/GEO',         tag:'ORGANIC',    body:'Traditional SEO plus the newer layer: getting your products found inside ChatGPT, Perplexity, and Google AI Overviews. It\'s early, and brands that move now tend to benefit most.' },
+      { num:'04', h:'PPC &amp; paid',         tag:'PAID',       body:'Google Ads, Meta, LinkedIn. Connected to your conversion data so every campaign is measured against trade revenue, not just clicks.' },
+      { num:'05', h:'CRO + UX/UI',            tag:'CONVERSION', body:'Conversion rate work and UX improvements focused on your actual goals, not generic ecommerce benchmarks.' },
+      { num:'06', h:'Analytics + reporting',  tag:'DATA',       body:'GA4 set up properly, with server-side tracking and branch-level revenue attribution. Reporting that gives leadership a clear view of what\'s driving growth.' },
+      { num:'07', h:'Custom AI tools',        tag:'AI DEV',     body:'Bespoke back-office automations: supplier price ingestion, branch stock reconciliation, quote drafting, RFQ triage. Built specifically for your workflow, not off-the-shelf templates.' },
       { num:'08', h:'Module library',         tag:'EXTENSIONS', body:'Pre-built trade modules — credit limits, branch picker, bulk reorder, CSV upload — included in the Hyva build. No third-party licence fees.' }
     ],
     fragmented: {
-      heading: 'Four vendors, four invoices, no joined-up view.',
+      heading: 'Multiple suppliers, no single view of what\'s working.',
       items: [
         '<strong>Dev agency</strong> — builds and patches the site',
         '<strong>Hosting provider</strong> — you pay a flat fee whether you use it or not',
-        '<strong>SEO agency</strong> — sends monthly reports nobody reads',
+        '<strong>SEO agency</strong> — reporting on rankings, without a view into what converts',
         '<strong>PPC freelancer</strong> — runs ads, can\'t see how they convert',
-        '<strong>In-house analyst</strong> — patches GA4 together when they have time',
-        'Nobody owns the whole picture, nobody is accountable for revenue'
+        '<strong>In-house analyst</strong> — managing tracking alongside other responsibilities',
+        'No single team with a view across the full picture'
       ]
     },
     unified: {
@@ -3158,11 +3158,11 @@ function renderResults(url, platform, scores) {
   // Dynamic findings heading
   const onHyva = platform && platform.theme === 'Hyva';
   document.getElementById('findings-title').textContent =
-    onHyva ? 'You\'re on Hyva — here\'s what\'s still on the table' : 'What\'s slowing your site down';
+    onHyva ? 'You\'re on Hyva — here\'s what\'s still on the table' : 'What this scan surfaced';
   document.getElementById('findings-sub').textContent =
     onHyva
       ? 'You\'ve already made the biggest move. These are the remaining opportunities — hosting, SEO/AEO, and conversion.'
-      : 'The biggest issues found — every one of them is what Hyva was built to fix. Impact called out in plain numbers.';
+      : 'Potential areas to explore further, with context on what typically causes them and what changes with Hyva.';
 
   renderScoreGrid(scores);
   renderFindings(scores, platform);
