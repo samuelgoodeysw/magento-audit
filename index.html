@@ -570,6 +570,80 @@ body {
   font-size: 10px;
 }
 
+.audit-rail {
+  display: none;
+}
+
+@media (min-width: 1500px) {
+  .audit-rail {
+    display: block;
+    position: fixed;
+    top: 104px;
+    left: max(16px, calc((100vw - 1280px) / 2 - 170px));
+    width: 148px;
+    z-index: 20;
+    color: var(--text-secondary);
+  }
+
+  .audit-rail-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .audit-rail-sub {
+    font-size: 11px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+  }
+
+  .audit-rail-track {
+    position: absolute;
+    left: 0;
+    top: 54px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-soft);
+  }
+
+  .audit-rail-progress {
+    width: 100%;
+    height: 0;
+    background: var(--accent);
+    transition: height 0.12s linear;
+  }
+
+  .audit-rail-items {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding-left: 14px;
+  }
+
+  .audit-rail button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: var(--text-secondary);
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .audit-rail button:hover,
+  .audit-rail button.is-active {
+    color: var(--text-primary);
+  }
+}
+
 /* SECTION TITLES */
 .section-title {
   font-family: 'Archivo Narrow', sans-serif;
@@ -1434,6 +1508,7 @@ body {
   body { background: white; }
 
   body::before,
+  .audit-rail,
   .results-actions,
   .details-callout,
   .modal-overlay,
@@ -1578,7 +1653,21 @@ body {
 
   <!-- ========== STAGE 3 — RESULTS ========== -->
   <section class="stage" id="stage-results">
-    <div class="results-head">
+    <nav class="audit-rail" aria-label="Audit report sections">
+      <div class="audit-rail-kicker">// Full audit</div>
+      <div class="audit-rail-sub">Speed, UX, hosting, growth, and next steps.</div>
+      <div class="audit-rail-track"><div class="audit-rail-progress" id="audit-rail-progress"></div></div>
+      <div class="audit-rail-items">
+        <button type="button" data-audit-target="audit-overview">Overview</button>
+        <button type="button" data-audit-target="findings-title">Findings</button>
+        <button type="button" data-audit-target="audit-if-moved">If you moved</button>
+        <button type="button" data-audit-target="audit-fragmentation">Growth stack</button>
+        <button type="button" data-audit-target="audit-stack">What you'd get</button>
+        <button type="button" data-audit-target="call-details-title">Tailor the call</button>
+      </div>
+    </nav>
+
+    <div class="results-head" id="audit-overview">
       <div>
         <div class="results-meta">// Audit complete · <span id="audit-timestamp"></span></div>
         <div class="results-url" id="results-url">—</div>
@@ -1600,7 +1689,7 @@ body {
     <p class="section-sub" id="findings-sub">Potential areas to explore further, with context on what typically causes them and what changes with Scandiweb.</p>
     <div class="findings" id="findings"></div>
 
-    <div class="section-title" data-num="02 / IF YOU MOVED">Same store, on Hyva + Readymage</div>
+    <div class="section-title" data-num="02 / IF YOU MOVED" id="audit-if-moved">Same store, on Hyva + Readymage</div>
     <p class="section-sub" id="compare-sub-text">Side-by-side comparison against a Scandiweb benchmark set for Hyva + Readymage projects.</p>
     <div class="compare-card">
       <div class="compare-eyebrow">// THE HEADLINE</div>
@@ -1609,7 +1698,7 @@ body {
       <div class="compare-rows" id="compare-rows"></div>
     </div>
 
-    <div class="section-title" data-num="03 / FRAGMENTATION">Bring the growth stack together</div>
+    <div class="section-title" data-num="03 / FRAGMENTATION" id="audit-fragmentation">Bring the growth stack together</div>
     <p class="section-sub" id="fragmentation-sub">Most SMB ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the full growth stack, it is hard to know what is actually moving revenue.</p>
 
     <div class="services-intro" id="services-intro">
@@ -1639,7 +1728,7 @@ body {
       </div>
     </div>
 
-    <div class="section-title" data-num="04 / WHAT YOU'D GET">The SMB growth stack</div>
+    <div class="section-title" data-num="04 / WHAT YOU'D GET" id="audit-stack">The SMB growth stack</div>
     <p class="section-sub">Pick what you need, drop what you don't. It all sits with one team.</p>
 
     <div class="stack-grid" id="stack-grid">
@@ -3584,6 +3673,7 @@ function showStage(stage) {
   document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
   document.getElementById('stage-' + stage).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.setTimeout(updateAuditRail, 120);
 }
 
 function resetAudit() {
@@ -3684,13 +3774,53 @@ function openContactModal() {
   document.getElementById('modal-overlay').classList.add('open');
 }
 
-function scrollToCallDetails() {
-  const target = document.getElementById('call-details-title');
-  const callout = document.getElementById('details-callout');
+const AUDIT_RAIL_SECTIONS = [
+  'audit-overview',
+  'findings-title',
+  'audit-if-moved',
+  'audit-fragmentation',
+  'audit-stack',
+  'call-details-title'
+];
+
+function getReportHeaderOffset() {
+  return (document.querySelector('.header')?.offsetHeight || 0) + 24;
+}
+
+function scrollToReportSection(targetId) {
+  const target = document.getElementById(targetId);
   if (!target) return;
-  const headerOffset = (document.querySelector('.header')?.offsetHeight || 0) + 24;
-  const targetTop = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+  const targetTop = target.getBoundingClientRect().top + window.scrollY - getReportHeaderOffset();
   window.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
+}
+
+function updateAuditRail() {
+  const stage = document.getElementById('stage-results');
+  if (!stage || !stage.classList.contains('active')) return;
+
+  const markerY = window.scrollY + getReportHeaderOffset() + 8;
+  let activeId = AUDIT_RAIL_SECTIONS[0];
+  AUDIT_RAIL_SECTIONS.forEach((id) => {
+    const section = document.getElementById(id);
+    if (section && section.offsetTop <= markerY) activeId = id;
+  });
+
+  document.querySelectorAll('[data-audit-target]').forEach((button) => {
+    button.classList.toggle('is-active', button.dataset.auditTarget === activeId);
+  });
+
+  const progress = document.getElementById('audit-rail-progress');
+  if (progress) {
+    const start = stage.offsetTop;
+    const end = start + stage.scrollHeight - window.innerHeight;
+    const pct = end > start ? Math.min(Math.max((window.scrollY - start) / (end - start), 0), 1) : 0;
+    progress.style.height = `${(pct * 100).toFixed(1)}%`;
+  }
+}
+
+function scrollToCallDetails() {
+  const callout = document.getElementById('details-callout');
+  scrollToReportSection('call-details-title');
   if (callout) {
     callout.classList.add('is-highlighted');
     window.setTimeout(() => callout.classList.remove('is-highlighted'), 1600);
@@ -3703,6 +3833,11 @@ document.getElementById('save-pdf-cta')?.addEventListener('click', () => {
 
 document.getElementById('jump-contact-cta')?.addEventListener('click', scrollToCallDetails);
 document.getElementById('details-call-cta')?.addEventListener('click', openContactModal);
+document.querySelectorAll('[data-audit-target]').forEach((button) => {
+  button.addEventListener('click', () => scrollToReportSection(button.dataset.auditTarget));
+});
+window.addEventListener('scroll', updateAuditRail, { passive: true });
+window.addEventListener('resize', updateAuditRail);
 
 // Modal — close
 document.getElementById('modal-close').addEventListener('click', () => {
