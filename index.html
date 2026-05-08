@@ -32,7 +32,6 @@
 .header,
 .stage-hero,
 .console,
-.compare-card,
 .error-banner {
   --accent: #6EF76E;
   --sage: #6EF76E;
@@ -758,130 +757,95 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* IF YOU MOVED — comparison */
-.compare-card {
-  background: var(--bg-charcoal);
-  color: var(--text-inverse);
-  padding: 36px 40px;
+/* OPPORTUNITY MAP */
+.opportunity-map {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
-}
-
-.compare-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 80% 20%, rgba(255, 214, 10, 0.08), transparent 50%);
-  pointer-events: none;
-}
-
-.compare-card > * { position: relative; z-index: 1; }
-
-.compare-eyebrow {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 14px;
-}
-
-.compare-title {
-  font-family: 'Archivo', sans-serif;
-  font-weight: 800;
-  font-size: 32px;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  background: var(--border);
+  gap: 1px;
   margin-bottom: 8px;
 }
 
-.compare-title em { color: var(--accent); font-style: normal; }
-
-.compare-sub {
-  color: var(--text-muted);
-  font-size: 14px;
-  margin-bottom: 28px;
-  max-width: 600px;
+@media (max-width: 1100px) {
+  .opportunity-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-.compare-rows {
+@media (max-width: 700px) {
+  .opportunity-map { grid-template-columns: 1fr; }
+}
+
+.opportunity-cell {
+  background: var(--bg-surface);
+  padding: 18px;
+  min-height: 184px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opportunity-cell.missing { border-top: 4px solid var(--brick); }
+.opportunity-cell.review { border-top: 4px solid var(--accent); }
+.opportunity-cell.detected { border-top: 4px solid var(--sage); }
+
+.opportunity-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.opportunity-area {
+  font-family: 'Archivo', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.005em;
+  color: var(--text-primary);
+}
+
+.opportunity-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 6px;
+  white-space: nowrap;
+}
+
+.opportunity-status.missing { background: var(--brick); color: #ffffff; }
+.opportunity-status.review { background: #10142C; color: #ffffff; }
+.opportunity-status.detected { background: #E9FAE9; color: #154617; border: 1px solid #9CE69C; }
+
+.opportunity-heat {
   display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
 }
 
-.compare-row {
-  display: grid;
-  grid-template-columns: 180px 1fr 1fr;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px dashed #2D2D2D;
+.opportunity-heat span {
+  height: 6px;
+  background: var(--border-soft);
 }
 
-.compare-row:last-child { border-bottom: none; }
+.opportunity-heat.heat-1 span:nth-child(-n+1) { background: var(--sage); }
+.opportunity-heat.heat-2 span:nth-child(-n+2) { background: var(--accent); }
+.opportunity-heat.heat-3 span:nth-child(-n+3) { background: var(--brick); }
 
-@media (max-width: 800px) {
-  .compare-row { grid-template-columns: 1fr; gap: 6px; }
+.opportunity-signal {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
 }
 
-.compare-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.compare-bar {
-  background: rgba(255,255,255,0.06);
-  height: 26px;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.compare-bar-fill {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding-left: 10px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  transition: width 1s ease;
-  width: 0;
-}
-
-.compare-bar-fill.now { background: var(--brick); color: white; }
-.compare-bar-fill.hyva { background: var(--accent); color: var(--bg-charcoal); }
-
-.compare-bar-label {
+.opportunity-help {
+  margin-top: auto;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  margin-bottom: 4px;
+  line-height: 1.45;
+  color: var(--text-primary);
 }
 
-.compare-note {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255,255,255,0.14);
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.6;
-  max-width: 920px;
-}
-
-.compare-note strong {
-  color: var(--text-inverse);
-  font-weight: 700;
-}
-
-.compare-note a {
+.opportunity-help a {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -1468,7 +1432,6 @@ body {
   .modal-overlay.open { place-items: start center; }
   .modal { max-height: none; }
   .field-row { grid-template-columns: 1fr; }
-  .compare-title { font-size: 22px; }
   .cta-btn { width: 100%; }
   .header-meta { display: none; }
 }
@@ -1597,7 +1560,7 @@ body {
   .results-head,
   .score-grid,
   .findings,
-  .compare-card,
+  .opportunity-map,
   .services-intro,
   .stack-grid,
   .req-grid {
@@ -1707,7 +1670,7 @@ body {
       <div class="audit-rail-items">
         <button type="button" data-audit-target="audit-overview">Overview</button>
         <button type="button" data-audit-target="findings-title">Findings</button>
-        <button type="button" data-audit-target="audit-if-moved">If you moved</button>
+        <button type="button" data-audit-target="audit-opportunity-map">Opportunity map</button>
         <button type="button" data-audit-target="audit-fragmentation">Growth stack</button>
         <button type="button" data-audit-target="audit-stack">What you'd get</button>
         <button type="button" data-audit-target="call-details-title">Tailor the call</button>
@@ -1736,19 +1699,9 @@ body {
     <p class="section-sub" id="findings-sub">Potential areas to explore further, with context on what typically causes them and what changes with Scandiweb.</p>
     <div class="findings" id="findings"></div>
 
-    <div class="section-title" data-num="02 / IF YOU MOVED" id="audit-if-moved">Same store, on Hyva + Readymage</div>
-    <p class="section-sub" id="compare-sub-text">Side-by-side comparison against a Scandiweb benchmark set for Hyva + Readymage projects.</p>
-    <div class="compare-card">
-      <div class="compare-eyebrow">// THE HEADLINE</div>
-      <div class="compare-title">Faster site, <em>more conversions.</em></div>
-      <div class="compare-sub" id="compare-conversion-stat">Faster mobile pages can improve conversion and protect organic visibility. Google has weighted Core Web Vitals since 2021.</div>
-      <div class="compare-rows" id="compare-rows"></div>
-      <div class="compare-note">
-        <strong>Source note:</strong> The “Now” values use the latest PageSpeed Insights snapshot. The Hyva + Readymage values are planning benchmarks, not guaranteed outcomes. Hyva’s docs support the direction of less JavaScript/CSS and fewer render-blocking resources, and Google confirms page experience became part of ranking systems in 2021.
-        <a href="https://docs.hyva.io/hyva-themes/performance/index.html" target="_blank" rel="noopener">Hyva performance docs</a> ·
-        <a href="https://developers.google.com/search/blog/2021/04/more-details-page-experience" target="_blank" rel="noopener">Google page experience update</a>
-      </div>
-    </div>
+    <div class="section-title" data-num="02 / OPPORTUNITY MAP" id="audit-opportunity-map">What looks missing or worth reviewing</div>
+    <p class="section-sub" id="opportunity-sub">A practical heat map of areas the scan could see, could not see, or thinks are worth a closer look. It is not a diagnosis; it is a shortlist for the first Scandiweb review.</p>
+    <div class="opportunity-map" id="opportunity-map"></div>
 
     <div class="section-title" data-num="03 / FRAGMENTATION" id="audit-fragmentation">Bring the growth stack together</div>
     <p class="section-sub" id="fragmentation-sub">Most SMB ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the full growth stack, it is hard to know what is actually moving revenue.</p>
@@ -1924,9 +1877,6 @@ const VERTICALS = {
     heroSub: 'Drop your URL. We run a live scan of your speed, SEO, hosting, tracking, and conversion gaps, then show what a Scandiweb SMB growth engagement typically changes. No account needed.',
     urlPlaceholder: 'https://your-business-site.com',
     currency: '\u00A3',
-    compareLabel: 'Hyva + Readymage benchmark',
-    compareSub: 'Side-by-side comparison against a Scandiweb benchmark set for Hyva + Readymage projects.',
-    conversionStat: 'Faster mobile pages can improve conversion and protect organic visibility. Google has weighted Core Web Vitals since 2021.',
     fragmentationSub: 'Most SMB ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the full growth stack, it is hard to know what is actually moving revenue.',
     reqFeaturesLabel: 'OPEN PRIORITIES',
     reqFeaturesHeading: 'Pick the themes that matter.',
@@ -2243,6 +2193,25 @@ async function detectPlatform(url) {
     if      (/loyaltylion/i.test(html))                          loyaltyTool = 'LoyaltyLion';
     else if (/smile\.io|sweetTooth/i.test(html))                 loyaltyTool = 'Smile.io';
 
+    // ── HTML signals — AI / chatbot features ───────────────────
+    const aiSignalPatterns = [
+      { label: 'AI assistant or chatbot copy', re: /\b(ai[-\s]?powered|ai assistant|ai chatbot|virtual assistant|conversational ai|generative ai|chatgpt|gpt[-\s]?powered)\b/i },
+      { label: 'OpenAI / GPT reference',       re: /openai|chatgpt|gpt-4|gpt-3\.5|gpt4|gpt3/i },
+      { label: 'Botpress chatbot',             re: /botpress|webchat\.botpress/i },
+      { label: 'Ada AI support',               re: /ada\.support|adasupport|ada-chat/i },
+      { label: 'Intercom Fin AI assistant',    re: /intercom[^<]{0,120}\bfin\b|\bfin\.ai\b/i },
+      { label: 'Kore.ai assistant',            re: /kore\.ai|koreai/i },
+      { label: 'Chatbase assistant',           re: /chatbase\.co|chatbase\.js|chatbase-/i },
+      { label: 'Forethought AI support',       re: /forethought\.ai|forethought/i },
+      { label: 'Rep AI shopping assistant',    re: /hellorep\.ai|\brep\.ai\b|rep-ai/i },
+      { label: 'Gorgias AI automation',        re: /gorgias[^<]{0,160}\b(ai|automation|automate)\b/i }
+    ];
+    const aiFeatureSignals = aiSignalPatterns
+      .filter(item => item.re.test(html))
+      .map(item => item.label);
+    const hasAiFeature = aiFeatureSignals.length > 0;
+    const hasAiChatbot = aiFeatureSignals.some(label => /assistant|chatbot|support|shopping/i.test(label));
+
     // ── Frontend stack signals ────────────────────────────────
     const hasRequireJs = /requirejs\/require\.js/i.test(html);
     const isHeadless   = /__NEXT_DATA__|window\.__NUXT__|vue-storefront|ScandiPWA|window\.SCANDI\b/i.test(html);
@@ -2269,6 +2238,8 @@ async function detectPlatform(url) {
       hasRequireJs, isHeadless,
       // third-party tools
       searchTool, emailTool, heatmapTool, abtestTool, loyaltyTool,
+      // AI / chatbot
+      hasAiFeature, hasAiChatbot, aiFeatureSignals,
       // seo
       hasStructuredData, hasMetaDesc, hasOGTags, hasCanonical, h1Count,
     };
@@ -2504,6 +2475,7 @@ function buildConsoleLines(url, platform) {
       { text: `Analytics stack — GA4, GTM, pixels…`, status: 'done', stat: sig.hasGA4 ? 'GA4 found' : sig.hasUAOnly ? 'UA only' : 'none found' },
       { text: `Structured data and schema markup…`, status: 'done', stat: sig.hasStructuredData ? 'found' : 'none found' },
       { text: `Cookie consent / GDPR compliance…`, status: 'done', stat: sig.hasCookieConsent ? 'found' : 'not detected' },
+      { text: `AI feature signals — assistants, chatbots, and AI copy…`, status: 'done', stat: sig.hasAiFeature ? 'found' : (sig.hasLiveChat ? 'chat found' : 'none detected') },
     );
   }
   lines.push(
@@ -2943,7 +2915,33 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 16. Site search ─────────────────────────────────────────
+  // ── 16. AI features / conversational commerce ───────────────
+  if (sig && sig.hasAiFeature) {
+    const aiSignals = (sig.aiFeatureSignals || []).slice(0, 3).join(', ');
+    findings.push({
+      severity: 'mid',
+      tagNow: 'COMPLIANCE RISK',
+      tagFix: solutionTag,
+      currentH: 'AI-related feature signals detected',
+      currentBody: `The scan found signs of AI functionality: <strong>${aiSignals}</strong>. That does not prove a compliance issue, but AI assistants, recommendations, or automated replies should be reviewed for data use, disclosures, guardrails, and human handoff.`,
+      fixH: 'AI compliance review',
+      fixBody: `Scandiweb can review how AI is disclosed, what data it uses, where customer data flows, and what safeguards are needed. See the <a href="https://scandiweb.ai/compliance" target="_blank" rel="noopener">Scandiweb AI compliance audit</a>.`,
+      impact: 'Reduce AI governance and data-use risk'
+    });
+  } else if (sig && sig.hasLiveChat) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
+      currentH: 'Live chat detected, but no AI sales assistant signal',
+      currentBody: `A live chat widget appears to be present, but the scan did not find clear AI assistant or conversational commerce signals. That may be fine for support, but it is worth reviewing whether chat could help customers choose, compare, and complete purchases.`,
+      fixH: 'Explore Chat to Buy for guided sales conversations',
+      fixBody: `Scandiweb's <a href="https://scandiweb.ai/chattobuy" target="_blank" rel="noopener">Chat to Buy</a> can be reviewed as a route from simple support chat to AI-assisted product discovery, recommendations, re-engagement, and checkout help.`,
+      impact: 'Turn chat from support into buying assistance'
+    });
+  }
+
+  // ── 17. Site search ─────────────────────────────────────────
   if (sig && !sig.searchTool) {
     findings.push({
       severity: 'mid',
@@ -2957,7 +2955,7 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 17. Email automation ─────────────────────────────────────
+  // ── 18. Email automation ─────────────────────────────────────
   if (sig && !sig.emailTool) {
     findings.push({
       severity: 'mid',
@@ -2975,36 +2973,83 @@ function buildFindings(scores, platform) {
 }
 
 // ============================================================
-// COMPARISON ROWS
+// OPPORTUNITY MAP
 // ============================================================
 
-function buildCompareRows(scores) {
-  // Each row: label, now value+display+max, hyva value+display+max
+function buildOpportunityMap(scores, platform) {
+  const sig = platform?.signals || null;
+  const lcp = parseFloat(scores.lcp);
+  const bundle = parseFloat(scores.bundleJs);
+  const hasTracking = !!(sig && (sig.hasGA4 || sig.hasGTM || sig.hasFBPixel));
+  const consentRisk = !!(sig && !sig.hasCookieConsent && hasTracking);
+  const speedNeedsReview = scores.mobileSpeed < 70 || lcp > 2.5 || bundle > 1.5;
+  const hostingNeedsReview = scores.ttfb > 500 || (sig && !sig.cdnType && !sig.hasCaching);
+
+  const classify = (status, heat, area, signal, help) => ({ status, heat, area, signal, help });
+
   return [
-    {
-      label: 'Mobile speed',
-      nowVal: scores.mobileSpeed,  nowMax: 100, nowDisplay: scores.mobileSpeed,
-      hyvaVal: HYVA_BENCH.mobileSpeed, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.mobileSpeed,
-      unit: '/100'
-    },
-    {
-      label: 'Page load time',
-      nowVal: 100 - Math.min(parseFloat(scores.lcp) * 14, 95), nowMax: 100, nowDisplay: scores.lcp + 's',
-      hyvaVal: 100 - HYVA_BENCH.lcp * 14, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.lcp + 's',
-      unit: ''
-    },
-    {
-      label: 'Server response',
-      nowVal: 100 - Math.min(scores.ttfb / 12, 92), nowMax: 100, nowDisplay: scores.ttfb + 'ms',
-      hyvaVal: 100 - HYVA_BENCH.ttfb / 12, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.ttfb + 'ms',
-      unit: ''
-    },
-    {
-      label: 'SEO health',
-      nowVal: scores.seo, nowMax: 100, nowDisplay: scores.seo,
-      hyvaVal: HYVA_BENCH.seo, hyvaMax: 100, hyvaDisplay: HYVA_BENCH.seo,
-      unit: '/100'
-    }
+    classify(
+      speedNeedsReview ? 'review' : 'detected',
+      speedNeedsReview ? 2 : 1,
+      'Frontend speed',
+      `Mobile ${scores.mobileSpeed}/100, main content ${scores.lcp}s, frontend code ${scores.bundleJs}MB.`,
+      'Scandiweb can review Hyva fit, script weight, layout stability, images, and third-party code.'
+    ),
+    classify(
+      !sig ? 'review' : hostingNeedsReview ? 'review' : 'detected',
+      !sig || hostingNeedsReview ? 2 : 1,
+      'Hosting and caching',
+      sig
+        ? `${sig.cdnType ? `${sig.cdnType} CDN detected` : 'No CDN detected'}; ${sig.hasCaching ? 'cache signals found' : 'cache signals not clear'}; server response ${scores.ttfb}ms.`
+        : `Header scan was limited; server response ${scores.ttfb}ms.`,
+      'Scandiweb can review Magento hosting, CDN, cache, and Readymage fit.'
+    ),
+    classify(
+      !sig ? 'review' : !sig.hasGA4 || sig.hasUAOnly ? 'missing' : 'detected',
+      !sig ? 2 : (!sig.hasGA4 || sig.hasUAOnly ? 3 : 1),
+      'Analytics setup',
+      !sig ? 'The scan could not verify analytics setup.' : sig.hasGA4 ? 'GA4 signal detected.' : sig.hasUAOnly ? 'Universal Analytics found; GA4 not clearly detected.' : 'GA4 was not clearly detected.',
+      'Scandiweb can audit GA4, events, ecommerce tracking, server-side tracking, and dashboards.'
+    ),
+    classify(
+      consentRisk ? 'missing' : !sig ? 'review' : sig.hasCookieConsent ? 'detected' : 'review',
+      consentRisk ? 3 : (!sig || !sig.hasCookieConsent ? 2 : 1),
+      'Consent and compliance',
+      consentRisk ? 'Tracking signals found, but no consent banner detected.' : sig?.hasCookieConsent ? 'Consent banner signal detected.' : 'Consent setup was not clear from the homepage scan.',
+      'Scandiweb can review cookie consent, tracking behaviour, and data-use compliance.'
+    ),
+    classify(
+      !sig ? 'review' : sig.searchTool ? 'detected' : 'missing',
+      !sig ? 2 : (sig.searchTool ? 1 : 3),
+      'Search and merchandising',
+      sig?.searchTool ? `${sig.searchTool} detected.` : 'No dedicated search or merchandising tool was clearly detected.',
+      'Scandiweb can review search relevance, product discovery, merchandising rules, and AI search.'
+    ),
+    classify(
+      !sig ? 'review' : sig.emailTool ? 'detected' : 'missing',
+      !sig ? 2 : (sig.emailTool ? 1 : 3),
+      'CRM and retention',
+      sig?.emailTool ? `${sig.emailTool} detected.` : 'No email or CRM automation tool was clearly detected.',
+      'Scandiweb can connect CRM, email flows, abandoned basket, win-back, and repeat-purchase journeys.'
+    ),
+    classify(
+      !sig ? 'review' : sig.hasAiFeature ? 'review' : sig.hasLiveChat ? 'review' : 'missing',
+      !sig ? 2 : (sig.hasAiFeature ? 2 : sig.hasLiveChat ? 2 : 3),
+      'AI shopping assistance',
+      sig?.hasAiFeature
+        ? `AI signal detected: ${(sig.aiFeatureSignals || []).slice(0, 2).join(', ')}.`
+        : sig?.hasLiveChat
+          ? 'Live chat detected, but no clear AI shopping assistant signal.'
+          : 'No AI assistant or live shopping help was clearly detected.',
+      'Scandiweb can review <a href="https://scandiweb.ai/chattobuy" target="_blank" rel="noopener">Chat to Buy</a> or run an <a href="https://scandiweb.ai/compliance" target="_blank" rel="noopener">AI compliance audit</a> where AI is already in use.'
+    ),
+    classify(
+      !sig ? 'review' : sig.hasStructuredData && scores.seo >= 85 ? 'detected' : 'missing',
+      !sig ? 2 : (sig.hasStructuredData && scores.seo >= 85 ? 1 : 3),
+      'SEO, schema, and AEO',
+      sig?.hasStructuredData ? `Structured data detected; SEO score ${scores.seo}/100.` : `Structured data not clearly detected; SEO score ${scores.seo}/100.`,
+      'Scandiweb can review product schema, technical SEO, content gaps, and AI search visibility.'
+    )
   ];
 }
 
@@ -3116,29 +3161,23 @@ function renderFindings(scores, platform) {
   `).join('');
 }
 
-function renderCompareRows(scores) {
-  const root = document.getElementById('compare-rows');
-  const rows = buildCompareRows(scores);
-  root.innerHTML = rows.map(r => `
-    <div class="compare-row">
-      <div class="compare-label">${r.label}</div>
-      <div>
-        <div class="compare-bar-label">Now</div>
-        <div class="compare-bar"><div class="compare-bar-fill now" data-target="${(r.nowVal / r.nowMax * 100).toFixed(1)}">${r.nowDisplay}</div></div>
+function renderOpportunityMap(scores, platform) {
+  const root = document.getElementById('opportunity-map');
+  if (!root) return;
+  const items = buildOpportunityMap(scores, platform);
+  root.innerHTML = items.map(item => `
+    <div class="opportunity-cell ${item.status}">
+      <div class="opportunity-top">
+        <div class="opportunity-area">${item.area}</div>
+        <div class="opportunity-status ${item.status}">${item.status}</div>
       </div>
-      <div>
-        <div class="compare-bar-label">${V.compareLabel}</div>
-        <div class="compare-bar"><div class="compare-bar-fill hyva" data-target="${(r.hyvaVal / r.hyvaMax * 100).toFixed(1)}">${r.hyvaDisplay}</div></div>
+      <div class="opportunity-heat heat-${item.heat}">
+        <span></span><span></span><span></span>
       </div>
+      <div class="opportunity-signal">${item.signal}</div>
+      <div class="opportunity-help">${item.help}</div>
     </div>
   `).join('');
-
-  // Animate bars in
-  setTimeout(() => {
-    root.querySelectorAll('.compare-bar-fill').forEach(el => {
-      el.style.width = el.dataset.target + '%';
-    });
-  }, 120);
 }
 
 // ============================================================
@@ -3184,8 +3223,6 @@ function applyVerticalConfig() {
   document.getElementById('hero-title').innerHTML      = V.heroTitle;
   document.getElementById('hero-sub').textContent      = V.heroSub;
   document.getElementById('url-input').placeholder     = V.urlPlaceholder;
-  document.getElementById('compare-sub-text').textContent     = V.compareSub;
-  document.getElementById('compare-conversion-stat').textContent = V.conversionStat;
   document.getElementById('fragmentation-sub').textContent    = V.fragmentationSub;
   document.getElementById('req-features-label').textContent   = V.reqFeaturesLabel;
   document.getElementById('req-features-heading').textContent = V.reqFeaturesHeading;
@@ -3546,7 +3583,7 @@ function buildPreviewInsights(platform) {
 
 function patchLiveScores(scores) {
   renderScoreGrid(scores);
-  renderCompareRows(scores);
+  renderOpportunityMap(scores, currentPlatform);
   renderFindings(scores, currentPlatform);
   const footnote = document.getElementById('footnote-source');
   if (!footnote) return;
@@ -3623,7 +3660,7 @@ function renderResults(url, platform, scores) {
 
   renderScoreGrid(scores);
   renderFindings(scores, platform);
-  renderCompareRows(scores);
+  renderOpportunityMap(scores, platform);
   renderReqToggles();
 
   // Update modal payload platform string
@@ -3744,7 +3781,7 @@ function openContactModal() {
 const AUDIT_RAIL_SECTIONS = [
   'audit-overview',
   'findings-title',
-  'audit-if-moved',
+  'audit-opportunity-map',
   'audit-fragmentation',
   'audit-stack',
   'call-details-title'
@@ -3836,7 +3873,7 @@ function buildReportSnapshot() {
       next_step: f.fixBody,
       impact: f.impact
     })),
-    comparison: buildCompareRows(scores)
+    opportunity_map: buildOpportunityMap(scores, currentPlatform)
   };
 }
 
