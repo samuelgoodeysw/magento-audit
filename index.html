@@ -1770,7 +1770,7 @@ body {
         <div class="stack-card-num">03</div>
         <div class="stack-card-h">SEO + AEO</div>
         <div class="stack-card-tag">ORGANIC</div>
-        <div class="stack-card-body">Classic SEO plus the new layer: getting your products surfaced inside ChatGPT, Perplexity, Google AI Overviews. Most agencies aren't doing this yet.</div>
+        <div class="stack-card-body">Classic SEO plus the new layer: getting your products surfaced inside ChatGPT, Perplexity, and Google AI Overviews.</div>
       </div>
       <div class="stack-card">
         <div class="stack-card-num">04</div>
@@ -1966,8 +1966,8 @@ const VERTICALS = {
       {
         tag: 'SEO + AEO',
         h: 'AI search is changing how customers discover products and services.',
-        body: 'ChatGPT, Perplexity, and Google AI Overviews now influence product research. Most SEO agencies are not optimising for it yet. Scandiweb\'s AEO work helps your products and expertise appear where customers are actually searching.',
-        cta: 'Scandiweb → SEO + AEO, the new search layer most agencies are ignoring'
+        body: 'ChatGPT, Perplexity, and Google AI Overviews now influence product research. Scandiweb\'s AEO work helps your products and expertise appear where customers are actually searching.',
+        cta: 'Scandiweb → SEO + AEO for traditional and AI search'
       },
       {
         tag: 'Operations',
@@ -2403,7 +2403,45 @@ async function detectPlatform(url) {
 
     // ── Frontend stack signals ────────────────────────────────
     const hasRequireJs = /requirejs\/require\.js/i.test(html);
-    const isHeadless   = /__NEXT_DATA__|window\.__NUXT__|vue-storefront|ScandiPWA|window\.SCANDI\b/i.test(html);
+    const storefrontSignals = [];
+    let storefrontType = 'magento_theme';
+    let storefrontName = result.theme === 'Hyva' ? 'Hyva' : result.theme === 'Luma' ? 'Luma' : 'Magento custom theme';
+    let storefrontConfidence = result.theme === 'unknown' ? 'low' : 'medium';
+
+    if (/scandipwa|window\.SCANDI\b|scandi-pwa|scandiweb-pwa/i.test(html)) {
+      storefrontType = 'scandipwa';
+      storefrontName = 'ScandiPWA';
+      storefrontConfidence = 'high';
+      storefrontSignals.push('ScandiPWA markers');
+    } else if (/@magento\/venia|venia-ui|peregrine|upward-js|pwa-studio|RootComponents/i.test(html)) {
+      storefrontType = 'pwa_studio';
+      storefrontName = 'Magento PWA Studio / Venia';
+      storefrontConfidence = 'high';
+      storefrontSignals.push('PWA Studio / Venia markers');
+    } else if (/vue-storefront|vsf-|__VUE_STORE_FRONT__|storefront-ui/i.test(html)) {
+      storefrontType = 'vue_storefront';
+      storefrontName = 'Vue Storefront';
+      storefrontConfidence = 'high';
+      storefrontSignals.push('Vue Storefront markers');
+    } else if (/__NEXT_DATA__|\/_next\/static\//i.test(html)) {
+      storefrontType = 'next_headless';
+      storefrontName = 'Next.js headless storefront';
+      storefrontConfidence = 'medium';
+      storefrontSignals.push('Next.js markers');
+    } else if (/window\.__NUXT__|\/_nuxt\/|data-n-head/i.test(html)) {
+      storefrontType = 'nuxt_headless';
+      storefrontName = 'Nuxt / Vue headless storefront';
+      storefrontConfidence = 'medium';
+      storefrontSignals.push('Nuxt markers');
+    } else if (/navigator\.serviceWorker|service-worker|workbox|manifest\.json|rel=["']manifest["']/i.test(html)) {
+      storefrontType = 'pwa_like';
+      storefrontName = 'PWA-like storefront';
+      storefrontConfidence = 'low';
+      storefrontSignals.push('PWA/service worker markers');
+    }
+
+    const isHeadless = ['scandipwa','pwa_studio','vue_storefront','next_headless','nuxt_headless','pwa_like'].includes(storefrontType);
+    const storefront = { type: storefrontType, name: storefrontName, confidence: storefrontConfidence, signals: storefrontSignals };
 
     // ── HTML signals — SEO ────────────────────────────────────
     const hasStructuredData = /<script[^>]*type=["']application\/ld\+json/i.test(html);
@@ -2425,7 +2463,7 @@ async function detectPlatform(url) {
       // ux
       hasLiveChat, hasReviewWidget,
       // frontend stack
-      hasRequireJs, isHeadless,
+      hasRequireJs, isHeadless, storefront,
       // third-party tools
       searchTool, emailTool, heatmapTool, abtestTool, loyaltyTool,
       // AI / chatbot
@@ -2669,6 +2707,7 @@ function buildConsoleLines(url, platform) {
       { text: `Cookie consent / GDPR compliance…`, status: 'done', stat: sig.hasCookieConsent ? 'found' : 'not detected' },
       { text: `AI feature signals — assistants, chatbots, and AI copy…`, status: 'done', stat: sig.hasAiFeature ? 'found' : (sig.hasLiveChat ? 'chat found' : 'none detected') },
       { text: `Ecommerce page scan — product, listing, checkout…`, status: 'done', stat: sig.pageScan ? `${sig.pageScan.pdp.checked ? 'PDP' : 'no PDP'} / ${sig.pageScan.plp.checked ? 'PLP' : 'no PLP'}` : 'not checked' },
+      { text: `Storefront architecture — theme, PWA, or headless…`, status: 'done', stat: sig.storefront?.name || 'not clear' },
     );
   }
   lines.push(
@@ -3221,6 +3260,16 @@ function buildOpportunityMap(scores, platform) {
       'Scandiweb can review Hyva fit, script weight, layout stability, images, and third-party code.'
     ),
     classify(
+      !sig ? 'review' : sig.storefront?.type === 'magento_theme' ? 'detected' : 'review',
+      !sig ? 2 : sig.storefront?.type === 'magento_theme' ? 1 : 2,
+      'Storefront architecture',
+      !sig ? 'Storefront architecture could not be verified.' :
+        `${sig.storefront?.name || 'Storefront type unclear'}${sig.storefront?.confidence ? ` (${sig.storefront.confidence} confidence)` : ''}.`,
+      sig?.storefront?.type === 'magento_theme'
+        ? 'Scandiweb can review whether the current Magento theme should be optimised, rebuilt on Hyva, or kept as-is.'
+        : 'Scandiweb can review headless/PWA maintainability, Magento integration points, performance, and whether the storefront architecture still fits the business.'
+    ),
+    classify(
       !sig ? 'review' : hostingNeedsReview ? 'review' : 'detected',
       !sig || hostingNeedsReview ? 2 : 1,
       'Hosting and caching',
@@ -3692,10 +3741,11 @@ function buildPreviewInsights(platform) {
       cta: 'Scandiweb → Hyva migration planning with data and integration review'
     });
   } else if (theme === 'Custom' && sig.isHeadless) {
+    const storefrontName = sig.storefront?.name || 'headless or PWA frontend';
     cards.push({
       tag: 'Frontend theme',
-      h: 'Headless or PWA frontend detected.',
-      body: 'Your site looks to be using a headless or PWA architecture on top of Magento. That\'s a different conversation from a standard Luma migration. The opportunities and risks are different. Full scores loading now will show where the performance gaps actually are.',
+      h: `${storefrontName} detected.`,
+      body: `Your site looks to be using ${storefrontName} on top of Magento. That's a different conversation from a standard Luma migration. The opportunities and risks are different. Full scores loading now will show where the performance gaps actually are.`,
       cta: 'Scandiweb → headless, PWA, and Hyva Magento work since 2012'
     });
   } else if (theme === 'Custom' && sig.hasRequireJs) {
