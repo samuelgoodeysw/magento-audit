@@ -2326,6 +2326,101 @@ function buildConsoleLines(url, platform) {
 // FINDINGS GENERATION
 // ============================================================
 
+function joinFindingSignals(items) {
+  if (items.length === 0) return '';
+  if (items.length === 1) return items[0];
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+}
+
+function buildFrontendSummaryFindings(scores, platform, solutionTag) {
+  const onHyva = platform && platform.theme === 'Hyva';
+  const bundle = parseFloat(scores.bundleJs);
+  const lcp = parseFloat(scores.lcp);
+  const cls = parseFloat(scores.cls);
+  const req = scores.requests || 0;
+
+  const hasPsiDetail = scores._source === 'psi';
+  const bundleHeavy = Number.isFinite(bundle) && bundle > 1.5;
+  const reqHigh = !onHyva && req > 80;
+  const unusedJsHigh = hasPsiDetail && scores.unusedJs > 300;
+  const renderBlockingHigh = hasPsiDetail && scores.renderBlocking > 2;
+  const lcpSlow = Number.isFinite(lcp) && lcp > 2.5;
+  const clsShifting = Number.isFinite(cls) && cls > 0.1;
+  const domComplex = hasPsiDetail && scores.domSize > 1500;
+
+  const weightSignals = [];
+  if (bundleHeavy) weightSignals.push(`${scores.bundleJs}MB of frontend code`);
+  if (reqHigh) weightSignals.push(`${req} separate page files`);
+  if (unusedJsHigh) weightSignals.push(`${scores.unusedJs}KB of unused JavaScript`);
+  if (renderBlockingHigh) weightSignals.push(`${scores.renderBlocking} render-blocking files`);
+
+  const experienceSignals = [];
+  if (Number.isFinite(lcp)) experienceSignals.push(`main content appearing in ${scores.lcp}s`);
+  if (Number.isFinite(cls)) experienceSignals.push(`layout shift at ${scores.cls}`);
+  if (domComplex) experienceSignals.push(`${scores.domSize.toLocaleString()} page elements`);
+
+  const weightHasIssue = weightSignals.length > 0;
+  const weightSerious = bundle > 4 || req > 180 || scores.unusedJs > 600;
+  const experienceHasIssue = lcpSlow || clsShifting || domComplex;
+  const experienceSerious = lcp > 4.5 || cls > 0.25 || scores.domSize > 3000;
+
+  return [
+    {
+      severity: weightSerious ? 'high' : 'mid',
+      tagNow: weightHasIssue ? (weightSerious ? 'PROBLEM' : 'AREA TO REVIEW') : (onHyva ? 'GOOD / PROTECT IT' : 'AREA TO REVIEW'),
+      tagFix: solutionTag,
+      currentH: weightHasIssue
+        ? 'Frontend weight is slowing the store down'
+        : onHyva
+          ? `Frontend weight: ${scores.bundleJs}MB. Hyva is already helping.`
+          : 'Frontend weight is worth keeping under review',
+      currentBody: weightHasIssue
+        ? `The scan points to ${joinFindingSignals(weightSignals)}. That usually means Magento modules, theme assets, and third-party scripts are all asking for browser time before the page feels ready.`
+        : `The frontend is in reasonable shape today. The thing to watch is script creep: tracking tags, widgets, and module assets tend to accumulate as the site grows.`,
+      fixH: 'Frontend performance workstream',
+      fixBody: onHyva
+        ? `Scandiweb can keep the Hyva build lean by reviewing third-party scripts, tracking, asset loading, and the parts of the theme that change over time.`
+        : `Scandiweb can review the Magento frontend, third-party scripts, asset loading, and whether Hyva is the right route to reduce the code the browser downloads and processes.`,
+      impact: weightHasIssue ? 'Less code, fewer files, faster interaction' : 'Protect frontend speed as the site grows'
+    },
+    {
+      severity: experienceSerious ? 'high' : 'mid',
+      tagNow: experienceHasIssue ? (experienceSerious ? 'PROBLEM' : 'AREA TO REVIEW') : 'GOOD / PROTECT IT',
+      tagFix: solutionTag,
+      currentH: experienceHasIssue ? 'Page experience needs tightening' : 'Page experience is in good shape',
+      currentBody: experienceHasIssue
+        ? `The scan highlights ${joinFindingSignals(experienceSignals)}. These issues usually come from image weight, layout slots that are not reserved, third-party widgets, or overly complex page markup.`
+        : `The main experience signals are healthy: ${joinFindingSignals(experienceSignals)}. The priority is protecting that as new content, campaigns, and integrations are added.`,
+      fixH: 'Improve page experience beyond the theme choice',
+      fixBody: `Hyva can help by reducing frontend complexity, but Scandiweb should also review layout structure, image loading, caching, third-party scripts, and hosting handoff.`,
+      impact: experienceHasIssue ? 'Smoother pages and stronger Core Web Vitals' : 'Protect Core Web Vitals over time'
+    }
+  ];
+}
+
+function isDetailedFrontendFinding(finding) {
+  const text = `${finding.currentH || ''} ${finding.fixH || ''}`;
+  return [
+    'Code load:',
+    'loads before the page responds',
+    'Main content',
+    'Page jumps around',
+    'Page loads without jumping',
+    'separate files downloaded',
+    'downloaded on every visit but never used',
+    'more complex than Google recommends',
+    'files are blocking the page'
+  ].some((fragment) => text.includes(fragment));
+}
+
+function consolidateFindings(findings, scores, platform, solutionTag) {
+  const nonFrontendFindings = findings.filter((finding) => !isDetailedFrontendFinding(finding));
+  return [
+    ...buildFrontendSummaryFindings(scores, platform, solutionTag),
+    ...nonFrontendFindings
+  ];
+}
+
 function buildFindings(scores, platform) {
   const onHyva = platform && platform.theme === 'Hyva';
   const findings = [];
@@ -2361,7 +2456,7 @@ function buildFindings(scores, platform) {
       currentH: `${scores.bundleJs}MB loads before the page responds`,
       currentBody: themeReason + auditNote,
       fixH: 'Hyva loads ~280KB, roughly 85% lighter',
-      fixBody: `Hyva replaces that code layer with something around 85% smaller. Same products, same back-end.`,
+      fixBody: `Hyva can reduce that code layer significantly while keeping the Magento back-end in place.`,
       impact: `~${(bundle - 0.28).toFixed(1)}MB lighter per page`
     });
   } else {
@@ -2511,7 +2606,7 @@ function buildFindings(scores, platform) {
       ? `${seo}/100 means real gaps in how search engines see your site. Products likely show as plain links with no ratings or pricing, and the newer layer of AI search is not covered.`
       : `${seo}/100 is solid. The gap most sites miss is AI search: getting products found inside ChatGPT, Perplexity, and Google AI Overviews. That layer doesn't show in standard SEO reports.`,
     fixH: 'SEO improvements plus visibility inside AI search',
-    fixBody: `We add product ratings and pricing into search results, fix page-level gaps, ${!onHyva ? 'and faster pages from Hyva lift rankings further. We also cover ' : 'and cover '}visibility inside ChatGPT, Perplexity, and Google AI Overviews. Most agencies cover only the first part.`,
+    fixBody: `We add product ratings and pricing into search results, fix page-level gaps, strengthen the technical SEO foundations, and cover visibility inside ChatGPT, Perplexity, and Google AI Overviews. Most agencies cover only the first part.`,
     impact: 'Higher organic rankings + visibility in AI results'
   });
 
@@ -2525,9 +2620,9 @@ function buildFindings(scores, platform) {
     currentH: `Accessibility: ${acc}/100`,
     currentBody: accWeak
       ? `${acc}/100 means real barriers for some visitors: missing image descriptions, poor contrast, unlabelled form fields. From June 2025, the European Accessibility Act requires ecommerce sites to meet accessibility standards, so gaps now carry legal exposure.`
-      : `${acc}/100 is above average. Getting to full legal compliance from here is a structured audit, screen-reader testing, and targeted fixes. We ship Hyva builds at 95+ as standard.`,
+      : `${acc}/100 is above average. Getting to full legal compliance from here is a structured audit, screen-reader testing, and targeted fixes.`,
     fixH: 'Legally compliant accessibility as standard',
-    fixBody: `${onHyva ? 'Your Hyva theme is a solid base.' : 'Hyva is built to accessible standards by default.'} We run a full audit, screen-reader testing, and targeted fixes, documented for compliance.`,
+    fixBody: `Scandiweb runs a full audit, screen-reader testing, and targeted fixes, documented for compliance.`,
     impact: 'Legally compliant + measurable conversion uplift'
   });
 
@@ -2661,7 +2756,7 @@ function buildFindings(scores, platform) {
       currentH: 'No dedicated search tool detected',
       currentBody: `No dedicated search tool detected. Magento's built-in search struggles with typos, SKUs, product names, and everyday customer language. The kind high-intent shoppers use most.`,
       fixH: 'Search built for real customer queries',
-      fixBody: `Scandiweb AI Search handles SKUs, synonyms, typos, attributes, and natural-language product searches out of the box. Fully compatible with Hyva.`,
+      fixBody: `Scandiweb AI Search handles SKUs, synonyms, typos, attributes, and natural-language product searches out of the box, connected to the Magento catalogue.`,
       impact: 'Higher search conversion, fewer abandoned sessions'
     });
   }
@@ -2680,7 +2775,7 @@ function buildFindings(scores, platform) {
     });
   }
 
-  return findings;
+  return consolidateFindings(findings, scores, platform, solutionTag);
 }
 
 // ============================================================
