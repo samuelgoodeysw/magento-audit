@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMB Magento Audit | Scandiweb</title>
+<title>Magento Growth Audit | Scandiweb</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Narrow:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -951,58 +951,6 @@ body {
 
 .services-list li strong { color: var(--text-primary); font-weight: 600; }
 
-/* SERVICES STACK */
-.stack-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-}
-
-@media (max-width: 900px) { .stack-grid { grid-template-columns: repeat(2, 1fr); } }
-
-.stack-card {
-  background: var(--bg-surface);
-  padding: 18px 18px 16px;
-  display: flex;
-  flex-direction: column;
-}
-
-.stack-card-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-
-.stack-card-h {
-  font-family: 'Archivo', sans-serif;
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: -0.005em;
-  margin-bottom: 4px;
-}
-
-.stack-card-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.06em;
-  color: var(--accent);
-  background: var(--bg-charcoal);
-  padding: 2px 6px;
-  display: inline-block;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.stack-card-body {
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
 /* REQUIREMENTS SECTION */
 .details-intro {
   display: grid;
@@ -1516,16 +1464,10 @@ body {
   border: none;
 }
 
-/* Stack + req grids — soft dividers */
-#stage-results .stack-grid,
+/* Req grids — soft dividers */
 #stage-results .req-grid {
   background: var(--border-soft);
   border-color: var(--border-soft);
-}
-
-#stage-results .stack-card-tag {
-  background: var(--bg-canvas);
-  color: var(--accent);
 }
 
 #stage-results .req-side-tag {
@@ -1580,7 +1522,6 @@ body {
   .findings,
   .opportunity-map,
   .services-intro,
-  .stack-grid,
   .req-grid {
     break-inside: avoid;
   }
@@ -1595,15 +1536,15 @@ body {
       <div class="brand-mark">SW</div>
       <div class="brand-text">
         <span class="brand-name">SCANDIWEB</span>
-        <span class="brand-sub">SMB Growth · Hyva · Readymage · SEO · PPC</span>
+        <span class="brand-sub">Magento Growth · Hyva · Readymage · SEO · PPC</span>
       </div>
     </div>
     <div class="title-block">
-      <span class="title-label">SMB Magento Growth Audit</span>
+      <span class="title-label">Magento Growth Audit</span>
       <span class="title-main">Ecommerce growth bottlenecks, surfaced fast.</span>
     </div>
     <div class="header-meta" id="header-meta">
-      <span><strong>v0.3</strong> · smb-magento-audit</span>
+      <span><strong>v0.3</strong> · magento-audit</span>
     </div>
   </div>
 </header>
@@ -1613,9 +1554,9 @@ body {
   <!-- ========== STAGE 1 — INPUT ========== -->
   <section class="stage active" id="stage-input">
     <div class="stage-hero">
-      <div class="hero-eyebrow">// FOR SMB MAGENTO STORES</div>
+      <div class="hero-eyebrow">// FOR MAGENTO STORES</div>
       <h1 class="hero-title" id="hero-title">Could your Magento store be <em>faster, clearer, and converting more?</em> Let's test it.</h1>
-      <p class="hero-sub" id="hero-sub">Drop your URL. We run a live scan of your speed, SEO, hosting, tracking, and conversion gaps, then show what a Scandiweb SMB growth engagement typically changes. No account needed.</p>
+      <p class="hero-sub" id="hero-sub">Drop your URL. We run a live scan of your speed, SEO, hosting, tracking, and conversion gaps, then show what a Scandiweb ecommerce growth engagement typically changes. No account needed.</p>
 
       <form class="url-form" id="url-form" onsubmit="return false;">
         <input class="url-input" id="url-input" type="text" placeholder="https://your-business-site.com" autocomplete="off" spellcheck="false">
@@ -1669,7 +1610,7 @@ body {
       <div class="error-eyebrow">// PLATFORM CHECK FAILED</div>
       <div class="error-title">This doesn't look like a Magento site.</div>
       <div class="error-body">
-        <p>This audit is built for Magento 2 storefronts used by growing SMBs. We checked <strong id="error-url">—</strong> and couldn't find Magento signals in the page.</p>
+        <p>This audit is built for Magento 2 storefronts. We checked <strong id="error-url">—</strong> and couldn't find Magento signals in the page.</p>
         <p>If you know this is a Magento site, it's possible the server is blocking automated checks or using a heavily customised setup. Try the URL directly, or talk to us and we'll run a manual check.</p>
       </div>
       <div class="error-details" id="error-details"></div>
@@ -1689,8 +1630,7 @@ body {
         <button type="button" data-audit-target="audit-overview">Overview</button>
         <button type="button" data-audit-target="findings-title">Findings</button>
         <button type="button" data-audit-target="audit-opportunity-map">Opportunity map</button>
-        <button type="button" data-audit-target="audit-fragmentation">Growth stack</button>
-        <button type="button" data-audit-target="audit-stack">What you'd get</button>
+        <button type="button" data-audit-target="audit-fragmentation">Fragmentation</button>
         <button type="button" data-audit-target="call-details-title">Tailor the call</button>
       </div>
     </nav>
@@ -1721,8 +1661,8 @@ body {
     <p class="section-sub" id="opportunity-sub">A practical heat map of areas the scan could see, could not see, or thinks are worth a closer look. It is not a diagnosis; it is a shortlist for the first Scandiweb review.</p>
     <div class="opportunity-map" id="opportunity-map"></div>
 
-    <div class="section-title" data-num="03 / FRAGMENTATION" id="audit-fragmentation">Bring the growth stack together</div>
-    <p class="section-sub" id="fragmentation-sub">Most SMB ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the full growth stack, it is hard to know what is actually moving revenue.</p>
+    <div class="section-title" data-num="03 / FRAGMENTATION" id="audit-fragmentation">Bring the work together</div>
+    <p class="section-sub" id="fragmentation-sub">Most ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the work, it is hard to know what is actually moving revenue.</p>
 
     <div class="services-intro" id="services-intro">
       <div class="services-side fragmented">
@@ -1751,61 +1691,7 @@ body {
       </div>
     </div>
 
-    <div class="section-title" data-num="04 / WHAT YOU'D GET" id="audit-stack">The SMB growth stack</div>
-    <p class="section-sub">Pick what you need, drop what you don't. It all sits with one team.</p>
-
-    <div class="stack-grid" id="stack-grid">
-      <div class="stack-card">
-        <div class="stack-card-num">01</div>
-        <div class="stack-card-h">Hyva build</div>
-        <div class="stack-card-tag">DEV</div>
-        <div class="stack-card-body">Replatform without rebuilding. Your existing data, integrations, and modules can carry over to a lighter Magento frontend.</div>
-      </div>
-      <div class="stack-card">
-        <div class="stack-card-num">02</div>
-        <div class="stack-card-h">Readymage hosting</div>
-        <div class="stack-card-tag">HOSTING</div>
-        <div class="stack-card-body">Auto-scaling Magento hosting. Pay for what you use, scale up for campaigns and peak periods, scale down when traffic settles. No fixed instance bills.</div>
-      </div>
-      <div class="stack-card">
-        <div class="stack-card-num">03</div>
-        <div class="stack-card-h">SEO + AEO</div>
-        <div class="stack-card-tag">ORGANIC</div>
-        <div class="stack-card-body">Classic SEO plus the new layer: getting your products surfaced inside ChatGPT, Perplexity, and Google AI Overviews.</div>
-      </div>
-      <div class="stack-card">
-        <div class="stack-card-num">04</div>
-        <div class="stack-card-h">PPC &amp; paid</div>
-        <div class="stack-card-tag">PAID</div>
-        <div class="stack-card-body">Google Ads, Meta, LinkedIn. Connected to your conversion data so we know which spend drives online revenue, not just clicks.</div>
-      </div>
-      <div class="stack-card">
-        <div class="stack-card-num">05</div>
-        <div class="stack-card-h">CRO + UX/UI</div>
-        <div class="stack-card-tag">CONVERSION</div>
-        <div class="stack-card-body">Conversion programme focused on product discovery, trust signals, checkout completion, average order value, and repeat purchase.</div>
-      </div>
-      <div class="stack-card">
-        <div class="stack-card-num">06</div>
-        <div class="stack-card-h">Analytics + reporting</div>
-        <div class="stack-card-tag">DATA</div>
-        <div class="stack-card-body">GA4 done properly. Server-side tracking. Revenue-level attribution. The dashboard your board actually wants.</div>
-      </div>
-      <div class="stack-card">
-        <div class="stack-card-num">07</div>
-        <div class="stack-card-h">Custom AI tools</div>
-        <div class="stack-card-tag">AI DEV</div>
-        <div class="stack-card-body">Bespoke back-office automations: support replies, product content, reporting, order admin, and operations checks. Built for actual use, not demos.</div>
-      </div>
-      <div class="stack-card">
-        <div class="stack-card-num">08</div>
-        <div class="stack-card-h">Module library</div>
-        <div class="stack-card-tag">EXTENSIONS</div>
-        <div class="stack-card-body">Retention and CRM flows: abandoned basket, post-purchase, win-back, replenishment, reviews, and loyalty connected to Magento data.</div>
-      </div>
-    </div>
-
-    <div class="section-title" data-num="05 / CONTEXT" id="call-details-title">A few details to tailor the call</div>
+    <div class="section-title" data-num="04 / CONTEXT" id="call-details-title">A few details to tailor the call</div>
     <div class="details-intro" id="call-details">
       <p class="section-sub">Optional. Share whatever you know, skip whatever you do not. The aim is to make the first conversation useful without turning this into a discovery form.</p>
       <div class="details-callout" id="details-callout">
@@ -1831,7 +1717,7 @@ body {
 
     <div class="footnote">
       <span id="footnote-source"><strong>// DEMO MODE</strong> · scores estimated from URL. Run a URL to get live PageSpeed Insights data.</span>
-      <span>v0.3 / smb-magento-audit</span>
+      <span>v0.3 / magento-audit</span>
     </div>
   </section>
 
@@ -1889,13 +1775,13 @@ body {
 // ============================================================
 
 const VERTICALS = {
-  'smb': {
-    pageTitle: 'SMB Magento Audit | Scandiweb',
+  'magento': {
+    pageTitle: 'Magento Growth Audit | Scandiweb',
     heroTitle: 'Could your Magento store be <em>faster, clearer, and converting more?</em> Let\'s test it.',
-    heroSub: 'Drop your URL. We run a live scan of your speed, SEO, hosting, tracking, and conversion gaps, then show what a Scandiweb SMB growth engagement typically changes. No account needed.',
+    heroSub: 'Drop your URL. We run a live scan of your speed, SEO, hosting, tracking, and conversion gaps, then show what a Scandiweb ecommerce growth engagement typically changes. No account needed.',
     urlPlaceholder: 'https://your-business-site.com',
     currency: '\u00A3',
-    fragmentationSub: 'Most SMB ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the full growth stack, it is hard to know what is actually moving revenue.',
+    fragmentationSub: 'Most ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the work, it is hard to know what is actually moving revenue.',
     reqFeaturesLabel: 'OPEN PRIORITIES',
     reqFeaturesHeading: 'Pick the themes that matter.',
     notesCue: 'e.g. conversion has dropped, paid ads are getting expensive, tracking is messy, the site slows down during campaigns, or the team needs a clearer upgrade plan...',
@@ -1922,16 +1808,6 @@ const VERTICALS = {
       { id: 'paid',            name: 'Paid media efficiency',                    desc: 'Connect spend to revenue and reduce wasted clicks.' },
       { id: 'retention',       name: 'Email, CRM, and retention',                desc: 'Recover baskets, win back customers, and drive repeat purchase.' },
       { id: 'ops',             name: 'Operations and admin workload',            desc: 'Reduce manual work around orders, content, reporting, and support.' }
-    ],
-    stackCards: [
-      { num:'01', h:'Hyva storefront',          tag:'DEV',        body:'Move to a faster Magento frontend without rebuilding the whole business. Your catalogue, customers, orders, and core integrations carry over.' },
-      { num:'02', h:'Readymage hosting',        tag:'HOSTING',    body:'Auto-scaling Magento hosting. Capacity adjusts with real traffic, so campaign spikes and peak trading periods do not punish load time.' },
-      { num:'03', h:'SEO + AEO',            tag:'ORGANIC',    body:'Traditional SEO plus the new layer: getting products and expertise surfaced inside ChatGPT, Perplexity, and Google AI Overviews.' },
-      { num:'04', h:'PPC & paid social',        tag:'PAID',       body:'Google Ads, Meta, LinkedIn, and shopping feeds connected to conversion data so spend is optimised against revenue, not clicks.' },
-      { num:'05', h:'CRO + UX/UI',              tag:'CONVERSION', body:'Conversion rate work and UX improvements focused on the moments that make SMB stores money: product discovery, trust, checkout, and repeat purchase.' },
-      { num:'06', h:'Analytics + reporting',    tag:'DATA',       body:'GA4 set up properly, server-side tracking where needed, and reporting that shows which channels, products, and campaigns are driving growth.' },
-      { num:'07', h:'Custom AI tools',          tag:'AI DEV',     body:'Practical automations for customer support, product content, reporting, order admin, and operations. Built around how your team actually works.' },
-      { num:'08', h:'CRM + retention',          tag:'RETENTION',  body:'Email and CRM flows for abandoned baskets, post-purchase, win-back, replenishment, reviews, and loyalty. More revenue from the customers you already paid to acquire.' }
     ],
     fragmented: {
       heading: 'Several vendors, no single view of what is working.',
@@ -1973,12 +1849,12 @@ const VERTICALS = {
       {
         tag: 'Operations',
         h: 'Multiple vendors means no single view of what drives growth.',
-        body: 'Dev, hosting, SEO, paid media, email, and analytics managed separately means no one team can see the full picture. Scandiweb runs the connected growth stack under one team.',
+        body: 'Dev, hosting, SEO, paid media, email, and analytics managed separately means no one team can see the full picture. Scandiweb brings the connected work under one team.',
         cta: 'Scandiweb → one team across dev, hosting, SEO, paid, CRM, and CRO'
       },
       {
         tag: 'Mobile',
-        h: 'Mobile is where SMB customers compare, shortlist, and abandon.',
+        h: 'Mobile is where customers compare, shortlist, and abandon.',
         body: 'If your mobile site is slow or hard to navigate, customers leave before checkout ever gets a chance. Hyva can give Magento stores a lighter frontend foundation, but the right route depends on the current build.',
         cta: 'Scandiweb → Hyva mobile-first Magento builds'
       },
@@ -1986,17 +1862,17 @@ const VERTICALS = {
         tag: 'Checkout',
         h: 'Checkout abandonment is high, and most causes are fixable.',
         body: 'The main culprits: slow page transitions, unclear delivery, weak trust signals, payment friction, and missing repeat-purchase paths. We fix the journey, not only the button colour.',
-        cta: 'Scandiweb → checkout built around real SMB buying behaviour'
+        cta: 'Scandiweb → checkout built around real buying behaviour'
       },
       {
         tag: 'Security',
         h: 'Every month on an unpatched Magento build adds risk.',
-        body: 'Adobe releases security patches regularly. Many SMB teams apply them late because they are worried about breaking custom modules. Scandiweb\'s managed stack handles patching and zero-downtime deployments.',
+        body: 'Adobe releases security patches regularly. Many ecommerce teams apply them late because they are worried about breaking custom modules. Scandiweb\'s managed stack handles patching and zero-downtime deployments.',
         cta: 'Scandiweb → managed updates, 48hr patch SLA'
       },
       {
         tag: 'Custom AI',
-        h: 'The back-office is where small teams lose the most time.',
+        h: 'The back-office is where teams lose the most time.',
         body: 'Customer support replies, product copy, reporting, order checks, stock updates, and campaign admin still happen manually in too many teams. Scandiweb builds practical AI tools that save hours, not demo slides.',
         cta: 'Scandiweb → custom AI tools built for actual use'
       },
@@ -2008,13 +1884,13 @@ const VERTICALS = {
       },
       {
         tag: 'Case study pattern',
-        h: 'SMB stores on Hyva see measurable uplift in mobile conversion.',
+        h: 'Magento stores on Hyva can see measurable uplift in mobile conversion.',
         body: 'Across the stores we have migrated, the pattern is consistent: mobile PageSpeed improves significantly, checkout completion goes up, and fewer fixes are needed to keep the frontend stable.',
         cta: 'Scandiweb → ask us for relevant client examples'
       },
       {
         tag: 'Retention',
-        h: 'Most SMBs already have more revenue in their customer base.',
+        h: 'Most stores already have more revenue in their customer base.',
         body: 'Abandoned baskets, replenishment, review requests, loyalty, win-back, and post-purchase education are often underused. Connected CRM flows turn existing traffic into repeat revenue.',
         cta: 'Scandiweb → retention flows connected to Magento data'
       },
@@ -2026,7 +1902,7 @@ const VERTICALS = {
       },
       {
         tag: 'CRO programme',
-        h: 'Generic CRO does not work for every SMB store.',
+        h: 'Generic CRO does not work for every store.',
         body: 'Effective CRO starts with your margins, products, traffic mix, and buying cycle. We test against outcomes that matter: checkout completion, average order value, repeat purchase, and paid traffic efficiency.',
         cta: 'Scandiweb → CRO built for your actual business model'
       },
@@ -2044,8 +1920,8 @@ const VERTICALS = {
       },
       {
         tag: 'Managed support',
-        h: 'Small teams need support that actually owns the outcome.',
-        body: 'Most SMBs cannot afford slow ticket loops when the store is under pressure. Scandiweb managed clients get monitoring, escalation, and a team that understands the frontend, hosting, tracking, and growth impact.',
+        h: 'Teams need support that actually owns the outcome.',
+        body: 'Ecommerce teams cannot afford slow ticket loops when the store is under pressure. Scandiweb managed clients get monitoring, escalation, and a team that understands the frontend, hosting, tracking, and growth impact.',
         cta: 'Scandiweb → managed support, dedicated contact, 24/7 monitoring'
       },
       {
@@ -2066,8 +1942,8 @@ const VERTICALS = {
   // To add a new vertical: 'auto-parts': { ... }, 'food-service': { ... }
 };
 
-const vParam = new URLSearchParams(location.search).get('v') || 'smb';
-const V = VERTICALS[vParam] || VERTICALS['smb'];
+const vParam = new URLSearchParams(location.search).get('v') || 'magento';
+const V = VERTICALS[vParam] || VERTICALS['magento'];
 
 // ============================================================
 // PLATFORM DETECTION
@@ -3502,18 +3378,6 @@ function renderOpportunityMap(scores, platform) {
 // VERTICAL CONFIG — DOM HYDRATION
 // ============================================================
 
-function renderStackGrid() {
-  const el = document.getElementById('stack-grid');
-  if (!el) return;
-  el.innerHTML = V.stackCards.map(c => `
-    <div class="stack-card">
-      <div class="stack-card-num">${c.num}</div>
-      <div class="stack-card-h">${c.h}</div>
-      <div class="stack-card-tag">${c.tag}</div>
-      <div class="stack-card-body">${c.body}</div>
-    </div>`).join('');
-}
-
 function renderServicesSection() {
   const el = document.getElementById('services-intro');
   if (!el) return;
@@ -3546,7 +3410,6 @@ function applyVerticalConfig() {
   document.getElementById('req-features-heading').textContent = V.reqFeaturesHeading;
   if (document.getElementById('r-notes')) document.getElementById('r-notes').placeholder = V.notesCue;
   document.getElementById('m-notes').placeholder       = V.modalNotesCue;
-  renderStackGrid();
   renderServicesSection();
 }
 
@@ -3738,7 +3601,7 @@ function buildPreviewInsights(platform) {
   if (theme === 'Hyva') {
     cards.push({
       tag: 'Frontend theme',
-      h: 'You\'re already ahead of most Magento SMBs.',
+      h: 'You\'re already ahead of many Magento stores.',
       body: 'Hyva detected. The speed foundation is there. The remaining gains are in hosting, SEO/AEO, and conversion rate. Full scores are loading now.',
       cta: 'Scandiweb → Hyva Platinum delivery partner'
     });
@@ -3812,7 +3675,7 @@ function buildPreviewInsights(platform) {
     cards.push({
       tag: 'Analytics',
       h: 'GA4 is installed. But is it tracking the right things?',
-      body: 'Most SMB GA4 setups miss important events: account creation, checkout friction, payment errors, repeat purchase, lead forms, and CRM handoff. That leaves too much of the funnel invisible. Server-side tracking and a proper data layer fix it.',
+      body: 'Many GA4 setups miss important events: account creation, checkout friction, payment errors, repeat purchase, lead forms, and CRM handoff. That leaves too much of the funnel invisible. Server-side tracking and a proper data layer fix it.',
       cta: 'Scandiweb → GA4 audit + server-side event tracking'
     });
   }
@@ -3828,7 +3691,7 @@ function buildPreviewInsights(platform) {
     cards.push({
       tag: 'Check result: PHP version',
       h: `Your server is running PHP ${sig.phpVersion}.`,
-      body: `PHP ${sig.phpVersion} ${parseFloat(sig.phpVersion) < 8.2 ? 'is approaching end-of-life. Security patches stop, and newer Magento features require 8.2+. Most SMB teams delay upgrades because they\'re worried about breaking custom modules. Scandiweb handles this as part of every managed engagement.' : 'is current. One less thing to worry about, though staying current on patches still requires active management.'}`,
+      body: `PHP ${sig.phpVersion} ${parseFloat(sig.phpVersion) < 8.2 ? 'is approaching end-of-life. Security patches stop, and newer Magento features require 8.2+. Many ecommerce teams delay upgrades because they\'re worried about breaking custom modules. Scandiweb handles this as part of every managed engagement.' : 'is current. One less thing to worry about, though staying current on patches still requires active management.'}`,
       cta: 'Scandiweb → managed stack, 48hr security patch SLA'
     });
   }
@@ -3870,7 +3733,7 @@ function buildPreviewInsights(platform) {
     cards.push({
       tag: 'Email automation',
       h: 'No email automation platform detected.',
-      body: 'For SMB stores, automated email can be one of the most useful retention channels. Basket recovery, win-back, and post-purchase flows help recover demand that would otherwise be left to chance.',
+      body: 'For ecommerce stores, automated email can be one of the most useful retention channels. Basket recovery, win-back, and post-purchase flows help recover demand that would otherwise be left to chance.',
       cta: 'Scandiweb → Klaviyo or Dotdigital, connected to your Magento data'
     });
   }
@@ -3889,7 +3752,7 @@ function buildPreviewInsights(platform) {
       tag: `Check result: A/B testing`,
       h: `${sig.abtestTool} detected on your site.`,
       body: `${sig.abtestTool} is installed. The gap we usually find is that tests are running against generic ecommerce metrics rather than your commercial model. Testing "add to basket" uplift alone can miss what matters: checkout completion, average order value, repeat purchase, and paid traffic efficiency.`,
-      cta: 'Scandiweb → A/B testing programme focused on SMB revenue goals'
+      cta: 'Scandiweb → A/B testing programme focused on revenue goals'
     });
   }
 
@@ -3897,8 +3760,8 @@ function buildPreviewInsights(platform) {
     cards.push({
       tag: `Check result: loyalty programme`,
       h: `${sig.loyaltyTool} detected on your site.`,
-      body: `${sig.loyaltyTool} is in place. For SMB ecommerce, loyalty mechanics need to match the product and margin model. Customers may respond to early access, replenishment reminders, bundles, reviews, subscriptions, or points. Worth reviewing whether the setup is tuned to actual buying behaviour.`,
-      cta: 'Scandiweb → loyalty strategy review for SMB buying patterns'
+      body: `${sig.loyaltyTool} is in place. Loyalty mechanics need to match the product and margin model. Customers may respond to early access, replenishment reminders, bundles, reviews, subscriptions, or points. Worth reviewing whether the setup is tuned to actual buying behaviour.`,
+      cta: 'Scandiweb → loyalty strategy review for buying patterns'
     });
   }
 
@@ -4107,7 +3970,6 @@ const AUDIT_RAIL_SECTIONS = [
   'findings-title',
   'audit-opportunity-map',
   'audit-fragmentation',
-  'audit-stack',
   'call-details-title'
 ];
 
@@ -4233,7 +4095,7 @@ document.getElementById('modal-send').addEventListener('click', async () => {
 
   const payload = {
     submitted_at: new Date().toISOString(),
-    source: 'smb-magento-audit-v0.1',
+    source: 'magento-audit-v0.1',
     audited_url: currentUrl,
     detected_platform: currentPlatform.themeDisplay || 'Magento 2.4.x · Luma theme · Standard hosting',
     report_recipient: REPORT_RECIPIENT,
