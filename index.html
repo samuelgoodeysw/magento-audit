@@ -872,6 +872,27 @@ body {
   margin-bottom: 4px;
 }
 
+.compare-note {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.14);
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.6;
+  max-width: 920px;
+}
+
+.compare-note strong {
+  color: var(--text-inverse);
+  font-weight: 700;
+}
+
+.compare-note a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* SERVICES */
 .services-intro {
   display: grid;
@@ -901,7 +922,12 @@ body {
 }
 
 .services-side.fragmented .services-side-tag { color: var(--brick); }
-.services-side.unified .services-side-tag { color: var(--bg-charcoal); background: var(--accent); padding: 2px 8px; display: inline-block; }
+.services-side.unified .services-side-tag {
+  color: #ffffff;
+  background: var(--bg-charcoal);
+  padding: 3px 9px;
+  display: inline-block;
+}
 
 .services-side-h {
   font-family: 'Archivo', sans-serif;
@@ -1019,9 +1045,17 @@ body {
 }
 
 .details-callout .cta-btn {
+  background: var(--bg-charcoal);
+  color: #ffffff;
+  border: 1px solid var(--bg-charcoal);
   width: 100%;
   max-width: 320px;
   text-align: center;
+}
+
+.details-callout .cta-btn:hover {
+  background: #1F244A;
+  border-color: #1F244A;
 }
 
 .details-callout.is-highlighted .cta-btn {
@@ -1084,7 +1118,9 @@ body {
   font-weight: 500;
 }
 
-.req-field-select {
+.req-field-select,
+.req-field-input,
+.req-field-textarea {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border-soft);
@@ -1094,7 +1130,15 @@ body {
   color: var(--text-primary);
 }
 
-.req-field-select:focus {
+.req-field-textarea {
+  min-height: 92px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.req-field-select:focus,
+.req-field-input:focus,
+.req-field-textarea:focus {
   outline: none;
   border-color: var(--bg-charcoal);
   background: white;
@@ -1696,6 +1740,11 @@ body {
       <div class="compare-title">Faster site, <em>more conversions.</em></div>
       <div class="compare-sub" id="compare-conversion-stat">Faster mobile pages can improve conversion and protect organic visibility. Google has weighted Core Web Vitals since 2021.</div>
       <div class="compare-rows" id="compare-rows"></div>
+      <div class="compare-note">
+        <strong>Source note:</strong> The “Now” values use the latest PageSpeed Insights snapshot. The Hyva + Readymage values are planning benchmarks, not guaranteed outcomes. Hyva’s docs support the direction of less JavaScript/CSS and fewer render-blocking resources, and Google confirms page experience became part of ranking systems in 2021.
+        <a href="https://docs.hyva.io/hyva-themes/performance/index.html" target="_blank" rel="noopener">Hyva performance docs</a> ·
+        <a href="https://developers.google.com/search/blog/2021/04/more-details-page-experience" target="_blank" rel="noopener">Google page experience update</a>
+      </div>
     </div>
 
     <div class="section-title" data-num="03 / FRAGMENTATION" id="audit-fragmentation">Bring the growth stack together</div>
@@ -1720,7 +1769,7 @@ body {
         <ul class="services-list good">
           <li><strong>Hyva development</strong>: Hyva Platinum delivery team</li>
           <li><strong>Readymage hosting</strong>: autoscale, pay-per-use, no idle costs</li>
-          <li><strong>SEO + AEO/GEO</strong>: including the new AI-search optimisation</li>
+          <li><strong>SEO + AEO</strong>: including the new AI-search optimisation</li>
           <li><strong>PPC + paid social</strong>: joined to your conversion data, not flying blind</li>
           <li><strong>CRO + UX/UI</strong>: testing what actually moves online revenue</li>
           <li><strong>Custom AI back-office tools</strong>: automation built around how you actually work</li>
@@ -1746,7 +1795,7 @@ body {
       </div>
       <div class="stack-card">
         <div class="stack-card-num">03</div>
-        <div class="stack-card-h">SEO + AEO/GEO</div>
+        <div class="stack-card-h">SEO + AEO</div>
         <div class="stack-card-tag">ORGANIC</div>
         <div class="stack-card-body">Classic SEO plus the new layer: getting your products surfaced inside ChatGPT, Perplexity, Google AI Overviews. Most agencies aren't doing this yet.</div>
       </div>
@@ -1792,90 +1841,27 @@ body {
 
     <div class="req-grid">
       <div class="req-side">
-        <div class="req-side-tag">BUSINESS SNAPSHOT</div>
-        <div class="req-side-h">Answer what you can.</div>
+        <div class="req-side-tag">ECOMMERCE ECOSYSTEM</div>
+        <div class="req-side-h">What is connected?</div>
 
         <div class="req-field">
-          <label class="req-field-label">Current platform / setup</label>
-          <select class="req-field-select" id="r-erp">
-            <option value="">— Pick one —</option>
-            <option>Magento 2</option>
-            <option>Adobe Commerce</option>
-            <option>Magento 1 / legacy Magento</option>
-            <option>Shopify / Shopify Plus</option>
-            <option>WooCommerce</option>
-            <option>BigCommerce</option>
-            <option>Custom / in-house</option>
-            <option>Not sure</option>
-          </select>
+          <label class="req-field-label">ERP / OMS / WMS</label>
+          <input class="req-field-input" id="r-erp-oms-wms" placeholder="e.g. NetSuite, Linnworks, Peoplevox, none, or not sure">
         </div>
 
         <div class="req-field">
-          <label class="req-field-label">Business model</label>
-          <select class="req-field-select" id="r-oms">
-            <option value="">— Pick one —</option>
-            <option>Online store</option>
-            <option>Retail + ecommerce</option>
-            <option>B2B and B2C mixed</option>
-            <option>Lead generation + ecommerce</option>
-            <option>Marketplace or channel-led</option>
-            <option>Services with ecommerce</option>
-            <option>Not sure</option>
-          </select>
+          <label class="req-field-label">CRM / email / marketing</label>
+          <input class="req-field-input" id="r-crm-email" placeholder="e.g. Klaviyo, Dotdigital, HubSpot, Mailchimp">
         </div>
 
         <div class="req-field">
-          <label class="req-field-label">Monthly online revenue</label>
-          <select class="req-field-select" id="r-sync">
-            <option value="">— Pick one —</option>
-            <option>Under £25k</option>
-            <option>£25k–£100k</option>
-            <option>£100k–£500k</option>
-            <option>£500k+</option>
-            <option>Prefer not to say</option>
-            <option>Not sure</option>
-          </select>
+          <label class="req-field-label">Search / merchandising / feeds</label>
+          <input class="req-field-input" id="r-search-feeds" placeholder="e.g. Algolia, Klevu, Google Merchant Center, marketplaces">
         </div>
 
         <div class="req-field">
-          <label class="req-field-label">Biggest bottleneck</label>
-          <select class="req-field-select" id="r-payments">
-            <option value="">— Pick one —</option>
-            <option>Site speed</option>
-            <option>Conversion rate</option>
-            <option>Tracking and reporting</option>
-            <option>SEO / organic growth</option>
-            <option>Paid ads efficiency</option>
-            <option>Checkout or payment friction</option>
-            <option>Operations or admin workload</option>
-            <option>Not sure</option>
-          </select>
-        </div>
-
-        <div class="req-field">
-          <label class="req-field-label">Team setup</label>
-          <select class="req-field-select" id="r-delivery">
-            <option value="">— Pick one —</option>
-            <option>Founder / owner-led</option>
-            <option>Small internal team</option>
-            <option>Marketing team</option>
-            <option>Ecommerce team</option>
-            <option>External agencies</option>
-            <option>Mixed model</option>
-            <option>Not sure</option>
-          </select>
-        </div>
-
-        <div class="req-field">
-          <label class="req-field-label">Timing</label>
-          <select class="req-field-select" id="r-company-size">
-            <option value="">— Pick one —</option>
-            <option>ASAP</option>
-            <option>1–3 months</option>
-            <option>3–6 months</option>
-            <option>This year</option>
-            <option>Exploring only</option>
-          </select>
+          <label class="req-field-label">Other tech stack / integrations</label>
+          <textarea class="req-field-textarea" id="r-tech-stack" placeholder="e.g. PIM, inventory sync, finance tools, custom APIs, reporting, fulfilment"></textarea>
         </div>
       </div>
 
@@ -1953,7 +1939,7 @@ const VERTICALS = {
     heroSub: 'Drop your URL. We run a live scan of your speed, SEO, hosting, tracking, and conversion gaps, then show what a Scandiweb SMB growth engagement typically changes. No account needed.',
     urlPlaceholder: 'https://your-business-site.com',
     currency: '\u00A3',
-    compareLabel: 'On Hyva + Readymage',
+    compareLabel: 'Hyva + Readymage benchmark',
     compareSub: 'Side-by-side comparison against a Scandiweb benchmark set for Hyva + Readymage projects.',
     conversionStat: 'Faster mobile pages can improve conversion and protect organic visibility. Google has weighted Core Web Vitals since 2021.',
     fragmentationSub: 'Most SMB ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the full growth stack, it is hard to know what is actually moving revenue.',
@@ -1973,12 +1959,10 @@ const VERTICALS = {
       { id: 'support',         name: 'Ongoing support and ownership',            desc: 'One accountable team across technical fixes and growth work.' },
       { id: 'strategy',        name: 'Growth roadmap',                           desc: 'Prioritise what to do first with budget, timing, and impact in mind.' }
     ],
-    erpOptions: ['Magento 2','Adobe Commerce','Magento 1 / legacy Magento','Shopify / Shopify Plus','WooCommerce','BigCommerce','Custom / in-house','Not sure'],
-    deliveryOptions: ['Founder / owner-led','Small internal team','Marketing team','Ecommerce team','External agencies','Mixed model','Not sure'],
     stackCards: [
       { num:'01', h:'Hyva storefront',          tag:'DEV',        body:'Move to a faster Magento frontend without rebuilding the whole business. Your catalogue, customers, orders, and core integrations carry over.' },
       { num:'02', h:'Readymage hosting',        tag:'HOSTING',    body:'Auto-scaling Magento hosting. Capacity adjusts with real traffic, so campaign spikes and peak trading periods do not punish load time.' },
-      { num:'03', h:'SEO + AEO/GEO',            tag:'ORGANIC',    body:'Traditional SEO plus the new layer: getting products and expertise surfaced inside ChatGPT, Perplexity, and Google AI Overviews.' },
+      { num:'03', h:'SEO + AEO',            tag:'ORGANIC',    body:'Traditional SEO plus the new layer: getting products and expertise surfaced inside ChatGPT, Perplexity, and Google AI Overviews.' },
       { num:'04', h:'PPC & paid social',        tag:'PAID',       body:'Google Ads, Meta, LinkedIn, and shopping feeds connected to conversion data so spend is optimised against revenue, not clicks.' },
       { num:'05', h:'CRO + UX/UI',              tag:'CONVERSION', body:'Conversion rate work and UX improvements focused on the moments that make SMB stores money: product discovery, trust, checkout, and repeat purchase.' },
       { num:'06', h:'Analytics + reporting',    tag:'DATA',       body:'GA4 set up properly, server-side tracking where needed, and reporting that shows which channels, products, and campaigns are driving growth.' },
@@ -2001,7 +1985,7 @@ const VERTICALS = {
       items: [
         '<strong>Hyva development</strong>: Magento frontend delivery team',
         '<strong>Readymage hosting</strong>: auto-scaling Magento hosting',
-        '<strong>SEO + AEO/GEO</strong>: organic and AI-search visibility',
+        '<strong>SEO + AEO</strong>: organic and AI-search visibility',
         '<strong>PPC + paid social</strong>: joined to conversion and revenue data',
         '<strong>CRO + UX/UI</strong>: testing what actually moves sales',
         '<strong>CRM, analytics, and AI tools</strong>: retention and operations connected to the store'
@@ -2019,8 +2003,8 @@ const VERTICALS = {
       {
         tag: 'SEO + AEO',
         h: 'AI search is changing how customers discover products and services.',
-        body: 'ChatGPT, Perplexity, and Google AI Overviews now influence product research. Most SEO agencies are not optimising for it yet. Scandiweb\'s AEO/GEO work helps your products and expertise appear where customers are actually searching.',
-        cta: 'Scandiweb → SEO + AEO/GEO, the new search layer most agencies are ignoring'
+        body: 'ChatGPT, Perplexity, and Google AI Overviews now influence product research. Most SEO agencies are not optimising for it yet. Scandiweb\'s AEO work helps your products and expertise appear where customers are actually searching.',
+        cta: 'Scandiweb → SEO + AEO, the new search layer most agencies are ignoring'
       },
       {
         tag: 'Operations',
@@ -2092,7 +2076,7 @@ const VERTICALS = {
         tag: 'AEO: AI search',
         h: 'Google AI Overviews are already influencing product research.',
         body: 'AI answers pull from structured data, reviews, brand authority, and clear product information. AEO (Answer Engine Optimisation) is how you start competing in that layer.',
-        cta: 'Scandiweb → SEO + AEO/GEO, optimising for AI and traditional search'
+        cta: 'Scandiweb → SEO + AEO, optimising for AI and traditional search'
       },
       {
         tag: 'Managed support',
@@ -2531,7 +2515,7 @@ function buildConsoleLines(url, platform) {
     { text: `Running Lighthouse — desktop performance…`, status: 'done', stat: 'complete' },
     { text: `Checking page speed, load time, and visual stability…`, status: 'done', stat: 'complete' },
     { text: `Scanning for unused code, page complexity, load blockers…`, status: 'done', stat: 'complete' },
-    { text: `Comparing against Hyva + Readymage benchmarks (n=50)…`, status: 'done', stat: 'OK' },
+    { text: `Comparing against Hyva + Readymage benchmark targets…`, status: 'done', stat: 'OK' },
     { text: `Audit complete. Generating report…`, status: 'done', stat: 'OK' }
   );
 
@@ -3199,20 +3183,6 @@ function renderServicesSection() {
     </div>`;
 }
 
-function renderErpOptions() {
-  const sel = document.getElementById('r-erp');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">— Pick one —</option>' +
-    V.erpOptions.map(o => `<option>${o}</option>`).join('');
-}
-
-function renderDeliveryOptions() {
-  const sel = document.getElementById('r-delivery');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">— Pick one —</option>' +
-    V.deliveryOptions.map(o => `<option>${o}</option>`).join('');
-}
-
 function applyVerticalConfig() {
   document.title = V.pageTitle;
   document.getElementById('hero-title').innerHTML      = V.heroTitle;
@@ -3227,8 +3197,6 @@ function applyVerticalConfig() {
   document.getElementById('m-notes').placeholder       = V.modalNotesCue;
   renderStackGrid();
   renderServicesSection();
-  renderErpOptions();
-  renderDeliveryOptions();
 }
 
 // ============================================================
@@ -3361,7 +3329,7 @@ async function finishConsoleWithPSI(scoresPromise) {
     streamEl.appendChild(card);
     if (insightIdx === 1) {
       stickyEl.style.opacity = '1';
-      document.getElementById('preview-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollToElementWithHeaderOffset('preview-container');
     } else {
       card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -3756,12 +3724,12 @@ function renderReqToggles() {
 
 function gatherRequirements() {
   return {
-    platform_setup: document.getElementById('r-erp')?.value || '',
-    business_model: document.getElementById('r-oms')?.value || '',
-    monthly_online_revenue: document.getElementById('r-sync')?.value || '',
-    biggest_bottleneck: document.getElementById('r-payments')?.value || '',
-    team_setup: document.getElementById('r-delivery')?.value || '',
-    timing: document.getElementById('r-company-size')?.value || '',
+    ecommerce_ecosystem: {
+      erp_oms_wms: document.getElementById('r-erp-oms-wms')?.value || '',
+      crm_email_marketing: document.getElementById('r-crm-email')?.value || '',
+      search_merchandising_feeds: document.getElementById('r-search-feeds')?.value || '',
+      other_tech_stack_integrations: document.getElementById('r-tech-stack')?.value || ''
+    },
     growth_priorities: [...reqState.features].map(id => ({
       id,
       name: V.features.find(f => f.id === id)?.name || id
@@ -3787,11 +3755,15 @@ function getReportHeaderOffset() {
   return (document.querySelector('.header')?.offsetHeight || 0) + 24;
 }
 
-function scrollToReportSection(targetId) {
+function scrollToElementWithHeaderOffset(targetId) {
   const target = document.getElementById(targetId);
   if (!target) return;
   const targetTop = target.getBoundingClientRect().top + window.scrollY - getReportHeaderOffset();
   window.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
+}
+
+function scrollToReportSection(targetId) {
+  scrollToElementWithHeaderOffset(targetId);
 }
 
 function updateAuditRail() {
