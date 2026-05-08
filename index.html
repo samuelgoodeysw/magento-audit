@@ -309,12 +309,13 @@ body {
   margin: 3rem auto 0;
   padding: 0 1rem;
   align-items: flex-start;
+  scroll-margin-top: 96px;
 }
 #preview-sticky {
   width: 260px;
   flex-shrink: 0;
   position: sticky;
-  top: 2rem;
+  top: 96px;
 }
 #preview-sticky { opacity: 0; transition: opacity 0.5s ease; }
 .preview-sticky-tag { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; }
@@ -3248,6 +3249,16 @@ function buildOpportunityMap(scores, platform) {
   const consentRisk = !!(sig && !sig.hasCookieConsent && hasTracking);
   const speedNeedsReview = scores.mobileSpeed < 70 || lcp > 2.5 || bundle > 1.5;
   const hostingNeedsReview = scores.ttfb > 500 || (sig && !sig.cdnType && !sig.hasCaching);
+  const storefrontType = sig?.storefront?.type;
+  const storefrontStatus = !sig ? 'review' : storefrontType === 'magento_theme' || storefrontType === 'scandipwa' ? 'detected' : 'review';
+  const storefrontHeat = !sig ? 2 : storefrontType === 'magento_theme' || storefrontType === 'scandipwa' ? 1 : 2;
+  const storefrontHelp = !sig
+    ? 'Scandiweb can review the storefront architecture once the page is readable.'
+    : storefrontType === 'scandipwa'
+      ? 'Scandiweb can review ScandiPWA performance, integrations, upgrade path, and ongoing optimisation without treating the architecture itself as a problem.'
+      : storefrontType === 'magento_theme'
+        ? 'Scandiweb can review whether the current Magento theme should be optimised, rebuilt on Hyva, or kept as-is.'
+        : 'Scandiweb can review headless/PWA performance, Magento integration points, maintainability, and ownership model.';
 
   const classify = (status, heat, area, signal, help) => ({ status, heat, area, signal, help });
 
@@ -3260,14 +3271,12 @@ function buildOpportunityMap(scores, platform) {
       'Scandiweb can review Hyva fit, script weight, layout stability, images, and third-party code.'
     ),
     classify(
-      !sig ? 'review' : sig.storefront?.type === 'magento_theme' ? 'detected' : 'review',
-      !sig ? 2 : sig.storefront?.type === 'magento_theme' ? 1 : 2,
+      storefrontStatus,
+      storefrontHeat,
       'Storefront architecture',
       !sig ? 'Storefront architecture could not be verified.' :
         `${sig.storefront?.name || 'Storefront type unclear'}${sig.storefront?.confidence ? ` (${sig.storefront.confidence} confidence)` : ''}.`,
-      sig?.storefront?.type === 'magento_theme'
-        ? 'Scandiweb can review whether the current Magento theme should be optimised, rebuilt on Hyva, or kept as-is.'
-        : 'Scandiweb can review headless/PWA maintainability, Magento integration points, performance, and whether the storefront architecture still fits the business.'
+      storefrontHelp
     ),
     classify(
       !sig ? 'review' : hostingNeedsReview ? 'review' : 'detected',
@@ -3742,11 +3751,16 @@ function buildPreviewInsights(platform) {
     });
   } else if (theme === 'Custom' && sig.isHeadless) {
     const storefrontName = sig.storefront?.name || 'headless or PWA frontend';
+    const isScandiPwa = sig.storefront?.type === 'scandipwa';
     cards.push({
       tag: 'Frontend theme',
       h: `${storefrontName} detected.`,
-      body: `Your site looks to be using ${storefrontName} on top of Magento. That's a different conversation from a standard Luma migration. The opportunities and risks are different. Full scores loading now will show where the performance gaps actually are.`,
-      cta: 'Scandiweb → headless, PWA, and Hyva Magento work since 2012'
+      body: isScandiPwa
+        ? `Your site looks to be using ScandiPWA on top of Magento. That is a strong headless foundation; the useful review is around performance, integrations, upgrade path, and ongoing optimisation.`
+        : `Your site looks to be using ${storefrontName} on top of Magento. That is a different architecture from a standard Luma storefront, so the useful review is around performance, integrations, maintainability, and ownership.`,
+      cta: isScandiPwa
+        ? 'Scandiweb → ScandiPWA optimisation and support'
+        : 'Scandiweb → headless, PWA, and Hyva Magento work since 2012'
     });
   } else if (theme === 'Custom' && sig.hasRequireJs) {
     cards.push({
