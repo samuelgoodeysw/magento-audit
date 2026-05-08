@@ -1451,7 +1451,7 @@ body {
     <div class="score-grid" id="score-grid"></div>
 
     <div class="section-title" data-num="01 / FINDINGS" id="findings-title">What this scan surfaced</div>
-    <p class="section-sub" id="findings-sub">Potential areas to explore further, with context on what typically causes them and what changes with Hyva.</p>
+    <p class="section-sub" id="findings-sub">Potential areas to explore further, with context on what typically causes them and what changes with Scandiweb.</p>
     <div class="findings" id="findings"></div>
 
     <div class="section-title" data-num="02 / IF YOU MOVED">Same store, on Hyva + Readymage</div>
@@ -2329,6 +2329,7 @@ function buildConsoleLines(url, platform) {
 function buildFindings(scores, platform) {
   const onHyva = platform && platform.theme === 'Hyva';
   const findings = [];
+  const solutionTag = 'IMPROVEMENTS TO EXPLORE WITH SCANDIWEB';
 
   // ── 1. JavaScript bundle ────────────────────────────────────────
   const bundle = parseFloat(scores.bundleJs);
@@ -2336,8 +2337,8 @@ function buildFindings(scores, platform) {
   if (onHyva) {
     findings.push({
       severity: 'mid',
-      tagNow: 'ALREADY IMPROVED',
-      tagFix: 'GO FURTHER',
+      tagNow: 'GOOD / PROTECT IT',
+      tagFix: solutionTag,
       currentH: `Code load: ${scores.bundleJs}MB. Hyva has already helped here.`,
       currentBody: `You're on Hyva, so the big overhead is already gone. ${scores.bundleJs}MB is healthy. Third-party scripts accumulate over time, so a periodic review is worth doing.`,
       fixH: 'Periodic script audit keeps things lean',
@@ -2354,9 +2355,9 @@ function buildFindings(scores, platform) {
       : `Your site downloads <strong>${scores.bundleJs}MB</strong> before the page responds to clicks. Standard Magento loads its full library on every page, whether it's needed or not.`;
     const auditNote = bundle > 3 ? ` At this size, a script audit before any migration work is worth doing.` : '';
     findings.push({
-      severity: 'high',
+      severity: 'mid',
       tagNow: 'PROBLEM',
-      tagFix: 'HYVA FIXES IT',
+      tagFix: solutionTag,
       currentH: `${scores.bundleJs}MB loads before the page responds`,
       currentBody: themeReason + auditNote,
       fixH: 'Hyva loads ~280KB, roughly 85% lighter',
@@ -2369,8 +2370,8 @@ function buildFindings(scores, platform) {
       : `At ${scores.bundleJs}MB, some optimisation work has been done. The architecture creates a floor you can't get below without switching the frontend.`;
     findings.push({
       severity: 'mid',
-      tagNow: 'IMPROVEMENT AVAILABLE',
-      tagFix: 'HYVA FIXES IT',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: `${scores.bundleJs}MB loads before the page responds`,
       currentBody: themeContext,
       fixH: 'Hyva loads ~280KB, roughly 85% lighter',
@@ -2386,11 +2387,11 @@ function buildFindings(scores, platform) {
   if (onHyva) {
     findings.push({
       severity: lcp > 2.5 ? 'mid' : 'mid',
-      tagNow: lcp > 2.5 ? 'NEEDS WORK' : 'GOOD / PROTECT IT',
-      tagFix: 'READYMAGE HELPS',
+      tagNow: lcp > 2.5 ? 'AREA TO REVIEW' : 'GOOD / PROTECT IT',
+      tagFix: solutionTag,
       currentH: `Main content appears in ${scores.lcp}s`,
       currentBody: lcp > 2.5
-        ? `Even on Hyva, your content takes ${scores.lcp}s to appear. Hyva removes code delays, but a slow server or large images can still hold it back.`
+        ? `Even on Hyva, your content takes ${scores.lcp}s to appear. Hyva can reduce frontend code delays, but a slow server or large images can still hold it back.`
         : `Your content appears in ${scores.lcp}s. The main risk is regression from new widgets, unoptimised images, or a hosting change.`,
       fixH: 'Readymage keeps the server fast under load',
       fixBody: `Auto-scaling hosting means load time doesn't spike during busy periods. Fixed-size servers queue requests at peak, adding seconds even on a fast frontend.`,
@@ -2398,24 +2399,24 @@ function buildFindings(scores, platform) {
     });
   } else if (lcpFail) {
     findings.push({
-      severity: 'high',
-      tagNow: 'PROBLEM',
-      tagFix: 'HYVA FIXES IT',
+      severity: 'mid',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: `Main content takes ${scores.lcp}s to appear`,
       currentBody: `<strong>${scores.lcp}s</strong> before content appears is a long wait. Google marks this as Poor and uses it as a ranking signal. On standard Magento, content can't show until the code layer finishes loading, which is built into how the platform works.`,
-      fixH: 'Hyva sites average 1.6s. Content appears straight away.',
-      fixBody: `Hyva builds the page before sending it to the browser, so content appears on arrival. Same catalogue, same products.`,
+      fixH: 'Hyva can help main content appear sooner',
+      fixBody: `Hyva reduces the frontend code the browser has to download and process, so the main content can appear sooner.`,
       impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to visible content`
     });
   } else {
     findings.push({
       severity: 'mid',
-      tagNow: 'IMPROVEMENT AVAILABLE',
-      tagFix: 'HYVA FIXES IT',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: `Main content appears in ${scores.lcp}s`,
-      currentBody: `${scores.lcp}s is within Google's acceptable range. The underlying delay is still present, just not over the threshold yet. Moving to Hyva removes the cause and gives headroom so future additions don't push it back over.`,
+      currentBody: `${scores.lcp}s is within Google's acceptable range. There may still be frontend overhead worth reviewing, especially if future additions could push the page back over Google's threshold.`,
       fixH: 'Hyva sites average 1.6s',
-      fixBody: `Hyva builds pages before they reach the browser. Content appears straight away and there's more headroom for future additions.`,
+      fixBody: `Hyva reduces the frontend code the browser has to download and process, so the main content can appear sooner and there is more headroom for future additions.`,
       impact: `${((lcp - 1.6) * 1000).toFixed(0)}ms faster to visible content`
     });
   }
@@ -2426,8 +2427,8 @@ function buildFindings(scores, platform) {
   if (onHyva) {
     findings.push({
       severity: cls > 0.1 ? 'mid' : 'mid',
-      tagNow: cls > 0.1 ? 'NEEDS WORK' : 'GOOD',
-      tagFix: 'MAINTAIN IT',
+      tagNow: cls > 0.1 ? 'AREA TO REVIEW' : 'GOOD / PROTECT IT',
+      tagFix: solutionTag,
       currentH: cls > 0.1 ? `Page jumps around as it loads (score: ${scores.cls})` : `Page loads without jumping around (score: ${scores.cls})`,
       currentBody: cls > 0.1
         ? `Your page visibly shifts as it loads. On Hyva this usually comes from third-party scripts injecting content after the page appears: review widgets, chat boxes, banners.`
@@ -2438,24 +2439,24 @@ function buildFindings(scores, platform) {
     });
   } else if (clsFail) {
     findings.push({
-      severity: 'high',
-      tagNow: 'PROBLEM',
-      tagFix: 'HYVA FIXES IT',
+      severity: 'mid',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: `Page jumps around as it loads (score: ${scores.cls})`,
       currentBody: `Your page visibly shifts while loading. Elements appear, then move to different positions. Google penalises this in rankings and it's frustrating on mobile.`,
-      fixH: 'Hyva pages are stable on arrival',
-      fixBody: `Hyva builds pages with all dimensions set upfront. Nothing moves after the page first appears.`,
+      fixH: 'Hyva can help make pages more stable',
+      fixBody: `Hyva can reduce the amount of frontend code and late-loading layout work, which makes it easier to keep page elements stable as the page loads.`,
       impact: 'Smoother experience, better rankings'
     });
   } else {
     findings.push({
       severity: 'mid',
-      tagNow: 'IMPROVEMENT AVAILABLE',
-      tagFix: 'HYVA FIXES IT',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: `Page loads without jumping around (score: ${scores.cls})`,
-      currentBody: `Your page avoids the worst shifting. Hyva achieves this by design rather than by patching, so it stays stable without ongoing maintenance as new features are added.`,
-      fixH: 'Hyva pages are stable by default',
-      fixBody: `Hyva builds the full layout upfront. Nothing to shift or inject later.`,
+      currentBody: `Your page avoids the worst shifting. Scandiweb can review whether that stability is protected as new features, scripts, and content are added.`,
+      fixH: 'Hyva can help make pages more stable',
+      fixBody: `Hyva can reduce the amount of frontend code and late-loading layout work, which makes it easier to keep page elements stable as the page loads.`,
       impact: 'No ongoing maintenance to stay stable'
     });
   }
@@ -2467,8 +2468,8 @@ function buildFindings(scores, platform) {
   const ttfbLabel = ttfb > 900 ? 'critically slow' : ttfb > 600 ? 'slow' : ttfb > 400 ? 'acceptable' : 'good';
   findings.push({
     severity: ttfbSlow ? (onHyva ? 'high' : 'mid') : 'mid',
-    tagNow: ttfbSlow ? 'PROBLEM' : ttfbFast ? 'GOOD / PROTECT IT' : 'IMPROVEMENT AVAILABLE',
-    tagFix: 'READYMAGE FIXES IT',
+    tagNow: ttfbSlow ? 'PROBLEM' : ttfbFast ? 'GOOD / PROTECT IT' : 'AREA TO REVIEW',
+    tagFix: solutionTag,
     currentH: `Server takes ${scores.ttfb}ms before anything loads`,
     currentBody: ttfbFast
       ? `Your server responds in <strong>${ttfb}ms</strong>, which is excellent. The important thing is protecting that response time during campaign spikes, seasonal peaks, and future site changes.`
@@ -2486,12 +2487,12 @@ function buildFindings(scores, platform) {
   if (!onHyva) {
     findings.push({
       severity: reqHigh ? 'mid' : 'mid',
-      tagNow: reqHigh ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
-      tagFix: 'HYVA FIXES IT',
+      tagNow: reqHigh ? 'PROBLEM' : 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: `${req} separate files downloaded to load one page`,
       currentBody: reqHigh
         ? `Every page load makes <strong>${req}</strong> separate requests. Each one adds waiting time before the page is ready. Standard Magento generates individual files for every module installed, and these stack up fast.`
-        : `${req} requests is above the 50-file target. Most come from how Magento's modules load assets. Hyva removes that overhead at the source.`,
+        : `${req} requests is above the 50-file target. Many come from how Magento's modules load assets. Hyva can reduce that overhead by simplifying the frontend layer.`,
       fixH: 'Hyva builds typically load 30–50 files',
       fixBody: `Everything bundled from scratch. Page styles built directly into the page, fonts self-hosted, tracking consolidated. The reduction is structural.`,
       impact: `${req - 40} fewer files per page load`
@@ -2503,8 +2504,8 @@ function buildFindings(scores, platform) {
   const seoWeak = seo < 80;
   findings.push({
     severity: 'mid',
-    tagNow: seoWeak ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
-    tagFix: 'WE FIX IT',
+    tagNow: seoWeak ? 'PROBLEM' : 'AREA TO REVIEW',
+    tagFix: solutionTag,
     currentH: `SEO health: ${seo}/100`,
     currentBody: seoWeak
       ? `${seo}/100 means real gaps in how search engines see your site. Products likely show as plain links with no ratings or pricing, and the newer layer of AI search is not covered.`
@@ -2519,8 +2520,8 @@ function buildFindings(scores, platform) {
   const accWeak = acc < 85;
   findings.push({
     severity: 'mid',
-    tagNow: accWeak ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
-    tagFix: 'WE FIX IT',
+    tagNow: accWeak ? 'PROBLEM' : 'AREA TO REVIEW',
+    tagFix: solutionTag,
     currentH: `Accessibility: ${acc}/100`,
     currentBody: accWeak
       ? `${acc}/100 means real barriers for some visitors: missing image descriptions, poor contrast, unlabelled form fields. From June 2025, the European Accessibility Act requires ecommerce sites to meet accessibility standards, so gaps now carry legal exposure.`
@@ -2537,11 +2538,11 @@ function buildFindings(scores, platform) {
     findings.push({
       severity: scores.unusedJs > 600 ? 'high' : 'mid',
       tagNow: 'PROBLEM',
-      tagFix: 'HYVA FIXES IT',
+      tagFix: solutionTag,
       currentH: `${scores.unusedJs}KB downloaded on every visit but never used`,
       currentBody: `Every visitor downloads <strong>${scores.unusedJs}KB</strong> of code the page never uses. Standard Magento loads everything on every page, whether it's needed or not.`,
-      fixH: 'Hyva only loads what each page actually needs',
-      fixBody: `Hyva builds each page with only the code it uses. The ${scores.unusedJs}KB disappears entirely.`,
+      fixH: 'Hyva can reduce unused frontend code',
+      fixBody: `Hyva can reduce the amount of unused JavaScript visitors need to download by simplifying what the frontend loads on each page.`,
       impact: `${scores.unusedJs}KB removed from every page load`
     });
   }
@@ -2550,12 +2551,12 @@ function buildFindings(scores, platform) {
   if (scores._source === 'psi' && scores.domSize > 1500) {
     findings.push({
       severity: scores.domSize > 3000 ? 'high' : 'mid',
-      tagNow: scores.domSize > 3000 ? 'PROBLEM' : 'IMPROVEMENT AVAILABLE',
-      tagFix: 'HYVA FIXES IT',
+      tagNow: scores.domSize > 3000 ? 'PROBLEM' : 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: `Page is ${(scores.domSize / 1500).toFixed(1)}× more complex than Google recommends`,
       currentBody: `Your page has <strong>${scores.domSize.toLocaleString()} individual elements</strong>. Google recommends staying under 1,500. The more elements on a page, the slower every click and scroll feels.`,
       fixH: 'Hyva pages typically have 400–600 elements',
-      fixBody: `Hyva builds each page with only what's on screen. No hidden containers, no invisible wrappers.`,
+      fixBody: `Hyva can reduce page complexity by simplifying the frontend markup and removing unnecessary wrappers or hidden elements during a rebuild.`,
       impact: `~${Math.round((scores.domSize - 500) / scores.domSize * 100)}% fewer page elements`
     });
   }
@@ -2565,11 +2566,11 @@ function buildFindings(scores, platform) {
     findings.push({
       severity: 'mid',
       tagNow: 'PROBLEM',
-      tagFix: 'HYVA FIXES IT',
+      tagFix: solutionTag,
       currentH: `${scores.renderBlocking} files are blocking the page from appearing`,
       currentBody: `<strong>${scores.renderBlocking} files</strong> must fully download before the browser can show anything. Visitors see a blank screen longer than necessary.`,
-      fixH: 'Hyva shows content immediately, loads the rest after',
-      fixBody: `Hyva builds the minimum needed to display the first screen directly into the page. Everything else loads in the background after.`,
+      fixH: 'Hyva can help the first screen appear sooner',
+      fixBody: `Hyva reduces the amount of frontend code the browser has to download and process before showing useful content.`,
       impact: 'Faster first appearance, faster load time overall'
     });
   }
@@ -2579,7 +2580,7 @@ function buildFindings(scores, platform) {
     findings.push({
       severity: 'high',
       tagNow: 'PROBLEM',
-      tagFix: 'WE FIX IT',
+      tagFix: solutionTag,
       currentH: 'Google can\'t show your prices or ratings in search results',
       currentBody: `Your listings show as plain links in search results. No star ratings, no pricing, no availability. Competitors with this in place get more prominent, more clickable results.`,
       fixH: 'Ratings, pricing, and availability in search results',
@@ -2593,7 +2594,7 @@ function buildFindings(scores, platform) {
     findings.push({
       severity: 'high',
       tagNow: 'PROBLEM',
-      tagFix: 'WE FIX IT',
+      tagFix: solutionTag,
       currentH: !sig.hasGA4 && !sig.hasGTM
         ? 'No analytics detected'
         : sig.hasUAOnly
@@ -2613,7 +2614,7 @@ function buildFindings(scores, platform) {
     findings.push({
       severity: 'mid',
       tagNow: 'PROBLEM',
-      tagFix: 'READYMAGE FIXES IT',
+      tagFix: solutionTag,
       currentH: 'No caching layer detected',
       currentBody: `Every visitor hits your server directly with no caching buffer. Traffic spikes go straight through with nothing to absorb them.`,
       fixH: 'Readymage: global caching plus auto-scaling',
@@ -2627,7 +2628,7 @@ function buildFindings(scores, platform) {
     findings.push({
       severity: 'high',
       tagNow: 'SECURITY RISK',
-      tagFix: 'READYMAGE FIXES IT',
+      tagFix: solutionTag,
       currentH: `PHP ${sig.phpVersion} detected in your server headers`,
       currentBody: `We found <strong>PHP ${sig.phpVersion}</strong> in your server's response headers. This version is no longer actively maintained. It also blocks future Magento upgrades, which require a more recent version.`,
       fixH: 'PHP 8.2 on Readymage as standard',
@@ -2642,7 +2643,7 @@ function buildFindings(scores, platform) {
     findings.push({
       severity: 'mid',
       tagNow: 'COMPLIANCE RISK',
-      tagFix: 'WE FIX IT',
+      tagFix: solutionTag,
       currentH: `Tracking running without a consent banner: ${trackingList}`,
       currentBody: `Your site loads <strong>${trackingList}</strong> but no consent banner was detected. UK and EU rules require visitors to opt in before tracking fires. Running without consent is an active compliance risk.`,
       fixH: 'Consent banner wired to your tracking',
@@ -2655,8 +2656,8 @@ function buildFindings(scores, platform) {
   if (sig && !sig.searchTool) {
     findings.push({
       severity: 'mid',
-      tagNow: 'IMPROVEMENT AVAILABLE',
-      tagFix: 'WE CAN HELP',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: 'No dedicated search tool detected',
       currentBody: `No dedicated search tool detected. Magento's built-in search struggles with typos, SKUs, product names, and everyday customer language. The kind high-intent shoppers use most.`,
       fixH: 'Search built for real customer queries',
@@ -2669,8 +2670,8 @@ function buildFindings(scores, platform) {
   if (sig && !sig.emailTool) {
     findings.push({
       severity: 'mid',
-      tagNow: 'IMPROVEMENT AVAILABLE',
-      tagFix: 'WE CAN HELP',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
       currentH: 'No email marketing tool detected',
       currentBody: `No email marketing platform detected. Automated email drives repeat purchase, basket recovery, post-purchase education, and win-back flows without ongoing manual effort.`,
       fixH: 'Email automation connected to your Magento data',
@@ -3319,7 +3320,7 @@ function renderResults(url, platform, scores) {
   document.getElementById('findings-sub').textContent =
     onHyva
       ? 'You\'ve already made the biggest move. These are the remaining opportunities: hosting, SEO/AEO, and conversion.'
-      : 'Potential areas to explore further, with context on what typically causes them and what changes with Hyva.';
+      : 'Potential areas to explore further, with context on what typically causes them and what changes with Scandiweb.';
 
   renderScoreGrid(scores);
   renderFindings(scores, platform);
