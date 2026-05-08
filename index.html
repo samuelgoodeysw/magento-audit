@@ -402,7 +402,7 @@ body {
 
 .results-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -412,25 +412,48 @@ body {
   background: transparent;
   border: 1px solid #404040;
   color: var(--text-inverse);
-  padding: 10px 16px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  padding: 13px 18px;
+  font-family: 'Archivo', sans-serif;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 800;
 }
 
 .btn-ghost:hover { background: #1F1F1F; }
 
 .btn-report {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: #ffffff;
+  border-color: #ffffff;
   color: var(--bg-charcoal);
   font-weight: 700;
 }
 
-.btn-report:hover { background: var(--text-inverse); color: var(--bg-charcoal); }
+.btn-report:hover { background: #F1F3FF; color: var(--bg-charcoal); }
+
+.btn-contact {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-charcoal);
+}
+
+.btn-contact:hover { background: #9BFF9B; color: var(--bg-charcoal); }
+
+.results-reset-link {
+  margin-top: 10px;
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  padding: 0;
+}
+
+.results-reset-link:hover { color: var(--text-inverse); text-decoration: underline; }
 
 /* SCORE CARDS */
 .score-grid {
@@ -1540,11 +1563,11 @@ body {
         <div class="results-platform" id="results-platform">
           <span class="tag" id="results-platform-tag">DETECTED</span><span id="results-platform-text">Magento 2.4.x · Luma theme · Standard hosting</span>
         </div>
+        <button class="results-reset-link" onclick="resetAudit()">Run another URL</button>
       </div>
       <div class="results-actions">
         <button class="btn-ghost btn-report" id="save-pdf-cta">Save report as PDF</button>
-        <button class="btn-ghost" id="jump-contact-cta">Get in touch with us</button>
-        <button class="btn-ghost" onclick="resetAudit()">← New URL</button>
+        <button class="btn-ghost btn-contact" id="jump-contact-cta">Get in touch with us</button>
       </div>
     </div>
 
@@ -3751,7 +3774,7 @@ document.getElementById('modal-send').addEventListener('click', async () => {
   try {
     sendButton.disabled = true;
     sendButton.textContent = 'Sending...';
-    await sendReport(payload);
+    var sendResult = await sendReport(payload);
   } catch (error) {
     console.error(error);
     sendButton.disabled = false;
@@ -3763,8 +3786,8 @@ document.getElementById('modal-send').addEventListener('click', async () => {
   document.getElementById('modal-body').innerHTML = `
     <div class="sent-state">
       <div class="sent-mark">✓</div>
-      <div class="sent-h">On its way.</div>
-      <div class="sent-sub">Your details are ready for Scandiweb review. We'll use the report and your context to make the first conversation specific.</div>
+      <div class="sent-h">${sendResult?.sent === false ? 'Email endpoint not connected yet.' : 'On its way.'}</div>
+      <div class="sent-sub">${sendResult?.sent === false ? `The report payload has been generated for ${REPORT_RECIPIENT}, but no email has been sent because REPORT_ENDPOINT is still blank.` : `Your details are ready for Scandiweb review. We'll use the report and your context to make the first conversation specific.`}</div>
     </div>
     <details style="margin-top:14px;background:var(--bg-page);border:1px solid var(--border-soft);padding:12px;">
       <summary style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);">// JSON payload (what sales receives)</summary>
