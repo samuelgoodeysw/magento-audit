@@ -757,6 +757,23 @@ body {
   letter-spacing: 0.02em;
 }
 
+.findings-empty {
+  border: 1px solid var(--border-soft);
+  background: var(--bg-surface);
+  padding: 22px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.findings-empty strong {
+  display: block;
+  color: var(--text-primary);
+  font-family: 'Archivo', sans-serif;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
 /* OPPORTUNITY MAP */
 .opportunity-map {
   display: grid;
@@ -1696,7 +1713,7 @@ body {
     <div class="score-disclaimer" id="score-disclaimer">// Live snapshot: scores come from the latest PageSpeed Insights API response and can vary between runs.</div>
 
     <div class="section-title" data-num="01 / FINDINGS" id="findings-title">What this scan surfaced</div>
-    <p class="section-sub" id="findings-sub">Potential areas to explore further, with context on what typically causes them and what changes with Scandiweb.</p>
+    <p class="section-sub" id="findings-sub">Only scan-backed issues or risks are shown here. Softer opportunities sit in the map below.</p>
     <div class="findings" id="findings"></div>
 
     <div class="section-title" data-num="02 / OPPORTUNITY MAP" id="audit-opportunity-map">What looks missing or worth reviewing</div>
@@ -2065,6 +2082,178 @@ const REPORT_ENDPOINT = '';
 
 const PROXY = 'https://merchantminisite.samuel-goodey.workers.dev';
 
+function decodeHtmlText(text = '') {
+  return String(text)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function fetchViaProxy(targetUrl, timeoutMs = 6000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${PROXY}?url=${encodeURIComponent(targetUrl)}`, {
+      signal: controller.signal,
+      cache: 'no-store'
+    });
+    const ct = response.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      const data = await response.json();
+      return { html: data.html || '', headers: data.headers || {}, status: data.status || response.status };
+    }
+    return { html: await response.text(), headers: {}, status: response.status };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function extractSameOriginLinks(html, baseUrl) {
+  const links = [];
+  const seen = new Set();
+  const origin = new URL(baseUrl).origin;
+  const anchorRe = /<a\b([^>]*?)href=["']([^"']+)["']([^>]*)>([\s\S]*?)<\/a>/gi;
+  let match;
+  while ((match = anchorRe.exec(html)) && links.length < 160) {
+    const rawHref = match[2].replace(/&amp;/g, '&').trim();
+    if (!rawHref || /^(#|mailto:|tel:|javascript:)/i.test(rawHref)) continue;
+    let absolute;
+    try {
+      absolute = new URL(rawHref, baseUrl);
+    } catch {
+      continue;
+    }
+    if (absolute.origin !== origin) continue;
+    absolute.hash = '';
+    const url = absolute.toString();
+    const path = absolute.pathname.toLowerCase();
+    if (seen.has(url)) continue;
+    if (/\.(pdf|jpg|jpeg|png|gif|webp|svg|zip|css|js)$/i.test(path)) continue;
+    seen.add(url);
+    links.push({
+      url,
+      path,
+      text: decodeHtmlText(match[4]),
+      attrs: decodeHtmlText(`${match[1]} ${match[3]}`)
+    });
+  }
+  return links;
+}
+
+function isUtilityPath(path) {
+  return /\/(account|customer|login|register|wishlist|privacy|terms|conditions|returns|delivery|shipping|contact|about|blog|news|help|faq|store-locator)\b/i.test(path);
+}
+
+function pickCommercePageCandidate(links, type) {
+  const scored = links.map(link => {
+    const combined = `${link.path} ${link.text} ${link.attrs}`.toLowerCase();
+    let score = 0;
+    if (isUtilityPath(link.path)) score -= 5;
+    if (/\/(cart|basket|bag|checkout)\b/i.test(link.path)) score -= 8;
+
+    if (type === 'pdp') {
+      if (/\/(product|products|p|item|sku)\//i.test(link.path)) score += 4;
+      if (/\/catalog\/product\/view/i.test(link.path)) score += 5;
+      if (/\.html($|\?)/i.test(link.path)) score += 2;
+      if (/\b(product-item|product-card|price|add to cart|add to basket|quick view)\b/i.test(combined)) score += 2;
+      if (/\b(category|collection|catalog|shop|sale|new in)\b/i.test(link.text)) score -= 2;
+    } else {
+      if (/\/(category|categories|collection|collections|catalog|shop|c)\b/i.test(link.path)) score += 4;
+      if (/\b(shop|category|categories|catalog|products|sale|new in|view all|all products)\b/i.test(link.text)) score += 2;
+      if (/\b(nav|menu|level-top|category-item)\b/i.test(combined)) score += 1;
+      if (/\.html($|\?)/i.test(link.path) && !/\/(product|products|p|item|sku)\//i.test(link.path)) score += 1;
+      if (/\b(add to cart|add to basket|price|product-card)\b/i.test(combined)) score -= 2;
+    }
+
+    return { ...link, score };
+  }).filter(link => link.score >= (type === 'pdp' ? 3 : 2));
+
+  scored.sort((a, b) => b.score - a.score || a.url.length - b.url.length);
+  return scored[0] || null;
+}
+
+function analysePdpHtml(html, url) {
+  const hasProductSchema = /"@type"\s*:\s*"?Product"?|schema\.org\/Product|itemtype=["'][^"']*Product/i.test(html);
+  const hasOfferSchema = /"@type"\s*:\s*"?Offer"?|"offers"\s*:|schema\.org\/Offer|itemprop=["']offers/i.test(html);
+  const hasPrice = /data-price-amount|itemprop=["']price|class=["'][^"']*price|[\u00A3$€]\s?\d+/i.test(html);
+  const hasAvailability = /in stock|out of stock|availability|itemprop=["']availability|schema\.org\/InStock|schema\.org\/OutOfStock/i.test(html);
+  const hasAddToCart = /add to cart|add to basket|tocart|product-add-form|data-role=["']tocart-form|name=["']product/i.test(html);
+  const hasReviews = /aggregateRating|reviewCount|ratingValue|trustpilot|feefo|reviews\.io|judge\.me|yotpo|stamped\.io|product-reviews/i.test(html);
+  const hasGallery = /product-image|gallery-placeholder|fotorama|data-gallery-role|swiper|splide|carousel|og:image/i.test(html);
+  return {
+    checked: true,
+    url,
+    hasProductSchema,
+    hasOfferSchema,
+    hasPrice,
+    hasAvailability,
+    hasAddToCart,
+    hasReviews,
+    hasGallery
+  };
+}
+
+function analysePlpHtml(html, url) {
+  const hasProductGrid = /products-grid|product-items|product-item|product-list|category-products|product-card|data-product-id/i.test(html);
+  const hasFilters = /layered-navigation|narrow-by-list|filter-options|facet|amshopby|price-filter|data-role=["']filter|block-filter|sidebar-main/i.test(html);
+  const hasSorting = /toolbar-sorter|sorter|sort-by|product_list_order|sorter-action/i.test(html);
+  const hasPagination = /pages-items|pagination|pager|load more|infinite-scroll|next page/i.test(html);
+  const hasMerchandising = /recommended|best seller|featured|new arrival|related products|promotion|sale/i.test(html);
+  return {
+    checked: true,
+    url,
+    hasProductGrid,
+    hasFilters,
+    hasSorting,
+    hasPagination,
+    hasMerchandising
+  };
+}
+
+function analyseCheckoutSignals(html, links) {
+  const linkText = links.map(link => `${link.path} ${link.text}`).join(' ');
+  return {
+    hasCartLink: /\/(cart|basket|bag)\b|checkout\/cart|shopping-cart|view cart/i.test(linkText) || /minicart|showcart|checkout\/cart/i.test(html),
+    hasCheckoutLink: /\/checkout\b|onepage|secure checkout|proceed to checkout/i.test(linkText) || /checkout-index-index|onepage|proceed to checkout/i.test(html),
+    hasMiniCart: /minicart|showcart|data-block=["']minicart|block-minicart/i.test(html),
+    hasPaymentSignals: /paypal|klarna|stripe|adyen|worldpay|braintree|checkout\.com|apple pay|google pay|visa|mastercard/i.test(html),
+    hasDeliveryReturnsCopy: /delivery|shipping|returns|free shipping|click and collect|dispatch/i.test(html)
+  };
+}
+
+async function scanCommercePages(baseUrl, homeHtml) {
+  const links = extractSameOriginLinks(homeHtml, baseUrl);
+  const pdpCandidate = pickCommercePageCandidate(links, 'pdp');
+  const plpCandidate = pickCommercePageCandidate(
+    links.filter(link => !pdpCandidate || link.url !== pdpCandidate.url),
+    'plp'
+  );
+  const checkout = analyseCheckoutSignals(homeHtml, links);
+
+  const [pdpResult, plpResult] = await Promise.allSettled([
+    pdpCandidate ? fetchViaProxy(pdpCandidate.url, 5500) : Promise.resolve(null),
+    plpCandidate ? fetchViaProxy(plpCandidate.url, 5500) : Promise.resolve(null)
+  ]);
+
+  const pdpPage = pdpResult.status === 'fulfilled' && pdpResult.value?.html
+    ? analysePdpHtml(pdpResult.value.html, pdpCandidate.url)
+    : { checked: false, url: pdpCandidate?.url || '', error: pdpCandidate ? 'fetch failed' : 'not found' };
+  const plpPage = plpResult.status === 'fulfilled' && plpResult.value?.html
+    ? analysePlpHtml(plpResult.value.html, plpCandidate.url)
+    : { checked: false, url: plpCandidate?.url || '', error: plpCandidate ? 'fetch failed' : 'not found' };
+
+  return {
+    linksChecked: links.length,
+    pdp: pdpPage,
+    plp: plpPage,
+    checkout
+  };
+}
+
 async function detectPlatform(url) {
   const result = {
     isMagento: null, theme: 'unknown', themeDisplay: '', error: null,
@@ -2223,6 +2412,7 @@ async function detectPlatform(url) {
     const hasOGTags   = /<meta[^>]+property=["']og:/i.test(html);
     const hasCanonical= /<link[^>]+rel=["']canonical["']/i.test(html);
     const h1Count     = (html.match(/<h1[\s>]/gi) || []).length;
+    const pageScan    = await scanCommercePages(url, html);
 
     result.signals = {
       // hosting
@@ -2242,6 +2432,8 @@ async function detectPlatform(url) {
       hasAiFeature, hasAiChatbot, aiFeatureSignals,
       // seo
       hasStructuredData, hasMetaDesc, hasOGTags, hasCanonical, h1Count,
+      // ecommerce page types
+      pageScan,
     };
 
   } catch (e) {
@@ -2476,6 +2668,7 @@ function buildConsoleLines(url, platform) {
       { text: `Structured data and schema markup…`, status: 'done', stat: sig.hasStructuredData ? 'found' : 'none found' },
       { text: `Cookie consent / GDPR compliance…`, status: 'done', stat: sig.hasCookieConsent ? 'found' : 'not detected' },
       { text: `AI feature signals — assistants, chatbots, and AI copy…`, status: 'done', stat: sig.hasAiFeature ? 'found' : (sig.hasLiveChat ? 'chat found' : 'none detected') },
+      { text: `Ecommerce page scan — product, listing, checkout…`, status: 'done', stat: sig.pageScan ? `${sig.pageScan.pdp.checked ? 'PDP' : 'no PDP'} / ${sig.pageScan.plp.checked ? 'PLP' : 'no PLP'}` : 'not checked' },
     );
   }
   lines.push(
@@ -2483,7 +2676,7 @@ function buildConsoleLines(url, platform) {
     { text: `Running Lighthouse — desktop performance…`, status: 'done', stat: 'complete' },
     { text: `Checking page speed, load time, and visual stability…`, status: 'done', stat: 'complete' },
     { text: `Scanning for unused code, page complexity, load blockers…`, status: 'done', stat: 'complete' },
-    { text: `Comparing against Hyva + Readymage benchmark targets…`, status: 'done', stat: 'OK' },
+    { text: `Mapping Scandiweb opportunity areas…`, status: 'done', stat: 'OK' },
     { text: `Audit complete. Generating report…`, status: 'done', stat: 'OK' }
   );
 
@@ -2506,10 +2699,12 @@ function buildFrontendSummaryFindings(scores, platform, solutionTag) {
   const lcp = parseFloat(scores.lcp);
   const cls = parseFloat(scores.cls);
   const req = scores.requests || 0;
+  const totalPageMb = scores.totalPageKb ? scores.totalPageKb / 1024 : null;
 
   const hasPsiDetail = scores._source === 'psi';
   const bundleHeavy = Number.isFinite(bundle) && bundle > 1.5;
-  const reqHigh = !onHyva && req > 80;
+  const pageHeavy = hasPsiDetail && Number.isFinite(totalPageMb) && totalPageMb > 2.5;
+  const reqHigh = !onHyva && req > 120;
   const unusedJsHigh = hasPsiDetail && scores.unusedJs > 300;
   const renderBlockingHigh = hasPsiDetail && scores.renderBlocking > 2;
   const lcpSlow = Number.isFinite(lcp) && lcp > 2.5;
@@ -2518,6 +2713,7 @@ function buildFrontendSummaryFindings(scores, platform, solutionTag) {
 
   const weightSignals = [];
   if (bundleHeavy) weightSignals.push(`${scores.bundleJs}MB of frontend code`);
+  if (pageHeavy) weightSignals.push(`${totalPageMb.toFixed(1)}MB total page weight`);
   if (reqHigh) weightSignals.push(`${req} separate page files`);
   if (unusedJsHigh) weightSignals.push(`${scores.unusedJs}KB of unused JavaScript`);
   if (renderBlockingHigh) weightSignals.push(`${scores.renderBlocking} render-blocking files`);
@@ -2528,42 +2724,40 @@ function buildFrontendSummaryFindings(scores, platform, solutionTag) {
   if (domComplex) experienceSignals.push(`${scores.domSize.toLocaleString()} page elements`);
 
   const weightHasIssue = weightSignals.length > 0;
-  const weightSerious = bundle > 4 || req > 180 || scores.unusedJs > 600;
+  const weightSerious = bundle > 4 || req > 170 || scores.unusedJs > 600 || totalPageMb > 4;
   const experienceHasIssue = lcpSlow || clsShifting || domComplex;
   const experienceSerious = lcp > 4.5 || cls > 0.25 || scores.domSize > 3000;
 
-  return [
-    {
+  const summaryFindings = [];
+  if (weightHasIssue) {
+    summaryFindings.push({
       severity: weightSerious ? 'high' : 'mid',
-      tagNow: weightHasIssue ? (weightSerious ? 'PROBLEM' : 'AREA TO REVIEW') : (onHyva ? 'GOOD / PROTECT IT' : 'AREA TO REVIEW'),
+      tagNow: weightSerious ? 'PROBLEM' : 'AREA TO REVIEW',
       tagFix: solutionTag,
-      currentH: weightHasIssue
-        ? 'Frontend weight is slowing the store down'
-        : onHyva
-          ? `Frontend weight: ${scores.bundleJs}MB. Hyva is already helping.`
-          : 'Frontend weight is worth keeping under review',
-      currentBody: weightHasIssue
-        ? `The scan points to ${joinFindingSignals(weightSignals)}. That usually means Magento modules, theme assets, and third-party scripts are all asking for browser time before the page feels ready.`
-        : `The frontend is in reasonable shape today. The thing to watch is script creep: tracking tags, widgets, and module assets tend to accumulate as the site grows.`,
+      currentH: 'Frontend weight is slowing the store down',
+      currentBody: `The scan points to ${joinFindingSignals(weightSignals)}. That usually means Magento modules, theme assets, and third-party scripts are all asking for browser time before the page feels ready.`,
       fixH: 'Frontend performance workstream',
       fixBody: onHyva
         ? `Scandiweb can keep the Hyva build lean by reviewing third-party scripts, tracking, asset loading, and the parts of the theme that change over time.`
         : `Scandiweb can review the Magento frontend, third-party scripts, asset loading, and whether Hyva is the right route to reduce the code the browser downloads and processes.`,
-      impact: weightHasIssue ? 'Less code, fewer files, faster interaction' : 'Protect frontend speed as the site grows'
-    },
-    {
+      impact: 'Less code, fewer files, faster interaction'
+    });
+  }
+
+  if (experienceHasIssue) {
+    summaryFindings.push({
       severity: experienceSerious ? 'high' : 'mid',
-      tagNow: experienceHasIssue ? (experienceSerious ? 'PROBLEM' : 'AREA TO REVIEW') : 'GOOD / PROTECT IT',
+      tagNow: experienceSerious ? 'PROBLEM' : 'AREA TO REVIEW',
       tagFix: solutionTag,
-      currentH: experienceHasIssue ? 'Page experience needs tightening' : 'Page experience is in good shape',
-      currentBody: experienceHasIssue
-        ? `The scan highlights ${joinFindingSignals(experienceSignals)}. These issues usually come from image weight, layout slots that are not reserved, third-party widgets, or overly complex page markup.`
-        : `The main experience signals are healthy: ${joinFindingSignals(experienceSignals)}. The priority is protecting that as new content, campaigns, and integrations are added.`,
+      currentH: 'Page experience needs tightening',
+      currentBody: `The scan highlights ${joinFindingSignals(experienceSignals)}. These issues usually come from image weight, layout slots that are not reserved, third-party widgets, or overly complex page markup.`,
       fixH: 'Improve page experience beyond the theme choice',
       fixBody: `Hyva can help by reducing frontend complexity, but Scandiweb should also review layout structure, image loading, caching, third-party scripts, and hosting handoff.`,
-      impact: experienceHasIssue ? 'Smoother pages and stronger Core Web Vitals' : 'Protect Core Web Vitals over time'
-    }
-  ];
+      impact: 'Smoother pages and stronger Core Web Vitals'
+    });
+  }
+
+  return summaryFindings;
 }
 
 function isDetailedFrontendFinding(finding) {
@@ -2582,7 +2776,9 @@ function isDetailedFrontendFinding(finding) {
 }
 
 function consolidateFindings(findings, scores, platform, solutionTag) {
-  const nonFrontendFindings = findings.filter((finding) => !isDetailedFrontendFinding(finding));
+  const nonFrontendFindings = findings.filter((finding) =>
+    !isDetailedFrontendFinding(finding) && finding.tagNow !== 'GOOD / PROTECT IT'
+  );
   return [
     ...buildFrontendSummaryFindings(scores, platform, solutionTag),
     ...nonFrontendFindings
@@ -2727,35 +2923,29 @@ function buildFindings(scores, platform) {
   // ── 4. Server response time (TTFB) ──────────────────────────────
   const ttfb = scores.ttfb;
   const ttfbSlow = ttfb > 600;
-  const ttfbFast = ttfb <= 200;
-  const ttfbLabel = ttfb > 900 ? 'critically slow' : ttfb > 600 ? 'slow' : ttfb > 400 ? 'acceptable' : 'good';
-  findings.push({
-    severity: ttfbSlow ? (onHyva ? 'high' : 'mid') : 'mid',
-    tagNow: ttfbSlow ? 'PROBLEM' : ttfbFast ? 'GOOD / PROTECT IT' : 'AREA TO REVIEW',
-    tagFix: solutionTag,
-    currentH: `Server takes ${scores.ttfb}ms before anything loads`,
-    currentBody: ttfbFast
-      ? `Your server responds in <strong>${ttfb}ms</strong>, which is excellent. The important thing is protecting that response time during campaign spikes, seasonal peaks, and future site changes.`
-      : ttfbSlow
-      ? `Your server takes <strong>${ttfb}ms</strong> before sending anything to the browser. Every other speed measure starts from this point, so even a fast frontend is held back.`
-      : `Your server responds in ${ttfb}ms. Scandiweb can review hosting, caching, and application response time to see whether the server is creating avoidable wait.`,
-    fixH: ttfbFast ? 'Protect fast response under load' : 'Review Magento hosting and response time',
-    fixBody: `Readymage uses distributed Magento infrastructure and auto-scaling to add capacity when load rises and scale back when it falls. Scandiweb can review whether hosting, caching, and application response time are holding the site back.`,
-    impact: ttfbFast ? 'Protect fast response at peak traffic' : 'Lower server wait time and better stability at peak'
-  });
+  if (ttfbSlow) {
+    findings.push({
+      severity: onHyva ? 'high' : 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: solutionTag,
+      currentH: `Server takes ${scores.ttfb}ms before anything loads`,
+      currentBody: `Your server takes <strong>${ttfb}ms</strong> before sending anything to the browser. Every other speed measure starts from this point, so even a fast frontend is held back.`,
+      fixH: 'Review Magento hosting and response time',
+      fixBody: `Readymage uses distributed Magento infrastructure and auto-scaling to add capacity when load rises and scale back when it falls. Scandiweb can review whether hosting, caching, and application response time are holding the site back.`,
+      impact: 'Lower server wait time and better stability at peak'
+    });
+  }
 
   // ── 5. HTTP requests ────────────────────────────────────────────
   const req = scores.requests;
-  const reqHigh = req > 150;
-  if (!onHyva) {
+  const reqHigh = req > 120;
+  if (!onHyva && reqHigh) {
     findings.push({
-      severity: reqHigh ? 'mid' : 'mid',
-      tagNow: reqHigh ? 'PROBLEM' : 'AREA TO REVIEW',
+      severity: req > 170 ? 'high' : 'mid',
+      tagNow: req > 170 ? 'PROBLEM' : 'AREA TO REVIEW',
       tagFix: solutionTag,
       currentH: `${req} separate files downloaded to load one page`,
-      currentBody: reqHigh
-        ? `Every page load makes <strong>${req}</strong> separate requests. Each one adds waiting time before the page is ready. Standard Magento generates individual files for every module installed, and these stack up fast.`
-        : `${req} requests is above the 50-file target. Many come from how Magento's modules load assets. Hyva can reduce that overhead by simplifying the frontend layer.`,
+      currentBody: `Every page load makes <strong>${req}</strong> separate requests. Each one adds waiting time before the page is ready. Magento modules, theme assets, and third-party scripts can stack up fast.`,
       fixH: 'Hyva can reduce frontend request overhead',
       fixBody: `Scandiweb can review which files are needed, which scripts can be consolidated, and whether a Hyva rebuild would simplify the frontend layer.`,
       impact: 'Fewer unnecessary files for the browser to request'
@@ -2765,36 +2955,39 @@ function buildFindings(scores, platform) {
   // ── 6. SEO ──────────────────────────────────────────────────────
   const seo = scores.seo;
   const seoWeak = seo < 80;
-  findings.push({
-    severity: 'mid',
-    tagNow: seoWeak ? 'PROBLEM' : 'AREA TO REVIEW',
-    tagFix: solutionTag,
-    currentH: `SEO health: ${seo}/100`,
-    currentBody: seoWeak
-      ? `${seo}/100 means real gaps in how search engines see your site. Products likely show as plain links with no ratings or pricing, and the newer layer of AI search is not covered.`
-      : `${seo}/100 is solid. The gap most sites miss is AI search: getting products found inside ChatGPT, Perplexity, and Google AI Overviews. That layer doesn't show in standard SEO reports.`,
-    fixH: 'SEO improvements plus visibility inside AI search',
-    fixBody: `We add product ratings and pricing into search results, fix page-level gaps, strengthen the technical SEO foundations, and cover visibility inside ChatGPT, Perplexity, and Google AI Overviews. Most agencies cover only the first part.`,
-    impact: 'Higher organic rankings + visibility in AI results'
-  });
+  if (seoWeak) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: solutionTag,
+      currentH: `SEO health: ${seo}/100`,
+      currentBody: `${seo}/100 means real gaps in how search engines see your site. Products may show as plain links without enough context for search engines or AI answer engines.`,
+      fixH: 'SEO improvements plus visibility inside AI search',
+      fixBody: `Scandiweb can fix page-level gaps, strengthen technical SEO foundations, add product data where needed, and review visibility inside ChatGPT, Perplexity, and Google AI Overviews.`,
+      impact: 'Stronger organic visibility and cleaner search signals'
+    });
+  }
 
   // ── 7. Accessibility ────────────────────────────────────────────
   const acc = scores.accessibility;
   const accWeak = acc < 85;
-  findings.push({
-    severity: 'mid',
-    tagNow: accWeak ? 'PROBLEM' : 'AREA TO REVIEW',
-    tagFix: solutionTag,
-    currentH: `Accessibility: ${acc}/100`,
-    currentBody: accWeak
-      ? `${acc}/100 means real barriers for some visitors: missing image descriptions, poor contrast, unlabelled form fields. From June 2025, the European Accessibility Act requires ecommerce sites to meet accessibility standards, so gaps now carry legal exposure.`
-      : `${acc}/100 is above average. Getting to full legal compliance from here is a structured audit, screen-reader testing, and targeted fixes.`,
-    fixH: 'Legally compliant accessibility as standard',
-    fixBody: `Scandiweb runs a full audit, screen-reader testing, and targeted fixes, documented for compliance.`,
-    impact: 'Legally compliant + measurable conversion uplift'
-  });
+  if (accWeak) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'PROBLEM',
+      tagFix: solutionTag,
+      currentH: `Accessibility: ${acc}/100`,
+      currentBody: `${acc}/100 means real barriers for some visitors: missing image descriptions, poor contrast, unlabelled form fields, or keyboard navigation issues.`,
+      fixH: 'Accessibility audit and targeted fixes',
+      fixBody: `Scandiweb can run a full accessibility audit, screen-reader testing, and targeted fixes, documented for compliance.`,
+      impact: 'Fewer access barriers and lower compliance risk'
+    });
+  }
 
   const sig = platform ? platform.signals : null;
+  const pdp = sig?.pageScan?.pdp;
+  const plp = sig?.pageScan?.plp;
+  const checkout = sig?.pageScan?.checkout;
 
   // ── 8. Unused JavaScript ────────────────────────────────────
   if (scores._source === 'psi' && scores.unusedJs > 300) {
@@ -2838,21 +3031,60 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 11. Structured data ─────────────────────────────────────
-  if (sig && !sig.hasStructuredData) {
+  // ── 11. Product page schema ─────────────────────────────────
+  if (pdp?.checked && !pdp.hasProductSchema) {
     findings.push({
       severity: 'high',
       tagNow: 'PROBLEM',
       tagFix: solutionTag,
-      currentH: 'Google can\'t show your prices or ratings in search results',
-      currentBody: `Your listings show as plain links in search results. No star ratings, no pricing, no availability. Competitors with this in place get more prominent, more clickable results.`,
-      fixH: 'Ratings, pricing, and availability in search results',
-      fixBody: `We add the full product markup: ratings and pricing on product pages, breadcrumbs across the site, and local information where relevant. Tested and monitored.`,
+      currentH: 'Product schema was not detected on a product page',
+      currentBody: `The scan checked a likely product page and did not detect Product schema. That means search engines and AI answer engines may have less structured context for price, availability, reviews, and product details.`,
+      fixH: 'Product schema and catalogue data review',
+      fixBody: `Scandiweb can review PDP schema, product attributes, price and availability markup, breadcrumbs, and catalogue data quality.`,
       impact: 'Rich results, AI search inclusion, click-through uplift'
+    });
+  } else if (pdp?.checked && pdp.hasProductSchema && (!pdp.hasOfferSchema || !pdp.hasPrice || !pdp.hasAvailability)) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
+      currentH: 'Product schema appears incomplete',
+      currentBody: `Product schema was detected, but the scan could not clearly confirm price, offer, or availability signals on the sampled PDP.`,
+      fixH: 'Strengthen product offer markup',
+      fixBody: `Scandiweb can review whether price, availability, reviews, variants, and product identifiers are exposed cleanly for search and AI systems.`,
+      impact: 'Clearer product context for search and AI systems'
     });
   }
 
-  // ── 12. Analytics blind spots ───────────────────────────────
+  // ── 12. PLP / category experience ───────────────────────────
+  if (plp?.checked && plp.hasProductGrid && !plp.hasFilters) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
+      currentH: 'Product listing page found, but filters were not clear',
+      currentBody: `The scan found a likely category or listing page with product-grid signals, but did not clearly detect filters or facets. For larger catalogues, weak filtering can make product discovery harder.`,
+      fixH: 'Review PLP filters and merchandising',
+      fixBody: `Scandiweb can review category filters, sorting, merchandising rules, search relevance, and whether product attributes support useful browsing.`,
+      impact: 'Better product discovery and fewer dead-end browsing sessions'
+    });
+  }
+
+  // ── 13. Checkout entry points ───────────────────────────────
+  if (checkout && !checkout.hasCartLink && !checkout.hasCheckoutLink && !checkout.hasMiniCart) {
+    findings.push({
+      severity: 'mid',
+      tagNow: 'AREA TO REVIEW',
+      tagFix: solutionTag,
+      currentH: 'Cart or checkout entry was not clearly detected',
+      currentBody: `The homepage scan did not clearly find a cart, checkout, or mini-cart signal. That does not prove the funnel is broken, but it is worth checking that the buying path is obvious from key entry pages.`,
+      fixH: 'Review cart and checkout visibility',
+      fixBody: `Scandiweb can review cart visibility, checkout entry points, payment messaging, delivery messaging, and friction in the purchase path.`,
+      impact: 'Clearer path from browsing to checkout'
+    });
+  }
+
+  // ── 14. Analytics blind spots ───────────────────────────────
   if (sig && (!sig.hasGA4 || sig.hasUAOnly)) {
     findings.push({
       severity: 'high',
@@ -2872,7 +3104,7 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 13. CDN / edge caching ──────────────────────────────────
+  // ── 15. CDN / edge caching ──────────────────────────────────
   if (sig && !sig.cdnType && !sig.hasCaching) {
     findings.push({
       severity: 'mid',
@@ -2886,7 +3118,7 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 14. PHP version ─────────────────────────────────────────
+  // ── 16. PHP version ─────────────────────────────────────────
   if (sig && sig.phpVersion && sig.phpEol) {
     findings.push({
       severity: 'high',
@@ -2900,7 +3132,7 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 15. Cookie consent / GDPR ───────────────────────────────
+  // ── 17. Cookie consent / GDPR ───────────────────────────────
   if (sig && !sig.hasCookieConsent && (sig.hasGA4 || sig.hasGTM || sig.hasFBPixel)) {
     const trackingList = [sig.hasGA4 && 'Google Analytics', sig.hasFBPixel && 'Facebook Pixel', sig.hasGTM && 'GTM'].filter(Boolean).join(', ');
     findings.push({
@@ -2915,7 +3147,7 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 16. AI features / conversational commerce ───────────────
+  // ── 18. AI features / conversational commerce ───────────────
   if (sig && sig.hasAiFeature) {
     const aiSignals = (sig.aiFeatureSignals || []).slice(0, 3).join(', ');
     findings.push({
@@ -2928,20 +3160,9 @@ function buildFindings(scores, platform) {
       fixBody: `Scandiweb can review how AI is disclosed, what data it uses, where customer data flows, and what safeguards are needed. See the <a href="https://scandiweb.ai/compliance" target="_blank" rel="noopener">Scandiweb AI compliance audit</a>.`,
       impact: 'Reduce AI governance and data-use risk'
     });
-  } else if (sig && sig.hasLiveChat) {
-    findings.push({
-      severity: 'mid',
-      tagNow: 'AREA TO REVIEW',
-      tagFix: solutionTag,
-      currentH: 'Live chat detected, but no AI sales assistant signal',
-      currentBody: `A live chat widget appears to be present, but the scan did not find clear AI assistant or conversational commerce signals. That may be fine for support, but it is worth reviewing whether chat could help customers choose, compare, and complete purchases.`,
-      fixH: 'Explore Chat to Buy for guided sales conversations',
-      fixBody: `Scandiweb's <a href="https://scandiweb.ai/chattobuy" target="_blank" rel="noopener">Chat to Buy</a> can be reviewed as a route from simple support chat to AI-assisted product discovery, recommendations, re-engagement, and checkout help.`,
-      impact: 'Turn chat from support into buying assistance'
-    });
   }
 
-  // ── 17. Site search ─────────────────────────────────────────
+  // ── 19. Site search ─────────────────────────────────────────
   if (sig && !sig.searchTool) {
     findings.push({
       severity: 'mid',
@@ -2955,7 +3176,7 @@ function buildFindings(scores, platform) {
     });
   }
 
-  // ── 18. Email automation ─────────────────────────────────────
+  // ── 20. Email automation ─────────────────────────────────────
   if (sig && !sig.emailTool) {
     findings.push({
       severity: 'mid',
@@ -2978,6 +3199,10 @@ function buildFindings(scores, platform) {
 
 function buildOpportunityMap(scores, platform) {
   const sig = platform?.signals || null;
+  const pageScan = sig?.pageScan || null;
+  const pdp = pageScan?.pdp || null;
+  const plp = pageScan?.plp || null;
+  const checkout = pageScan?.checkout || null;
   const lcp = parseFloat(scores.lcp);
   const bundle = parseFloat(scores.bundleJs);
   const hasTracking = !!(sig && (sig.hasGA4 || sig.hasGTM || sig.hasFBPixel));
@@ -3024,6 +3249,32 @@ function buildOpportunityMap(scores, platform) {
       'Search and merchandising',
       sig?.searchTool ? `${sig.searchTool} detected.` : 'No dedicated search or merchandising tool was clearly detected.',
       'Scandiweb can review search relevance, product discovery, merchandising rules, and AI search.'
+    ),
+    classify(
+      !pdp ? 'review' : !pdp.checked ? 'review' : (pdp.hasProductSchema && pdp.hasPrice && pdp.hasAddToCart ? 'detected' : 'missing'),
+      !pdp ? 2 : !pdp.checked ? 2 : (pdp.hasProductSchema && pdp.hasPrice && pdp.hasAddToCart ? 1 : 3),
+      'PDP quality',
+      !pdp ? 'Product page scan was not available.' :
+        !pdp.checked ? 'A likely product page could not be verified from homepage links.' :
+        `${pdp.hasProductSchema ? 'Product schema found' : 'No product schema detected'}; ${pdp.hasPrice ? 'price signal found' : 'price signal unclear'}; ${pdp.hasAddToCart ? 'add-to-cart found' : 'add-to-cart unclear'}.`,
+      'Scandiweb can review product-page schema, media, price and availability signals, reviews, trust content, and add-to-cart UX.'
+    ),
+    classify(
+      !plp ? 'review' : !plp.checked ? 'review' : (plp.hasProductGrid && plp.hasFilters && plp.hasSorting ? 'detected' : 'review'),
+      !plp ? 2 : !plp.checked ? 2 : (plp.hasProductGrid && plp.hasFilters && plp.hasSorting ? 1 : 2),
+      'PLP and filters',
+      !plp ? 'Listing page scan was not available.' :
+        !plp.checked ? 'A likely listing page could not be verified from homepage links.' :
+        `${plp.hasProductGrid ? 'product grid found' : 'product grid unclear'}; ${plp.hasFilters ? 'filters found' : 'filters unclear'}; ${plp.hasSorting ? 'sorting found' : 'sorting unclear'}.`,
+      'Scandiweb can review category filters, sorting, merchandising, product attributes, and listing-page performance.'
+    ),
+    classify(
+      !checkout ? 'review' : (checkout.hasCartLink || checkout.hasCheckoutLink || checkout.hasMiniCart ? 'detected' : 'review'),
+      !checkout ? 2 : (checkout.hasCartLink || checkout.hasCheckoutLink || checkout.hasMiniCart ? 1 : 2),
+      'Cart and checkout path',
+      !checkout ? 'Checkout signal scan was not available.' :
+        `${checkout.hasCartLink ? 'cart link found' : 'cart link unclear'}; ${checkout.hasCheckoutLink ? 'checkout link found' : 'checkout link unclear'}; ${checkout.hasPaymentSignals ? 'payment signals found' : 'payment signals unclear'}.`,
+      'Scandiweb can review cart visibility, checkout friction, payment messaging, delivery/returns clarity, and conversion blockers.'
     ),
     classify(
       !sig ? 'review' : sig.emailTool ? 'detected' : 'missing',
@@ -3143,6 +3394,15 @@ function renderScoreGrid(scores) {
 function renderFindings(scores, platform) {
   const root = document.getElementById('findings');
   const items = buildFindings(scores, platform);
+  if (!items.length) {
+    root.innerHTML = `
+      <div class="findings-empty">
+        <strong>No major scan-backed findings surfaced.</strong>
+        The scan did not find enough evidence for a problem card. Use the opportunity map below for softer areas to discuss or verify manually.
+      </div>
+    `;
+    return;
+  }
   root.innerHTML = items.map((f, i) => `
     <div class="finding">
       <div class="finding-marker ${f.severity === 'mid' ? 'warn' : ''}">${String(i+1).padStart(2,'0')}</div>
@@ -3655,8 +3915,8 @@ function renderResults(url, platform, scores) {
     onHyva ? 'You\'re on Hyva: here\'s what\'s still on the table' : 'What this scan surfaced';
   document.getElementById('findings-sub').textContent =
     onHyva
-      ? 'You\'ve already made the biggest move. These are the remaining opportunities: hosting, SEO/AEO, and conversion.'
-      : 'Potential areas to explore further, with context on what typically causes them and what changes with Scandiweb.';
+      ? 'Only scan-backed issues or risks are shown here. Softer opportunities sit in the map below.'
+      : 'Only scan-backed issues or risks are shown here. Softer opportunities sit in the map below.';
 
   renderScoreGrid(scores);
   renderFindings(scores, platform);
