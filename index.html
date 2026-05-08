@@ -400,7 +400,13 @@ body {
   font-weight: 600;
 }
 
-.results-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.results-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 
 .btn-ghost {
   background: transparent;
@@ -416,6 +422,15 @@ body {
 }
 
 .btn-ghost:hover { background: #1F1F1F; }
+
+.btn-report {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-charcoal);
+  font-weight: 700;
+}
+
+.btn-report:hover { background: var(--text-inverse); color: var(--bg-charcoal); }
 
 /* SCORE CARDS */
 .score-grid {
@@ -876,6 +891,33 @@ body {
 }
 
 /* REQUIREMENTS SECTION */
+.details-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 28px;
+}
+
+.details-intro .section-sub { margin: 0; }
+
+.details-callout {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.details-callout .cta-btn {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.details-callout.is-highlighted .cta-btn {
+  outline: 3px solid rgba(255, 78, 55, 0.35);
+  outline-offset: 6px;
+}
+
 .req-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -885,7 +927,12 @@ body {
   margin-bottom: 24px;
 }
 
-@media (max-width: 900px) { .req-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .details-intro { grid-template-columns: 1fr; }
+  .details-callout { justify-content: stretch; }
+  .details-callout .cta-btn { max-width: none; }
+  .req-grid { grid-template-columns: 1fr; }
+}
 
 .req-side {
   background: var(--bg-surface);
@@ -1255,7 +1302,6 @@ body {
   .url-submit { padding: 16px; }
   .field-row { grid-template-columns: 1fr; }
   .compare-title { font-size: 22px; }
-  .cta-strip { flex-direction: column; align-items: stretch; text-align: left; }
   .cta-btn { width: 100%; }
   .header-meta { display: none; }
 }
@@ -1337,6 +1383,58 @@ body {
 #stage-results .req-side-tag {
   background: var(--bg-canvas);
   color: var(--accent);
+}
+
+@media print {
+  body { background: white; }
+
+  body::before,
+  .results-actions,
+  .details-callout,
+  .modal-overlay,
+  .footnote,
+  #call-details-title,
+  .details-intro,
+  .req-grid,
+  .req-textarea-wrap,
+  .url-form,
+  .console-bar,
+  .cta-strip {
+    display: none !important;
+  }
+
+  .app-header,
+  .header {
+    position: static;
+  }
+
+  main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .stage,
+  .stage.active {
+    display: block;
+  }
+
+  #stage-input,
+  #stage-preview,
+  #stage-error {
+    display: none !important;
+  }
+
+  .results-head,
+  .score-grid,
+  .findings,
+  .compare-card,
+  .services-intro,
+  .stack-grid,
+  .req-grid {
+    break-inside: avoid;
+  }
 }
 </style>
 </head>
@@ -1444,6 +1542,8 @@ body {
         </div>
       </div>
       <div class="results-actions">
+        <button class="btn-ghost btn-report" id="save-pdf-cta">Save report as PDF</button>
+        <button class="btn-ghost" id="jump-contact-cta">Get in touch with us</button>
         <button class="btn-ghost" onclick="resetAudit()">← New URL</button>
       </div>
     </div>
@@ -1547,8 +1647,13 @@ body {
       </div>
     </div>
 
-    <div class="section-title" data-num="05 / CONTEXT">A few details to tailor the call</div>
-    <p class="section-sub">Optional. Share whatever you know, skip whatever you do not. The aim is to make the first conversation useful without turning this into a discovery form.</p>
+    <div class="section-title" data-num="05 / CONTEXT" id="call-details-title">A few details to tailor the call</div>
+    <div class="details-intro" id="call-details">
+      <p class="section-sub">Optional. Share whatever you know, skip whatever you do not. The aim is to make the first conversation useful without turning this into a discovery form.</p>
+      <div class="details-callout" id="details-callout">
+        <button class="cta-btn" id="details-call-cta">Get in touch with us →</button>
+      </div>
+    </div>
 
     <div class="req-grid">
       <div class="req-side">
@@ -1652,11 +1757,6 @@ body {
       <textarea class="req-textarea" id="r-notes" placeholder="e.g. conversion has dropped, paid ads are getting expensive, tracking is messy, the site slows down during campaigns, or the team needs a clearer upgrade plan..."></textarea>
     </div>
 
-    <div class="cta-strip">
-      <div class="cta-text">Want a call, plus get this as a PDF?</div>
-      <button class="cta-btn" id="open-cta">Get the report →</button>
-    </div>
-
     <div class="footnote">
       <span id="footnote-source"><strong>// DEMO MODE</strong> · scores estimated from URL. Run a URL to get live PageSpeed Insights data.</span>
       <span>v0.3 / smb-magento-audit</span>
@@ -1671,13 +1771,13 @@ body {
     <div class="modal-head">
       <div>
         <div class="label">// LET'S TALK</div>
-        <div class="title">Get the full audit</div>
+        <div class="title">Get in touch with Scandiweb</div>
       </div>
       <button class="modal-close" id="modal-close">×</button>
     </div>
     <div class="modal-body" id="modal-body">
       <div class="modal-summary">
-        We'll send you this report as a PDF for <strong id="modal-url">—</strong>, and set up a short call to understand your goals and see whether we're the right fit for your project.
+        Send your audit context for <strong id="modal-url">—</strong>. We'll review the report, look at the details you shared, and come back with the most useful next steps.
       </div>
       <div class="field-row">
         <div class="field-group">
@@ -1723,7 +1823,7 @@ body {
     </div>
     <div class="modal-foot">
       <span class="foot-text">// Shared with Scandiweb only. Not passed on or sold.</span>
-      <button class="btn-primary" id="modal-send">Send →</button>
+      <button class="btn-primary" id="modal-send">Send details →</button>
     </div>
   </div>
 </div>
@@ -1913,9 +2013,12 @@ const V = VERTICALS[vParam] || VERTICALS['smb'];
 // ============================================================
 
 let currentPlatform = { isMagento: null, theme: 'unknown', themeDisplay: '', error: null };
+let currentScores = null;
 let earlyPsiUrl = '';
 let earlyPsiPromise = null;
 let psiStartTime = 0;
+const REPORT_RECIPIENT = 'samuel.goodey@scandiweb.com';
+const REPORT_ENDPOINT = '';
 
 const PROXY = 'https://merchantminisite.samuel-goodey.workers.dev';
 
@@ -2818,30 +2921,42 @@ function buildCompareRows(scores) {
 
 function renderScoreGrid(scores) {
   const grid = document.getElementById('score-grid');
+  const scoreDelta = (current, benchmark) => {
+    const diff = benchmark - current;
+    if (diff > 0) return `+${diff} pts on Hyva`;
+    if (diff < 0) return `${Math.abs(diff)} pts above Hyva avg`;
+    return 'Matches Hyva avg';
+  };
+  const loadDelta = (current, benchmark) => {
+    const diff = parseFloat(current) - benchmark;
+    if (diff > 0) return `${diff.toFixed(1)}s faster on Hyva`;
+    if (diff < 0) return `${Math.abs(diff).toFixed(1)}s faster than Hyva avg`;
+    return 'Matches Hyva avg';
+  };
   const cards = [
     {
       label: 'Mobile speed', value: scores.mobileSpeed, unit: '/100',
       cls: classify(scores.mobileSpeed, [50, 90]),
       bench: `Hyva avg ${HYVA_BENCH.mobileSpeed}`,
-      delta: `+${HYVA_BENCH.mobileSpeed - scores.mobileSpeed} pts on Hyva`
+      delta: scoreDelta(scores.mobileSpeed, HYVA_BENCH.mobileSpeed)
     },
     {
       label: 'Desktop speed', value: scores.desktopSpeed, unit: '/100',
       cls: classify(scores.desktopSpeed, [50, 90]),
       bench: `Hyva avg ${HYVA_BENCH.desktopSpeed}`,
-      delta: `+${HYVA_BENCH.desktopSpeed - scores.desktopSpeed} pts on Hyva`
+      delta: scoreDelta(scores.desktopSpeed, HYVA_BENCH.desktopSpeed)
     },
     {
       label: 'Page load time', value: scores.lcp, unit: 's',
       cls: classifyReverse(parseFloat(scores.lcp), [2.5, 4.0]),
       bench: `Hyva avg ${HYVA_BENCH.lcp}s`,
-      delta: `${(scores.lcp - HYVA_BENCH.lcp).toFixed(1)}s faster on Hyva`
+      delta: loadDelta(scores.lcp, HYVA_BENCH.lcp)
     },
     {
       label: 'SEO health', value: scores.seo, unit: '/100',
       cls: classify(scores.seo, [60, 90]),
       bench: `Hyva avg ${HYVA_BENCH.seo}`,
-      delta: `+${HYVA_BENCH.seo - scores.seo} pts on Hyva`
+      delta: scoreDelta(scores.seo, HYVA_BENCH.seo)
     }
   ];
 
@@ -3370,6 +3485,7 @@ function showError(url, platform) {
 
 function renderResults(url, platform, scores) {
   if (!scores) scores = generateScores(url);
+  currentScores = scores;
 
   document.getElementById('results-url').textContent = url;
   document.getElementById('audit-timestamp').textContent = new Date().toLocaleString('en-GB', {
@@ -3437,6 +3553,7 @@ function showStage(stage) {
 
 function resetAudit() {
   currentPlatform = { isMagento: null, theme: 'unknown', themeDisplay: '', error: null };
+  currentScores = null;
   showStage('input');
   document.getElementById('url-input').value = '';
   document.getElementById('url-input').focus();
@@ -3528,11 +3645,28 @@ function gatherRequirements() {
   };
 }
 
-// CTA — open modal
-document.getElementById('open-cta').addEventListener('click', () => {
+function openContactModal() {
   document.getElementById('modal-url').textContent = currentUrl;
   document.getElementById('modal-overlay').classList.add('open');
+}
+
+function scrollToCallDetails() {
+  const target = document.getElementById('call-details-title');
+  const callout = document.getElementById('details-callout');
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (callout) {
+    callout.classList.add('is-highlighted');
+    window.setTimeout(() => callout.classList.remove('is-highlighted'), 1600);
+  }
+}
+
+document.getElementById('save-pdf-cta')?.addEventListener('click', () => {
+  window.print();
 });
+
+document.getElementById('jump-contact-cta')?.addEventListener('click', scrollToCallDetails);
+document.getElementById('details-call-cta')?.addEventListener('click', openContactModal);
 
 // Modal — close
 document.getElementById('modal-close').addEventListener('click', () => {
@@ -3543,10 +3677,51 @@ document.getElementById('modal-overlay').addEventListener('click', (e) => {
 });
 
 // Modal — send
-document.getElementById('modal-send').addEventListener('click', () => {
+function buildReportSnapshot() {
+  const scores = currentScores || generateScores(currentUrl);
+  return {
+    recipient: REPORT_RECIPIENT,
+    url: currentUrl,
+    generated_at: new Date().toISOString(),
+    detected_platform: currentPlatform.themeDisplay || 'Magento 2.4.x - Luma theme - Standard hosting',
+    scores,
+    findings: buildFindings(scores, currentPlatform).map(f => ({
+      tag: f.tagNow,
+      heading: f.currentH,
+      context: f.currentBody,
+      next_step_tag: f.tagFix,
+      next_step_heading: f.fixH,
+      next_step: f.fixBody,
+      impact: f.impact
+    })),
+    comparison: buildCompareRows(scores)
+  };
+}
+
+async function sendReport(payload) {
+  console.log('REPORT PAYLOAD', payload);
+  if (!REPORT_ENDPOINT) {
+    return { mode: 'demo', sent: false };
+  }
+
+  const response = await fetch(REPORT_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw new Error('Report send failed');
+  }
+
+  return response.json();
+}
+
+document.getElementById('modal-send').addEventListener('click', async () => {
   const name = document.getElementById('m-name').value.trim();
   const email = document.getElementById('m-email').value.trim();
   const company = document.getElementById('m-company').value.trim();
+  const sendButton = document.getElementById('modal-send');
 
   if (!name || !email || !company) {
     alert('Name, email, and company are required.');
@@ -3558,7 +3733,8 @@ document.getElementById('modal-send').addEventListener('click', () => {
     source: 'smb-magento-audit-v0.1',
     audited_url: currentUrl,
     detected_platform: currentPlatform.themeDisplay || 'Magento 2.4.x · Luma theme · Standard hosting',
-    scores: generateScores(currentUrl),
+    report_recipient: REPORT_RECIPIENT,
+    report: buildReportSnapshot(),
     requirements: gatherRequirements(),
     contact: {
       name,
@@ -3572,11 +3748,23 @@ document.getElementById('modal-send').addEventListener('click', () => {
   };
   console.log('PAYLOAD ⤴', payload);
 
+  try {
+    sendButton.disabled = true;
+    sendButton.textContent = 'Sending...';
+    await sendReport(payload);
+  } catch (error) {
+    console.error(error);
+    sendButton.disabled = false;
+    sendButton.textContent = 'Send details →';
+    alert('The report could not be sent yet. Please try again.');
+    return;
+  }
+
   document.getElementById('modal-body').innerHTML = `
     <div class="sent-state">
       <div class="sent-mark">✓</div>
       <div class="sent-h">On its way.</div>
-      <div class="sent-sub">Full report + 30-min call slot lands in your inbox within 1 working day. We'll bring numbers, not buzzwords.</div>
+      <div class="sent-sub">Your details are ready for Scandiweb review. We'll use the report and your context to make the first conversation specific.</div>
     </div>
     <details style="margin-top:14px;background:var(--bg-page);border:1px solid var(--border-soft);padding:12px;">
       <summary style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);">// JSON payload (what sales receives)</summary>
