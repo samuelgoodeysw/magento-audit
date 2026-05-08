@@ -424,21 +424,22 @@ body {
 .btn-ghost:hover { background: #1F1F1F; }
 
 .btn-report {
+  background: transparent;
+  border-color: #6B708F;
+  color: var(--text-inverse);
+  font-weight: 800;
+}
+
+.btn-report:hover { background: #1F244A; color: var(--text-inverse); }
+
+.btn-contact {
   background: #ffffff;
   border-color: #ffffff;
   color: var(--bg-charcoal);
-  font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
 }
 
-.btn-report:hover { background: #F1F3FF; color: var(--bg-charcoal); }
-
-.btn-contact {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg-charcoal);
-}
-
-.btn-contact:hover { background: #9BFF9B; color: var(--bg-charcoal); }
+.btn-contact:hover { background: #F1F3FF; color: var(--bg-charcoal); }
 
 .results-reset-link {
   margin-top: 10px;
@@ -1213,24 +1214,26 @@ body {
   background: rgba(10, 10, 10, 0.85);
   display: none;
   z-index: 200;
-  padding: 24px;
+  padding: 16px;
   overflow-y: auto;
 }
 
-.modal-overlay.open { display: grid; place-items: start center; }
+.modal-overlay.open { display: grid; place-items: center; }
 
 .modal {
   background: var(--bg-surface);
   border: 1px solid var(--bg-charcoal);
-  max-width: 640px;
+  max-width: 760px;
   width: 100%;
-  margin-top: 40px;
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-head {
   background: var(--bg-charcoal);
   color: var(--text-inverse);
-  padding: 22px 28px;
+  padding: 18px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1247,12 +1250,15 @@ body {
 }
 .modal-close:hover { background: var(--brick); border-color: var(--brick); }
 
-.modal-body { padding: 24px 28px; }
+.modal-body {
+  padding: 18px 24px;
+  overflow: visible;
+}
 
 .modal-summary {
   background: var(--bg-page);
-  padding: 14px 16px;
-  margin-bottom: 20px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11.5px;
   line-height: 1.6;
@@ -1263,7 +1269,8 @@ body {
 .modal-summary strong { color: var(--text-primary); }
 
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-.field-group { margin-bottom: 14px; }
+.field-row .field-group { margin-bottom: 0; }
+.field-group { margin-bottom: 12px; }
 
 .field-label {
   display: block;
@@ -1279,7 +1286,7 @@ body {
 
 .field-input, .field-select, .field-textarea {
   width: 100%;
-  padding: 10px 12px;
+  padding: 9px 12px;
   border: 1px solid var(--border-soft);
   background: var(--bg-page);
   font-family: 'Manrope', sans-serif;
@@ -1290,10 +1297,10 @@ body {
   outline: none; border-color: var(--bg-charcoal); background: white;
 }
 
-.field-textarea { resize: vertical; min-height: 70px; }
+.field-textarea { resize: vertical; min-height: 58px; }
 
 .modal-foot {
-  padding: 18px 28px;
+  padding: 14px 24px;
   background: var(--bg-page);
   border-top: 1px solid var(--border-soft);
   display: flex;
@@ -1323,6 +1330,8 @@ body {
   .stage-hero { padding: 40px 28px; }
   .url-form { grid-template-columns: 1fr; }
   .url-submit { padding: 16px; }
+  .modal-overlay.open { place-items: start center; }
+  .modal { max-height: none; }
   .field-row { grid-template-columns: 1fr; }
   .compare-title { font-size: 22px; }
   .cta-btn { width: 100%; }
@@ -1775,11 +1784,6 @@ body {
       </div>
     </div>
 
-    <div class="req-textarea-wrap">
-      <label class="req-field-label" style="margin-bottom:10px;">Anything else worth flagging? <span style="text-transform:none;letter-spacing:0;color:var(--text-muted);">(context, goals, blockers, tools, deadlines, internal pressure…)</span></label>
-      <textarea class="req-textarea" id="r-notes" placeholder="e.g. conversion has dropped, paid ads are getting expensive, tracking is messy, the site slows down during campaigns, or the team needs a clearer upgrade plan..."></textarea>
-    </div>
-
     <div class="footnote">
       <span id="footnote-source"><strong>// DEMO MODE</strong> · scores estimated from URL. Run a URL to get live PageSpeed Insights data.</span>
       <span>v0.3 / smb-magento-audit</span>
@@ -1800,7 +1804,7 @@ body {
     </div>
     <div class="modal-body" id="modal-body">
       <div class="modal-summary">
-        Send your audit context for <strong id="modal-url">—</strong>. We'll review the report, look at the details you shared, and come back with the most useful next steps.
+        Leave your details for <strong id="modal-url">—</strong>. We'll review the audit before replying.
       </div>
       <div class="field-row">
         <div class="field-group">
@@ -1808,31 +1812,14 @@ body {
           <input class="field-input" id="m-name" placeholder="First, surname">
         </div>
         <div class="field-group">
-          <label class="field-label">Role</label>
-          <input class="field-input" id="m-role" placeholder="e.g. Head of Digital">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field-group">
-          <label class="field-label">Company <span class="req">*</span></label>
-          <input class="field-input" id="m-company" placeholder="e.g. Acme Homeware">
-        </div>
-        <div class="field-group">
-          <label class="field-label">Company size</label>
-          <select class="field-select" id="m-company-size">
-            <option value="">—</option>
-            <option>1–10 employees</option>
-            <option>11–50 employees</option>
-            <option>51–200 employees</option>
-            <option>201–500 employees</option>
-            <option>500+ employees</option>
-          </select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field-group">
           <label class="field-label">Email <span class="req">*</span></label>
           <input class="field-input" id="m-email" type="email" placeholder="you@company.com">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Company</label>
+          <input class="field-input" id="m-company" placeholder="e.g. Acme Homeware">
         </div>
         <div class="field-group">
           <label class="field-label">Phone</label>
@@ -3122,7 +3109,7 @@ function applyVerticalConfig() {
   document.getElementById('fragmentation-sub').textContent    = V.fragmentationSub;
   document.getElementById('req-features-label').textContent   = V.reqFeaturesLabel;
   document.getElementById('req-features-heading').textContent = V.reqFeaturesHeading;
-  document.getElementById('r-notes').placeholder       = V.notesCue;
+  if (document.getElementById('r-notes')) document.getElementById('r-notes').placeholder = V.notesCue;
   document.getElementById('m-notes').placeholder       = V.modalNotesCue;
   renderStackGrid();
   renderServicesSection();
@@ -3663,8 +3650,7 @@ function gatherRequirements() {
     growth_priorities: [...reqState.features].map(id => ({
       id,
       name: V.features.find(f => f.id === id)?.name || id
-    })),
-    notes: document.getElementById('r-notes')?.value.trim() || ''
+    }))
   };
 }
 
@@ -3677,7 +3663,9 @@ function scrollToCallDetails() {
   const target = document.getElementById('call-details-title');
   const callout = document.getElementById('details-callout');
   if (!target) return;
-  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const headerOffset = (document.querySelector('.header')?.offsetHeight || 0) + 24;
+  const targetTop = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+  window.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
   if (callout) {
     callout.classList.add('is-highlighted');
     window.setTimeout(() => callout.classList.remove('is-highlighted'), 1600);
@@ -3746,8 +3734,8 @@ document.getElementById('modal-send').addEventListener('click', async () => {
   const company = document.getElementById('m-company').value.trim();
   const sendButton = document.getElementById('modal-send');
 
-  if (!name || !email || !company) {
-    alert('Name, email, and company are required.');
+  if (!name || !email) {
+    alert('Name and email are required.');
     return;
   }
 
@@ -3761,9 +3749,7 @@ document.getElementById('modal-send').addEventListener('click', async () => {
     requirements: gatherRequirements(),
     contact: {
       name,
-      role: document.getElementById('m-role').value.trim(),
       company,
-      company_size: document.getElementById('m-company-size').value,
       email,
       phone: document.getElementById('m-phone').value.trim(),
       notes: document.getElementById('m-notes').value.trim()
