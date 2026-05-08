@@ -1847,25 +1847,7 @@ body {
         <div class="req-side-tag">ECOMMERCE ECOSYSTEM</div>
         <div class="req-side-h">What is connected?</div>
 
-        <div class="req-field">
-          <label class="req-field-label">ERP / OMS / WMS</label>
-          <input class="req-field-input" id="r-erp-oms-wms" placeholder="e.g. NetSuite, Linnworks, Peoplevox, none, or not sure">
-        </div>
-
-        <div class="req-field">
-          <label class="req-field-label">CRM / email / marketing</label>
-          <input class="req-field-input" id="r-crm-email" placeholder="e.g. Klaviyo, Dotdigital, HubSpot, Mailchimp">
-        </div>
-
-        <div class="req-field">
-          <label class="req-field-label">Search / merchandising / feeds</label>
-          <input class="req-field-input" id="r-search-feeds" placeholder="e.g. Algolia, Klevu, Google Merchant Center, marketplaces">
-        </div>
-
-        <div class="req-field">
-          <label class="req-field-label">Other tech stack / integrations</label>
-          <textarea class="req-field-textarea" id="r-tech-stack" placeholder="e.g. PIM, inventory sync, finance tools, custom APIs, reporting, fulfilment"></textarea>
-        </div>
+        <div class="req-toggles" id="ecosystem-toggles"></div>
       </div>
 
       <div class="req-side">
@@ -1950,6 +1932,16 @@ const VERTICALS = {
     reqFeaturesHeading: 'Pick the themes that matter.',
     notesCue: 'e.g. conversion has dropped, paid ads are getting expensive, tracking is messy, the site slows down during campaigns, or the team needs a clearer upgrade plan...',
     modalNotesCue: 'e.g. paid ads are getting expensive, GA4 numbers do not match sales, the site slows down during campaigns, or the team needs a cleaner Magento upgrade plan...',
+    ecosystem: [
+      { id: 'erp',         name: 'ERP / finance system',                  desc: 'Stock, pricing, accounts, invoicing, or back-office records.' },
+      { id: 'oms',         name: 'Order management (OMS)',                desc: 'Order routing, fulfilment rules, customer service, or returns.' },
+      { id: 'wms',         name: 'Warehouse or fulfilment system',         desc: 'Warehouse stock, picking, packing, delivery, or dispatch.' },
+      { id: 'pim',         name: 'Product information system (PIM)',       desc: 'Product content, images, attributes, categories, or translations.' },
+      { id: 'crm_email',   name: 'CRM or email marketing',                desc: 'Customer lists, abandoned basket, retention, win-back, or newsletters.' },
+      { id: 'search_feeds',name: 'Search, marketplaces, or product feeds', desc: 'Site search, Google Shopping, Amazon, eBay, Meta, or other channels.' },
+      { id: 'analytics',   name: 'Analytics and reporting',               desc: 'GA4, dashboards, attribution, pixels, consent, or sales reporting.' },
+      { id: 'not_sure',    name: 'Not sure yet',                          desc: 'You know tools exist, but not exactly what is connected.' }
+    ],
     features: [
       { id: 'migration',       name: 'Upgrade or migration planning',            desc: 'Understand effort, risk, dependencies, and sequencing.' },
       { id: 'support',         name: 'Ongoing support and ownership',            desc: 'One accountable team across technical fixes and growth work.' },
@@ -3698,20 +3690,20 @@ document.getElementById('url-input').addEventListener('input', () => {
 });
 
 // ============================================================
-// REQUIREMENTS — OPEN PRIORITIES (rendered on results page)
+// REQUIREMENTS — ECOSYSTEM + OPEN PRIORITIES (rendered on results page)
 // ============================================================
 
 
-const reqState = { features: new Set() };
+const reqState = { ecosystem: new Set(), features: new Set() };
 
-function renderReqToggles() {
-  const root = document.getElementById('req-toggles');
+function renderToggleGroup(rootId, items, selectedSet) {
+  const root = document.getElementById(rootId);
   if (!root) return;
-  root.innerHTML = V.features.map(f => `
-    <div class="req-toggle ${reqState.features.has(f.id) ? 'on' : ''}" data-id="${f.id}">
+  root.innerHTML = items.map(item => `
+    <div class="req-toggle ${selectedSet.has(item.id) ? 'on' : ''}" data-id="${item.id}">
       <div class="req-toggle-text">
-        <strong>${f.name}</strong>
-        ${f.desc}
+        <strong>${item.name}</strong>
+        ${item.desc}
       </div>
       <div class="req-mini-toggle"></div>
     </div>
@@ -3719,21 +3711,24 @@ function renderReqToggles() {
   root.querySelectorAll('.req-toggle').forEach(el => {
     el.addEventListener('click', () => {
       const id = el.dataset.id;
-      if (reqState.features.has(id)) reqState.features.delete(id);
-      else reqState.features.add(id);
-      renderReqToggles();
+      if (selectedSet.has(id)) selectedSet.delete(id);
+      else selectedSet.add(id);
+      renderToggleGroup(rootId, items, selectedSet);
     });
   });
 }
 
+function renderReqToggles() {
+  renderToggleGroup('ecosystem-toggles', V.ecosystem, reqState.ecosystem);
+  renderToggleGroup('req-toggles', V.features, reqState.features);
+}
+
 function gatherRequirements() {
   return {
-    ecommerce_ecosystem: {
-      erp_oms_wms: document.getElementById('r-erp-oms-wms')?.value || '',
-      crm_email_marketing: document.getElementById('r-crm-email')?.value || '',
-      search_merchandising_feeds: document.getElementById('r-search-feeds')?.value || '',
-      other_tech_stack_integrations: document.getElementById('r-tech-stack')?.value || ''
-    },
+    ecommerce_ecosystem: [...reqState.ecosystem].map(id => ({
+      id,
+      name: V.ecosystem.find(item => item.id === id)?.name || id
+    })),
     growth_priorities: [...reqState.features].map(id => ({
       id,
       name: V.features.find(f => f.id === id)?.name || id
