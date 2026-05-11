@@ -1574,12 +1574,10 @@ body {
   <!-- ========== STAGE 3 — RESULTS ========== -->
   <section class="stage" id="stage-results" hidden>
     <nav class="audit-rail" aria-label="Audit report sections">
-      <div class="audit-rail-kicker">// Full audit</div>
       <div class="audit-rail-track"><div class="audit-rail-progress" id="audit-rail-progress"></div></div>
       <div class="audit-rail-items">
         <button type="button" data-audit-target="audit-overview">Overview</button>
-        <button type="button" data-audit-target="findings-title">Findings</button>
-        <button type="button" data-audit-target="audit-opportunity-map">Opportunity map</button>
+        <button type="button" data-audit-target="audit-opportunity-map">Opportunity heatmap</button>
         <button type="button" data-audit-target="audit-fragmentation">Fragmentation</button>
       </div>
     </nav>
@@ -1602,15 +1600,11 @@ body {
     <div class="score-grid" id="score-grid"></div>
     <div class="score-disclaimer" id="score-disclaimer">// Live snapshot: scores come from the latest PageSpeed Insights API response and can vary between runs.</div>
 
-    <div class="section-title" data-num="01 / FINDINGS" id="findings-title">What this scan surfaced</div>
-    <p class="section-sub" id="findings-sub">Only scan-backed issues or risks are shown here. Softer opportunities sit in the map below.</p>
-    <div class="findings" id="findings"></div>
-
-    <div class="section-title" data-num="02 / OPPORTUNITY MAP" id="audit-opportunity-map">What looks missing or worth reviewing</div>
+    <div class="section-title" data-num="01 / OPPORTUNITY HEATMAP" id="audit-opportunity-map">What looks missing or worth reviewing</div>
     <p class="section-sub" id="opportunity-sub">A practical heat map of areas the scan could see, could not see, or thinks are worth a closer look. It is not a diagnosis; it is a shortlist for the first Scandiweb review.</p>
     <div class="opportunity-map" id="opportunity-map"></div>
 
-    <div class="section-title" data-num="03 / FRAGMENTATION" id="audit-fragmentation">Bring the work together</div>
+    <div class="section-title" data-num="02 / FRAGMENTATION" id="audit-fragmentation">Bring the work together</div>
     <p class="section-sub" id="fragmentation-sub">Most ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the work, it is hard to know what is actually moving revenue.</p>
 
     <div class="services-intro" id="services-intro">
@@ -3802,7 +3796,6 @@ function buildPreviewInsights(platform) {
 function patchLiveScores(scores) {
   renderScoreGrid(scores);
   renderOpportunityMap(scores, currentPlatform);
-  renderFindings(scores, currentPlatform);
   const footnote = document.getElementById('footnote-source');
   if (!footnote) return;
   const t = new Date().toLocaleTimeString('en-GB');
@@ -3867,17 +3860,14 @@ function renderResults(url, platform, scores) {
     }
   }
 
-  // Dynamic findings heading
+  // Dynamic opportunity heatmap heading
   const onHyva = platform && platform.theme === 'Hyva';
-  document.getElementById('findings-title').textContent =
-    onHyva ? 'Your frontend\'s slick with Hyva. Here\'s where we can improve.' : 'What this scan surfaced';
-  document.getElementById('findings-sub').textContent =
-    onHyva
-      ? 'Only scan-backed issues or risks are shown here. Softer opportunities sit in the map below.'
-      : 'Only scan-backed issues or risks are shown here. Softer opportunities sit in the map below.';
+  const oppTitle = document.querySelector('#audit-opportunity-map');
+  if (oppTitle && onHyva) {
+    oppTitle.textContent = 'Your frontend\'s slick with Hyva. Here\'s where we can improve.';
+  }
 
   renderScoreGrid(scores);
-  renderFindings(scores, platform);
   renderOpportunityMap(scores, platform);
   renderReqToggles();
 
@@ -4005,7 +3995,6 @@ function openContactModal() {
 
 const AUDIT_RAIL_SECTIONS = [
   'audit-overview',
-  'findings-title',
   'audit-opportunity-map',
   'audit-fragmentation'
 ];
