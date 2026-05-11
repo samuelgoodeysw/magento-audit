@@ -2505,7 +2505,6 @@ function buildConsoleLines(url, platform) {
       { text: `Structured data and schema markup…`, status: 'done', stat: sig.hasStructuredData ? 'found' : 'none found' },
       { text: `Cookie consent / GDPR compliance…`, status: 'done', stat: sig.hasCookieConsent ? 'found' : 'not detected' },
       { text: `AI feature signals — assistants, chatbots, and AI copy…`, status: 'done', stat: sig.hasAiFeature ? 'found' : (sig.hasLiveChat ? 'chat found' : 'none detected') },
-      { text: `Ecommerce page scan — product, listing, checkout…`, status: 'done', stat: sig.pageScan ? `${sig.pageScan.pdp.checked ? 'PDP' : 'no PDP'} / ${sig.pageScan.plp.checked ? 'PLP' : 'no PLP'}` : 'not checked' },
       { text: `Storefront architecture — theme, PWA, or headless…`, status: 'done', stat: sig.storefront?.name || 'not clear' },
     );
   }
@@ -3871,7 +3870,7 @@ function renderResults(url, platform, scores) {
   // Dynamic findings heading
   const onHyva = platform && platform.theme === 'Hyva';
   document.getElementById('findings-title').textContent =
-    onHyva ? 'You\'re on Hyva: here\'s what\'s still on the table' : 'What this scan surfaced';
+    onHyva ? 'Your frontend\'s slick with Hyva. Here\'s where we can improve.' : 'What this scan surfaced';
   document.getElementById('findings-sub').textContent =
     onHyva
       ? 'Only scan-backed issues or risks are shown here. Softer opportunities sit in the map below.'
