@@ -961,8 +961,19 @@ body {
   margin-bottom: 24px;
 }
 
+.req-grid-single { grid-template-columns: 1fr; }
+.req-grid-single .req-toggles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 18px;
+  row-gap: 0;
+}
+
 @media (max-width: 900px) {
   .req-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .req-grid-single .req-toggles { grid-template-columns: 1fr; }
 }
 
 .req-side {
@@ -1064,27 +1075,31 @@ body {
 }
 
 .req-mini-toggle {
-  width: 32px;
-  height: 18px;
-  background: var(--border-soft);
+  width: 20px;
+  height: 20px;
+  background: white;
+  border: 1.5px solid #9BA2C8;
   position: relative;
   flex-shrink: 0;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
+  border-radius: 4px;
 }
 
 .req-mini-toggle::after {
   content: '';
   position: absolute;
   top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  background: white;
+  left: 6px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
   transition: transform 0.15s;
 }
 
-.req-toggle.on .req-mini-toggle { background: var(--bg-charcoal); }
-.req-toggle.on .req-mini-toggle::after { transform: translateX(14px); background: var(--accent); }
+.req-toggle.on .req-mini-toggle { background: var(--accent); border-color: var(--accent); }
+.req-toggle.on .req-mini-toggle::after { transform: rotate(45deg) scale(1); }
 
 /* CTA STRIP */
 .cta-strip {
@@ -1226,7 +1241,7 @@ body {
 .modal-head {
   background: var(--bg-charcoal);
   color: var(--text-inverse);
-  padding: 18px 24px;
+  padding: 14px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1234,7 +1249,7 @@ body {
 }
 
 .modal-head .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
-.modal-head .title { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 22px; margin-top: 4px; }
+.modal-head .title { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 20px; margin-top: 2px; }
 
 .modal-close {
   background: transparent; border: 1px solid #404040; color: var(--text-inverse);
@@ -1244,26 +1259,26 @@ body {
 .modal-close:hover { background: var(--brick); border-color: var(--brick); }
 
 .modal-body {
-  padding: 18px 24px;
+  padding: 12px 24px;
   overflow-y: auto;
 }
 
 .modal-summary {
   background: var(--bg-page);
-  padding: 12px 14px;
-  margin-bottom: 16px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11.5px;
-  line-height: 1.6;
+  line-height: 1.5;
   color: var(--text-secondary);
   border-left: 3px solid var(--accent);
 }
 
 .modal-summary strong { color: var(--text-primary); }
 
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
 .field-row .field-group { margin-bottom: 0; }
-.field-group { margin-bottom: 12px; }
+.field-group { margin-bottom: 8px; }
 
 .field-label {
   display: block;
@@ -1293,35 +1308,37 @@ body {
 .field-textarea { resize: vertical; min-height: 58px; }
 
 .modal .req-grid {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   border-color: var(--border-soft);
   background: var(--border-soft);
 }
 
 .modal .req-side {
-  padding: 18px 20px;
+  padding: 12px 16px;
 }
 
 .modal .req-side-h {
-  font-size: 15px;
-  margin-bottom: 10px;
+  font-size: 14px;
+  margin-bottom: 6px;
 }
 
 .modal .req-toggle {
-  padding: 7px 0;
+  padding: 3px 0;
   gap: 10px;
 }
 
 .modal .req-toggle-text {
-  font-size: 11.5px;
+  font-size: 10.5px;
+  line-height: 1.3;
 }
 
 .modal .req-toggle-text strong {
-  font-size: 12.5px;
+  font-size: 12px;
+  margin-bottom: 0;
 }
 
 .modal-foot {
-  padding: 14px 24px;
+  padding: 10px 24px;
   background: var(--bg-page);
   border-top: 1px solid var(--border-soft);
   display: flex;
@@ -1348,12 +1365,24 @@ body {
 
 @media (max-width: 700px) {
   .hero-title { font-size: 30px; }
-  .stage-hero { padding: 40px 28px; }
+  .stage-hero { padding: 22px 20px; }
   .url-form { grid-template-columns: 1fr; }
   .url-submit { padding: 16px; }
-  .modal-overlay.open { place-items: start center; }
-  .modal { max-height: none; }
-  .field-row { grid-template-columns: 1fr; }
+  .modal-overlay { padding: 0; }
+  .modal-overlay.open { place-items: stretch; }
+  .modal { max-height: 100dvh; max-width: 100%; border: none; }
+  .modal-head { padding: 12px 16px; }
+  .modal-head .title { font-size: 17px; }
+  .modal-body { padding: 10px 16px; }
+  .modal-summary { padding: 8px 10px; font-size: 11px; margin-bottom: 8px; }
+  .field-row { grid-template-columns: 1fr; gap: 8px; }
+  .modal .req-grid { grid-template-columns: 1fr; gap: 1px; }
+  .modal .req-side { padding: 10px 12px; }
+  .modal .req-side-tag { font-size: 9px; }
+  .modal .req-side-h { font-size: 13px; margin-bottom: 4px; }
+  .modal .req-toggle { padding: 6px 0; }
+  .modal-foot { padding: 8px 16px; gap: 8px; flex-wrap: wrap; }
+  .foot-text { font-size: 9px; }
   .cta-btn { width: 100%; }
   .header-meta { display: none; }
 }
@@ -1666,13 +1695,7 @@ body {
           <input class="field-input" id="m-email" type="email" placeholder="you@company.com">
         </div>
       </div>
-      <div class="req-grid">
-        <div class="req-side">
-          <div class="req-side-tag">ECOMMERCE ECOSYSTEM</div>
-          <div class="req-side-h">What is connected?</div>
-          <div class="req-toggles" id="ecosystem-toggles"></div>
-        </div>
-
+      <div class="req-grid req-grid-single">
         <div class="req-side">
           <div class="req-side-tag" id="req-features-label">OPEN PRIORITIES</div>
           <div class="req-side-h" id="req-features-heading">What should we cover?</div>
@@ -1903,6 +1926,32 @@ async function fetchViaProxy(targetUrl, timeoutMs = 6000) {
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+async function probeLlmDiscovery(baseUrl) {
+  let origin;
+  try { origin = new URL(baseUrl).origin; } catch { return { llmsTxt: false, agentsJson: false }; }
+  const targets = [
+    { key: 'llmsTxt',    url: `${origin}/llms.txt` },
+    { key: 'agentsJson', url: `${origin}/agents.json` }
+  ];
+  const results = await Promise.allSettled(targets.map(t => fetchViaProxy(t.url, 4000)));
+  const out = { llmsTxt: false, agentsJson: false };
+  targets.forEach((t, i) => {
+    const r = results[i];
+    if (r.status !== 'fulfilled' || !r.value) return;
+    const { status, html } = r.value;
+    if (!(status >= 200 && status < 300)) return;
+    const body = (html || '').trim();
+    if (!body) return;
+    if (t.key === 'agentsJson') {
+      try { JSON.parse(body); out.agentsJson = true; } catch { /* not valid json */ }
+    } else {
+      // llms.txt: should be a small markdown-style text file, not an HTML 404 page
+      if (!/^\s*<!doctype|^\s*<html/i.test(body) && body.length < 200000) out.llmsTxt = true;
+    }
+  });
+  return out;
 }
 
 function extractSameOriginLinks(html, baseUrl) {
@@ -2243,7 +2292,10 @@ async function detectPlatform(url) {
     const hasOGTags   = /<meta[^>]+property=["']og:/i.test(html);
     const hasCanonical= /<link[^>]+rel=["']canonical["']/i.test(html);
     const h1Count     = (html.match(/<h1[\s>]/gi) || []).length;
-    const pageScan    = await scanCommercePages(url, html);
+    const [pageScan, llmDiscovery] = await Promise.all([
+      scanCommercePages(url, html),
+      probeLlmDiscovery(url)
+    ]);
 
     result.signals = {
       // hosting
@@ -2265,6 +2317,8 @@ async function detectPlatform(url) {
       hasStructuredData, hasMetaDesc, hasOGTags, hasCanonical, h1Count,
       // ecommerce page types
       pageScan,
+      // AI / LLM discovery files
+      llmDiscovery,
     };
 
   } catch (e) {
@@ -2499,6 +2553,10 @@ function buildConsoleLines(url, platform) {
       { text: `Structured data and schema markup…`, status: 'done', stat: sig.hasStructuredData ? 'found' : 'none found' },
       { text: `Cookie consent / GDPR compliance…`, status: 'done', stat: sig.hasCookieConsent ? 'found' : 'not detected' },
       { text: `AI feature signals — assistants, chatbots, and AI copy…`, status: 'done', stat: sig.hasAiFeature ? 'found' : (sig.hasLiveChat ? 'chat found' : 'none detected') },
+      { text: `AI crawler discovery — llms.txt, agents.json…`, status: 'done', stat: (() => {
+        const f = [sig.llmDiscovery?.llmsTxt && 'llms.txt', sig.llmDiscovery?.agentsJson && 'agents.json'].filter(Boolean);
+        return f.length ? f.join(' + ') : 'none found';
+      })() },
       { text: `Storefront architecture — theme, PWA, or headless…`, status: 'done', stat: sig.storefront?.name || 'not clear' },
     );
   }
@@ -3179,6 +3237,18 @@ function buildOpportunityMap(scores, platform, options = {}) {
       sig?.hasStructuredData ? `Structured data detected; SEO score ${scores.seo}/100.` : `Structured data not clearly detected; SEO score ${scores.seo}/100.`,
       'Review product schema, technical SEO, content gaps, and AI visibility.',
       86
+    ),
+    classify(
+      !sig ? 'review' : (sig.llmDiscovery?.llmsTxt || sig.llmDiscovery?.agentsJson) ? 'detected' : 'missing',
+      !sig ? 2 : (sig.llmDiscovery?.llmsTxt || sig.llmDiscovery?.agentsJson) ? 1 : 2,
+      'AI crawler discovery',
+      !sig ? 'AI discovery files could not be checked.' :
+        (() => {
+          const found = [sig.llmDiscovery?.llmsTxt && 'llms.txt', sig.llmDiscovery?.agentsJson && 'agents.json'].filter(Boolean);
+          return found.length ? `${found.join(' + ')} found at site root.` : 'No llms.txt or agents.json found at site root.';
+        })(),
+      'Publish llms.txt / agents.json so ChatGPT, Perplexity, and other AI crawlers can index your catalogue and brand context.',
+      68
     ),
     classify(
       securityNeedsReview ? 'review' : 'detected',
@@ -3971,7 +4041,6 @@ function renderToggleGroup(rootId, items, selectedSet) {
 }
 
 function renderReqToggles() {
-  renderToggleGroup('ecosystem-toggles', V.ecosystem, reqState.ecosystem);
   renderToggleGroup('req-toggles', V.features, reqState.features);
 }
 
