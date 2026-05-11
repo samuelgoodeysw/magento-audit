@@ -986,9 +986,9 @@ body {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--accent);
+  color: white;
   background: var(--bg-charcoal);
-  padding: 3px 8px;
+  padding: 4px 10px;
   display: inline-block;
   margin-bottom: 6px;
   font-weight: 600;
@@ -1349,14 +1349,15 @@ body {
 .foot-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
 
 .btn-primary {
-  background: var(--accent); border: 1px solid var(--bg-charcoal);
-  padding: 10px 16px;
+  background: var(--accent); border: 1px solid var(--accent);
+  padding: 11px 22px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
-  cursor: pointer; font-weight: 600; color: var(--bg-charcoal);
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  cursor: pointer; font-weight: 700; color: white;
+  transition: background 0.15s, border-color 0.15s;
 }
-.btn-primary:hover { background: var(--bg-charcoal); color: var(--accent); }
-.btn-primary:disabled { background: #5A5A5A; color: #999; cursor: not-allowed; border-color: #5A5A5A; }
+.btn-primary:hover { background: var(--bg-charcoal); border-color: var(--bg-charcoal); color: white; }
+.btn-primary:disabled { background: #C5C9DD; color: white; cursor: not-allowed; border-color: #C5C9DD; }
 
 .sent-state { text-align: center; padding: 24px 12px; }
 .sent-mark { width: 56px; height: 56px; background: var(--accent); margin: 0 auto 14px; display: grid; place-items: center; font-family: 'Archivo', sans-serif; font-size: 28px; font-weight: 900; color: var(--bg-charcoal); }
@@ -1743,6 +1744,7 @@ const VERTICALS = {
       { id: 'conversion',      name: 'UX and conversion',                        desc: 'Product discovery, trust, checkout, and enquiry paths.' },
       { id: 'analytics',       name: 'Analytics',                                desc: 'GA4, events, dashboards, consent, and revenue data.' },
       { id: 'organic',         name: 'SEO and AEO',                              desc: 'Traditional search plus AI search visibility.' },
+      { id: 'ai_commerce',     name: 'AI commerce tools',                        desc: 'Chat-to-buy, AI search inside the store, recommendations, and automation.' },
       { id: 'paid',            name: 'Paid media',                               desc: 'Feeds, pixels, attribution, and spend efficiency.' },
       { id: 'retention',       name: 'Email, CRM, and retention',                desc: 'Basket recovery, win-back, and repeat-purchase flows.' },
       { id: 'loyalty',         name: 'Loyalty',                                  desc: 'Rewards, referrals, subscriptions, and repeat purchase.' },
