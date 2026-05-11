@@ -951,52 +951,6 @@ body {
 
 .services-list li strong { color: var(--text-primary); font-weight: 600; }
 
-/* REQUIREMENTS SECTION */
-.details-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
-  gap: 28px;
-  align-items: start;
-  margin-bottom: 28px;
-}
-
-.details-intro .section-sub { margin: 0; }
-
-.details-callout {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-}
-
-.details-callout .cta-btn {
-  background: #10142C;
-  color: #ffffff;
-  border: 1px solid #10142C;
-  width: 100%;
-  max-width: 320px;
-  text-align: center;
-}
-
-#details-callout #details-call-cta {
-  background: #10142C;
-  color: #ffffff;
-  border-color: #10142C;
-  opacity: 1;
-}
-
-.details-callout .cta-btn:hover,
-#details-callout #details-call-cta:hover {
-  background: #FF4E37;
-  border-color: #FF4E37;
-  color: #0A0A0A;
-  opacity: 1;
-}
-
-.details-callout.is-highlighted .cta-btn {
-  outline: 3px solid rgba(255, 78, 55, 0.35);
-  outline-offset: 6px;
-}
-
 .req-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1007,9 +961,6 @@ body {
 }
 
 @media (max-width: 900px) {
-  .details-intro { grid-template-columns: 1fr; }
-  .details-callout { justify-content: stretch; }
-  .details-callout .cta-btn { max-width: none; }
   .req-grid { grid-template-columns: 1fr; }
 }
 
@@ -1133,30 +1084,6 @@ body {
 
 .req-toggle.on .req-mini-toggle { background: var(--bg-charcoal); }
 .req-toggle.on .req-mini-toggle::after { transform: translateX(14px); background: var(--accent); }
-
-.req-textarea-wrap {
-  margin-bottom: 24px;
-}
-
-.req-textarea {
-  width: 100%;
-  border: 1px solid var(--border-soft);
-  background: var(--bg-page);
-  font-family: 'Manrope', sans-serif;
-  font-size: 13px;
-  color: var(--text-primary);
-  resize: vertical;
-  min-height: 80px;
-  outline: none;
-  padding: 10px 12px;
-}
-
-.req-textarea:focus {
-  border-color: var(--bg-charcoal);
-  background: white;
-}
-
-.req-textarea::placeholder { color: var(--text-secondary); }
 
 /* CTA STRIP */
 .cta-strip {
@@ -1288,7 +1215,7 @@ body {
 .modal {
   background: var(--bg-surface);
   border: 1px solid var(--bg-charcoal);
-  max-width: 760px;
+  max-width: 980px;
   width: 100%;
   max-height: calc(100dvh - 32px);
   display: flex;
@@ -1317,7 +1244,7 @@ body {
 
 .modal-body {
   padding: 18px 24px;
-  overflow: visible;
+  overflow-y: auto;
 }
 
 .modal-summary {
@@ -1363,6 +1290,34 @@ body {
 }
 
 .field-textarea { resize: vertical; min-height: 58px; }
+
+.modal .req-grid {
+  margin: 6px 0 0;
+  border-color: var(--border-soft);
+  background: var(--border-soft);
+}
+
+.modal .req-side {
+  padding: 18px 20px;
+}
+
+.modal .req-side-h {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.modal .req-toggle {
+  padding: 7px 0;
+  gap: 10px;
+}
+
+.modal .req-toggle-text {
+  font-size: 11.5px;
+}
+
+.modal .req-toggle-text strong {
+  font-size: 12.5px;
+}
 
 .modal-foot {
   padding: 14px 24px;
@@ -1481,13 +1436,8 @@ body {
   body::before,
   .audit-rail,
   .results-actions,
-  .details-callout,
   .modal-overlay,
   .footnote,
-  #call-details-title,
-  .details-intro,
-  .req-grid,
-  .req-textarea-wrap,
   .url-form,
   .console-bar,
   .cta-strip {
@@ -1521,8 +1471,7 @@ body {
   .score-grid,
   .findings,
   .opportunity-map,
-  .services-intro,
-  .req-grid {
+  .services-intro {
     break-inside: avoid;
   }
 }
@@ -1631,7 +1580,6 @@ body {
         <button type="button" data-audit-target="findings-title">Findings</button>
         <button type="button" data-audit-target="audit-opportunity-map">Opportunity map</button>
         <button type="button" data-audit-target="audit-fragmentation">Fragmentation</button>
-        <button type="button" data-audit-target="call-details-title">Tailor the call</button>
       </div>
     </nav>
 
@@ -1691,30 +1639,6 @@ body {
       </div>
     </div>
 
-    <div class="section-title" data-num="04 / CONTEXT" id="call-details-title">A few details to tailor the call</div>
-    <div class="details-intro" id="call-details">
-      <p class="section-sub">Optional. Share whatever you know, skip whatever you do not. The aim is to make the first conversation useful without turning this into a discovery form.</p>
-      <div class="details-callout" id="details-callout">
-        <button class="cta-btn" id="details-call-cta">Get in touch with us →</button>
-      </div>
-    </div>
-
-    <div class="req-grid">
-      <div class="req-side">
-        <div class="req-side-tag">ECOMMERCE ECOSYSTEM</div>
-        <div class="req-side-h">What is connected?</div>
-
-        <div class="req-toggles" id="ecosystem-toggles"></div>
-      </div>
-
-      <div class="req-side">
-        <div class="req-side-tag" id="req-features-label">OPEN PRIORITIES</div>
-        <div class="req-side-h" id="req-features-heading">Pick the themes that matter.</div>
-
-        <div class="req-toggles" id="req-toggles"></div>
-      </div>
-    </div>
-
     <div class="footnote">
       <span id="footnote-source"><strong>// DEMO MODE</strong> · scores estimated from URL. Run a URL to get live PageSpeed Insights data.</span>
       <span>v0.3 / magento-audit</span>
@@ -1747,19 +1671,18 @@ body {
           <input class="field-input" id="m-email" type="email" placeholder="you@company.com">
         </div>
       </div>
-      <div class="field-row">
-        <div class="field-group">
-          <label class="field-label">Company</label>
-          <input class="field-input" id="m-company" placeholder="e.g. Acme Homeware">
+      <div class="req-grid">
+        <div class="req-side">
+          <div class="req-side-tag">ECOMMERCE ECOSYSTEM</div>
+          <div class="req-side-h">What is connected?</div>
+          <div class="req-toggles" id="ecosystem-toggles"></div>
         </div>
-        <div class="field-group">
-          <label class="field-label">Phone</label>
-          <input class="field-input" id="m-phone" type="tel" placeholder="+44…">
+
+        <div class="req-side">
+          <div class="req-side-tag" id="req-features-label">OPEN PRIORITIES</div>
+          <div class="req-side-h" id="req-features-heading">What should we cover?</div>
+          <div class="req-toggles" id="req-toggles"></div>
         </div>
-      </div>
-      <div class="field-group">
-        <label class="field-label">Anything specific you want covered on the call?</label>
-        <textarea class="field-textarea" id="m-notes" placeholder="e.g. paid ads are getting expensive, GA4 numbers do not match sales, the site slows down during campaigns, or the team needs a cleaner Magento upgrade plan..."></textarea>
       </div>
     </div>
     <div class="modal-foot">
@@ -1783,9 +1706,7 @@ const VERTICALS = {
     currency: '\u00A3',
     fragmentationSub: 'Most ecommerce teams juggle developers, hosting, SEO, paid media, email, and analytics separately. Without one accountable team across the work, it is hard to know what is actually moving revenue.',
     reqFeaturesLabel: 'OPEN PRIORITIES',
-    reqFeaturesHeading: 'Pick the themes that matter.',
-    notesCue: 'e.g. conversion has dropped, paid ads are getting expensive, tracking is messy, the site slows down during campaigns, or the team needs a clearer upgrade plan...',
-    modalNotesCue: 'e.g. paid ads are getting expensive, GA4 numbers do not match sales, the site slows down during campaigns, or the team needs a cleaner Magento upgrade plan...',
+    reqFeaturesHeading: 'What should we cover?',
     ecosystem: [
       { id: 'erp',         name: 'ERP / finance system',                  desc: 'Stock, pricing, accounts, invoicing, or back-office records.' },
       { id: 'oms',         name: 'Order management (OMS)',                desc: 'Order routing, fulfilment rules, customer service, or returns.' },
@@ -1797,16 +1718,16 @@ const VERTICALS = {
       { id: 'not_sure',    name: 'Not sure yet',                          desc: 'You know tools exist, but not exactly what is connected.' }
     ],
     features: [
-      { id: 'migration',       name: 'Upgrade or migration planning',            desc: 'Understand effort, risk, dependencies, and sequencing.' },
-      { id: 'support',         name: 'Ongoing support and ownership',            desc: 'One accountable team across technical fixes and growth work.' },
-      { id: 'integrations',    name: 'Integrations',                             desc: 'Connect ERP, OMS, WMS, CRM, feeds, and other operational systems.' },
-      { id: 'strategy',        name: 'Growth roadmap',                           desc: 'Prioritise what to do first with budget, timing, and impact in mind.' },
-      { id: 'speed',           name: 'Speed and Core Web Vitals',                desc: 'Make the store feel faster and protect search visibility.' },
-      { id: 'conversion',      name: 'Conversion and UX',                        desc: 'Improve product discovery, trust, checkout, and enquiry paths.' },
-      { id: 'tracking',        name: 'Tracking and attribution',                 desc: 'Clean up GA4, pixels, consent, dashboards, and revenue data.' },
-      { id: 'organic',         name: 'SEO and AI search visibility',             desc: 'Traditional search plus ChatGPT, Perplexity, and AI Overviews.' },
-      { id: 'paid',            name: 'Paid media efficiency',                    desc: 'Connect spend to revenue and reduce wasted clicks.' },
-      { id: 'retention',       name: 'Email, CRM, and retention',                desc: 'Recover baskets, win back customers, and drive repeat purchase.' },
+      { id: 'migration',       name: 'Upgrade or migration planning',            desc: 'Effort, risk, dependencies, and sequencing.' },
+      { id: 'developer_support', name: 'Developer support',                      desc: 'Magento fixes, improvements, and technical ownership.' },
+      { id: 'integrations',    name: 'Integrations',                             desc: 'ERP, OMS, WMS, CRM, feeds, and operational systems.' },
+      { id: 'hosting',         name: 'Hosting',                                  desc: 'Performance, caching, scaling, security, and Readymage fit.' },
+      { id: 'conversion',      name: 'UX and conversion',                        desc: 'Product discovery, trust, checkout, and enquiry paths.' },
+      { id: 'analytics',       name: 'Analytics',                                desc: 'GA4, events, dashboards, consent, and revenue data.' },
+      { id: 'organic',         name: 'SEO and AEO',                              desc: 'Traditional search plus AI search visibility.' },
+      { id: 'paid',            name: 'Paid media',                               desc: 'Feeds, pixels, attribution, and spend efficiency.' },
+      { id: 'retention',       name: 'Email, CRM, and retention',                desc: 'Basket recovery, win-back, and repeat-purchase flows.' },
+      { id: 'loyalty',         name: 'Loyalty',                                  desc: 'Rewards, referrals, subscriptions, and repeat purchase.' },
       { id: 'ops',             name: 'Operations and admin workload',            desc: 'Reduce manual work around orders, content, reporting, and support.' }
     ],
     fragmented: {
@@ -3113,7 +3034,8 @@ function buildFindings(scores, platform) {
 // OPPORTUNITY MAP
 // ============================================================
 
-function buildOpportunityMap(scores, platform) {
+function buildOpportunityMap(scores, platform, options = {}) {
+  const maxItems = options.maxItems ?? 12;
   const sig = platform?.signals || null;
   const pageScan = sig?.pageScan || null;
   const pdp = pageScan?.pdp || null;
@@ -3125,6 +3047,14 @@ function buildOpportunityMap(scores, platform) {
   const consentRisk = !!(sig && !sig.hasCookieConsent && hasTracking);
   const speedNeedsReview = scores.mobileSpeed < 70 || lcp > 2.5 || bundle > 1.5;
   const hostingNeedsReview = scores.ttfb > 500 || (sig && !sig.cdnType && !sig.hasCaching);
+  const securityNeedsReview = !sig || !!sig.phpEol || !!sig.exposesPhpVersion || !sig.hasHsts || !sig.hasSecurityHeaders;
+  const croToolDetected = !!(sig && (sig.heatmapTool || sig.abtestTool));
+  const trustDetected = !!(sig && (sig.hasReviewWidget || pdp?.hasReviews));
+  const loyaltyDetected = !!(sig && sig.loyaltyTool);
+  const paidFeedSignals = !!(sig && (sig.hasFBPixel || sig.hasGTM || sig.hasStructuredData || sig.searchTool));
+  const accessibilityNeedsReview = scores.accessibility < 90;
+  const integrationSignals = !!(sig && (sig.emailTool || sig.searchTool || sig.hasGTM || sig.hasFBPixel));
+  const b2bSignal = !!(sig && /quote|company account|trade account|invoice|purchase order|reorder|quick order|customer group/i.test(JSON.stringify(sig.pageScan || {})));
   const storefrontType = sig?.storefront?.type;
   const storefrontStatus = !sig ? 'review' : storefrontType === 'magento_theme' || storefrontType === 'scandipwa' ? 'detected' : 'review';
   const storefrontHeat = !sig ? 2 : storefrontType === 'magento_theme' || storefrontType === 'scandipwa' ? 1 : 2;
@@ -3136,15 +3066,25 @@ function buildOpportunityMap(scores, platform) {
         ? 'Scandiweb can review whether the current Magento theme should be optimised, rebuilt on Hyva, or kept as-is.'
         : 'Scandiweb can review headless/PWA performance, Magento integration points, maintainability, and ownership model.';
 
-  const classify = (status, heat, area, signal, help) => ({ status, heat, area, signal, help });
+  const statusWeight = { missing: 300, review: 200, detected: 60 };
+  const classify = (status, heat, area, signal, help, priority = 50) => ({
+    status,
+    heat,
+    area,
+    signal,
+    help,
+    priority,
+    relevance: (statusWeight[status] || 0) + (heat * 20) + priority
+  });
 
-  return [
+  const opportunities = [
     classify(
       speedNeedsReview ? 'review' : 'detected',
       speedNeedsReview ? 2 : 1,
       'Frontend speed',
-      `Mobile ${scores.mobileSpeed}/100, main content ${scores.lcp}s, frontend code ${scores.bundleJs}MB.`,
-      'Scandiweb can review Hyva fit, script weight, layout stability, images, and third-party code.'
+      `Mobile ${scores.mobileSpeed}/100 · LCP ${scores.lcp}s · JS ${scores.bundleJs}MB.`,
+      'Review Hyva fit, script weight, images, and third-party code.',
+      96
     ),
     classify(
       storefrontStatus,
@@ -3152,37 +3092,42 @@ function buildOpportunityMap(scores, platform) {
       'Storefront architecture',
       !sig ? 'Storefront architecture could not be verified.' :
         `${sig.storefront?.name || 'Storefront type unclear'}${sig.storefront?.confidence ? ` (${sig.storefront.confidence} confidence)` : ''}.`,
-      storefrontHelp
+      storefrontHelp.replace(/^Scandiweb can review /, 'Review '),
+      80
     ),
     classify(
       !sig ? 'review' : hostingNeedsReview ? 'review' : 'detected',
       !sig || hostingNeedsReview ? 2 : 1,
-      'Hosting and caching',
+      'Infrastructure and hosting',
       sig
-        ? `${sig.cdnType ? `${sig.cdnType} CDN detected` : 'No CDN detected'}; ${sig.hasCaching ? 'cache signals found' : 'cache signals not clear'}; server response ${scores.ttfb}ms.`
-        : `Header scan was limited; server response ${scores.ttfb}ms.`,
-      'Scandiweb can review Magento hosting, CDN, cache, and Readymage fit.'
+        ? `${sig.cdnType ? `${sig.cdnType} CDN` : 'No CDN signal'} · ${sig.hasCaching ? 'cache signal found' : 'cache unclear'} · TTFB ${scores.ttfb}ms.`
+        : `Header scan limited · TTFB ${scores.ttfb}ms.`,
+      'Review hosting, CDN, cache, origin response, and Readymage fit.',
+      92
     ),
     classify(
       !sig ? 'review' : !sig.hasGA4 || sig.hasUAOnly ? 'missing' : 'detected',
       !sig ? 2 : (!sig.hasGA4 || sig.hasUAOnly ? 3 : 1),
       'Analytics setup',
-      !sig ? 'The scan could not verify analytics setup.' : sig.hasGA4 ? 'GA4 signal detected.' : sig.hasUAOnly ? 'Universal Analytics found; GA4 not clearly detected.' : 'GA4 was not clearly detected.',
-      'Scandiweb can audit GA4, events, ecommerce tracking, server-side tracking, and dashboards.'
+      !sig ? 'Analytics setup could not be verified.' : sig.hasGA4 ? 'GA4 signal detected.' : sig.hasUAOnly ? 'Universal Analytics found; GA4 unclear.' : 'GA4 was not clearly detected.',
+      'Audit GA4, ecommerce events, server-side tracking, and dashboards.',
+      90
     ),
     classify(
       consentRisk ? 'missing' : !sig ? 'review' : sig.hasCookieConsent ? 'detected' : 'review',
       consentRisk ? 3 : (!sig || !sig.hasCookieConsent ? 2 : 1),
       'Consent and compliance',
-      consentRisk ? 'Tracking signals found, but no consent banner detected.' : sig?.hasCookieConsent ? 'Consent banner signal detected.' : 'Consent setup was not clear from the homepage scan.',
-      'Scandiweb can review cookie consent, tracking behaviour, and data-use compliance.'
+      consentRisk ? 'Tracking found, but no consent banner detected.' : sig?.hasCookieConsent ? 'Consent banner signal detected.' : 'Consent setup was not clear.',
+      'Review cookie consent, tracking behaviour, and data-use compliance.',
+      76
     ),
     classify(
       !sig ? 'review' : sig.searchTool ? 'detected' : 'missing',
       !sig ? 2 : (sig.searchTool ? 1 : 3),
       'Search and merchandising',
       sig?.searchTool ? `${sig.searchTool} detected.` : 'No dedicated search or merchandising tool was clearly detected.',
-      'Scandiweb can review search relevance, product discovery, merchandising rules, and AI search.'
+      'Review search relevance, product discovery, rules, and AI search.',
+      82
     ),
     classify(
       !pdp ? 'review' : !pdp.checked ? 'review' : (pdp.hasProductSchema && pdp.hasPrice && pdp.hasAddToCart ? 'detected' : 'missing'),
@@ -3190,8 +3135,9 @@ function buildOpportunityMap(scores, platform) {
       'PDP quality',
       !pdp ? 'Product page scan was not available.' :
         !pdp.checked ? 'A likely product page could not be verified from homepage links.' :
-        `${pdp.hasProductSchema ? 'Product schema found' : 'No product schema detected'}; ${pdp.hasPrice ? 'price signal found' : 'price signal unclear'}; ${pdp.hasAddToCart ? 'add-to-cart found' : 'add-to-cart unclear'}.`,
-      'Scandiweb can review product-page schema, media, price and availability signals, reviews, trust content, and add-to-cart UX.'
+        `${pdp.hasProductSchema ? 'schema found' : 'schema unclear'} · ${pdp.hasPrice ? 'price found' : 'price unclear'} · ${pdp.hasAddToCart ? 'add-to-cart found' : 'add-to-cart unclear'}.`,
+      'Review schema, media, price, availability, reviews, and add-to-cart UX.',
+      84
     ),
     classify(
       !plp ? 'review' : !plp.checked ? 'review' : (plp.hasProductGrid && plp.hasFilters && plp.hasSorting ? 'detected' : 'review'),
@@ -3199,23 +3145,26 @@ function buildOpportunityMap(scores, platform) {
       'PLP and filters',
       !plp ? 'Listing page scan was not available.' :
         !plp.checked ? 'A likely listing page could not be verified from homepage links.' :
-        `${plp.hasProductGrid ? 'product grid found' : 'product grid unclear'}; ${plp.hasFilters ? 'filters found' : 'filters unclear'}; ${plp.hasSorting ? 'sorting found' : 'sorting unclear'}.`,
-      'Scandiweb can review category filters, sorting, merchandising, product attributes, and listing-page performance.'
+        `${plp.hasProductGrid ? 'grid found' : 'grid unclear'} · ${plp.hasFilters ? 'filters found' : 'filters unclear'} · ${plp.hasSorting ? 'sorting found' : 'sorting unclear'}.`,
+      'Review filters, sorting, merchandising, attributes, and PLP speed.',
+      83
     ),
     classify(
       !checkout ? 'review' : (checkout.hasCartLink || checkout.hasCheckoutLink || checkout.hasMiniCart ? 'detected' : 'review'),
       !checkout ? 2 : (checkout.hasCartLink || checkout.hasCheckoutLink || checkout.hasMiniCart ? 1 : 2),
       'Cart and checkout path',
       !checkout ? 'Checkout signal scan was not available.' :
-        `${checkout.hasCartLink ? 'cart link found' : 'cart link unclear'}; ${checkout.hasCheckoutLink ? 'checkout link found' : 'checkout link unclear'}; ${checkout.hasPaymentSignals ? 'payment signals found' : 'payment signals unclear'}.`,
-      'Scandiweb can review cart visibility, checkout friction, payment messaging, delivery/returns clarity, and conversion blockers.'
+        `${checkout.hasCartLink ? 'cart found' : 'cart unclear'} · ${checkout.hasCheckoutLink ? 'checkout found' : 'checkout unclear'} · ${checkout.hasPaymentSignals ? 'payment found' : 'payment unclear'}.`,
+      'Review cart visibility, checkout friction, payments, delivery, and returns.',
+      88
     ),
     classify(
       !sig ? 'review' : sig.emailTool ? 'detected' : 'missing',
       !sig ? 2 : (sig.emailTool ? 1 : 3),
-      'CRM and retention',
+      'CRM and email automation',
       sig?.emailTool ? `${sig.emailTool} detected.` : 'No email or CRM automation tool was clearly detected.',
-      'Scandiweb can connect CRM, email flows, abandoned basket, win-back, and repeat-purchase journeys.'
+      'Connect email flows, abandoned basket, win-back, and CRM data.',
+      72
     ),
     classify(
       !sig ? 'review' : sig.hasAiFeature ? 'review' : sig.hasLiveChat ? 'review' : 'missing',
@@ -3226,16 +3175,100 @@ function buildOpportunityMap(scores, platform) {
         : sig?.hasLiveChat
           ? 'Live chat detected, but no clear AI shopping assistant signal.'
           : 'No AI assistant or live shopping help was clearly detected.',
-      'Scandiweb can review <a href="https://scandiweb.ai/chattobuy" target="_blank" rel="noopener">Chat to Buy</a> or run an <a href="https://scandiweb.ai/compliance" target="_blank" rel="noopener">AI compliance audit</a> where AI is already in use.'
+      'Review <a href="https://scandiweb.ai/chattobuy" target="_blank" rel="noopener">Chat to Buy</a> or an <a href="https://scandiweb.ai/compliance" target="_blank" rel="noopener">AI compliance audit</a>.',
+      62
     ),
     classify(
       !sig ? 'review' : sig.hasStructuredData && scores.seo >= 85 ? 'detected' : 'missing',
       !sig ? 2 : (sig.hasStructuredData && scores.seo >= 85 ? 1 : 3),
       'SEO, schema, and AEO',
       sig?.hasStructuredData ? `Structured data detected; SEO score ${scores.seo}/100.` : `Structured data not clearly detected; SEO score ${scores.seo}/100.`,
-      'Scandiweb can review product schema, technical SEO, content gaps, and AI search visibility.'
+      'Review product schema, technical SEO, content gaps, and AI visibility.',
+      86
+    ),
+    classify(
+      securityNeedsReview ? 'review' : 'detected',
+      securityNeedsReview ? 2 : 1,
+      'Security and maintenance',
+      !sig ? 'Security headers could not be verified.' :
+        `${sig.phpVersion ? `PHP ${sig.phpVersion}` : 'PHP hidden'} · HSTS ${sig.hasHsts ? 'found' : 'unclear'} · headers ${sig.hasSecurityHeaders ? 'found' : 'unclear'}.`,
+      'Review patches, PHP version, security headers, monitoring, and support.',
+      74
+    ),
+    classify(
+      !sig ? 'review' : croToolDetected ? 'detected' : 'missing',
+      !sig ? 2 : (croToolDetected ? 1 : 3),
+      'CRO and testing setup',
+      !sig ? 'CRO tooling could not be verified.' :
+        [sig.heatmapTool && `Session data: ${sig.heatmapTool}`, sig.abtestTool && `Testing: ${sig.abtestTool}`].filter(Boolean).join(' · ') || 'No heatmap, session recording, or A/B testing tool detected.',
+      'Review session data, experiments, UX issues, and revenue-led test plans.',
+      70
+    ),
+    classify(
+      accessibilityNeedsReview ? 'review' : 'detected',
+      accessibilityNeedsReview ? 2 : 1,
+      'Accessibility',
+      `Accessibility score ${scores.accessibility}/100.`,
+      'Review usability, accessibility risks, and inclusive checkout journeys.',
+      58
+    ),
+    classify(
+      !sig ? 'review' : trustDetected ? 'detected' : 'review',
+      !sig ? 2 : (trustDetected ? 1 : 2),
+      'Trust and reviews',
+      trustDetected ? 'Review or trust signal detected.' : 'Reviews or trust proof were not clearly detected.',
+      'Review ratings, reviews, guarantees, delivery proof, and PDP trust content.',
+      56
+    ),
+    classify(
+      !sig ? 'review' : loyaltyDetected ? 'detected' : 'missing',
+      !sig ? 2 : (loyaltyDetected ? 1 : 3),
+      'Loyalty and repeat purchase',
+      loyaltyDetected ? `${sig.loyaltyTool} detected.` : 'No loyalty, rewards, or repeat-purchase tool clearly detected.',
+      'Review rewards, referrals, subscriptions, win-back, and repeat purchase.',
+      66
+    ),
+    classify(
+      !sig ? 'review' : paidFeedSignals ? 'review' : 'missing',
+      !sig ? 2 : (paidFeedSignals ? 2 : 3),
+      'Paid media and feeds',
+      !sig ? 'Paid media/feed readiness could not be verified.' :
+        `${sig.hasFBPixel ? 'Meta pixel found' : 'Meta pixel unclear'} · ${sig.hasGTM ? 'GTM found' : 'GTM unclear'} · ${sig.hasStructuredData ? 'product data signals found' : 'product data unclear'}.`,
+      'Review product feeds, pixels, attribution, and paid traffic efficiency.',
+      60
+    ),
+    classify(
+      !sig ? 'review' : integrationSignals ? 'review' : 'missing',
+      !sig ? 2 : (integrationSignals ? 2 : 3),
+      'Integrations and operations',
+      integrationSignals ? 'Some connected tool signals found.' : 'Few connected operations or marketing tools were visible.',
+      'Review ERP, OMS, WMS, PIM, CRM, feeds, reporting, and fulfilment links.',
+      64
+    ),
+    classify(
+      !pdp ? 'review' : !pdp.checked ? 'review' : (pdp.hasProductSchema && pdp.hasOfferSchema && pdp.hasAvailability && pdp.hasGallery ? 'detected' : 'review'),
+      !pdp ? 2 : !pdp.checked ? 2 : (pdp.hasProductSchema && pdp.hasOfferSchema && pdp.hasAvailability && pdp.hasGallery ? 1 : 2),
+      'Product data quality',
+      !pdp ? 'Product data scan was not available.' :
+        !pdp.checked ? 'A product page could not be verified.' :
+        `${pdp.hasOfferSchema ? 'offer data found' : 'offer data unclear'} · ${pdp.hasAvailability ? 'availability found' : 'availability unclear'} · ${pdp.hasGallery ? 'media found' : 'media unclear'}.`,
+      'Review attributes, PIM quality, availability, media, and structured data.',
+      68
+    ),
+    classify(
+      !sig ? 'review' : b2bSignal ? 'detected' : 'review',
+      !sig ? 2 : (b2bSignal ? 1 : 2),
+      'Account and B2B workflows',
+      b2bSignal ? 'Account, quote, invoice, or reorder language detected.' : 'Account, quote, invoice, or reorder workflows were not clear.',
+      'Review trade accounts, quotes, reorder, customer groups, and payment terms.',
+      52
     )
   ];
+
+  const ranked = opportunities
+    .sort((a, b) => b.relevance - a.relevance || a.area.localeCompare(b.area))
+    .map(({ relevance, priority, ...item }) => item);
+  return maxItems === null ? ranked : ranked.slice(0, maxItems);
 }
 
 // ============================================================
@@ -3408,8 +3441,6 @@ function applyVerticalConfig() {
   document.getElementById('fragmentation-sub').textContent    = V.fragmentationSub;
   document.getElementById('req-features-label').textContent   = V.reqFeaturesLabel;
   document.getElementById('req-features-heading').textContent = V.reqFeaturesHeading;
-  if (document.getElementById('r-notes')) document.getElementById('r-notes').placeholder = V.notesCue;
-  document.getElementById('m-notes').placeholder       = V.modalNotesCue;
   renderServicesSection();
 }
 
@@ -3969,8 +4000,7 @@ const AUDIT_RAIL_SECTIONS = [
   'audit-overview',
   'findings-title',
   'audit-opportunity-map',
-  'audit-fragmentation',
-  'call-details-title'
+  'audit-fragmentation'
 ];
 
 function getReportHeaderOffset() {
@@ -4012,21 +4042,11 @@ function updateAuditRail() {
   }
 }
 
-function scrollToCallDetails() {
-  const callout = document.getElementById('details-callout');
-  scrollToReportSection('call-details-title');
-  if (callout) {
-    callout.classList.add('is-highlighted');
-    window.setTimeout(() => callout.classList.remove('is-highlighted'), 1600);
-  }
-}
-
 document.getElementById('save-pdf-cta')?.addEventListener('click', () => {
   window.print();
 });
 
-document.getElementById('jump-contact-cta')?.addEventListener('click', scrollToCallDetails);
-document.getElementById('details-call-cta')?.addEventListener('click', openContactModal);
+document.getElementById('jump-contact-cta')?.addEventListener('click', openContactModal);
 document.querySelectorAll('[data-audit-target]').forEach((button) => {
   button.addEventListener('click', () => scrollToReportSection(button.dataset.auditTarget));
 });
@@ -4042,24 +4062,217 @@ document.getElementById('modal-overlay').addEventListener('click', (e) => {
 });
 
 // Modal — send
+function signalStatus(value) {
+  if (value === true) return 'detected';
+  if (value === false) return 'not_detected';
+  if (value === null || value === undefined || value === '') return 'unclear';
+  return 'detected';
+}
+
+function buildTechnologyContext(platform) {
+  const sig = platform?.signals || null;
+  if (!sig) {
+    return {
+      scan_depth: 'limited',
+      note: 'Technology scan signals were unavailable, likely because the proxy request timed out or could not access the page.'
+    };
+  }
+
+  return {
+    scan_depth: 'homepage_plus_sampled_commerce_pages',
+    platform: {
+      is_magento: platform.isMagento,
+      theme: platform.theme || 'unknown',
+      theme_display: platform.themeDisplay || '',
+      custom_theme_name: platform.customThemeName || '',
+      detection_error: platform.error || ''
+    },
+    frontend: {
+      storefront: sig.storefront || null,
+      is_headless_or_pwa: !!sig.isHeadless,
+      requirejs_detected: !!sig.hasRequireJs
+    },
+    hosting_and_security: {
+      php_version: sig.phpVersion || '',
+      php_version_exposed: !!sig.exposesPhpVersion,
+      php_eol_or_legacy: !!sig.phpEol,
+      server_software: sig.serverSoftware || '',
+      cdn: sig.cdnType || '',
+      cache_signals: !!sig.hasCaching,
+      hsts: !!sig.hasHsts,
+      security_headers: !!sig.hasSecurityHeaders
+    },
+    analytics_and_consent: {
+      ga4: !!sig.hasGA4,
+      universal_analytics: !!sig.hasUA,
+      ua_without_ga4: !!sig.hasUAOnly,
+      gtm: !!sig.hasGTM,
+      meta_pixel: !!sig.hasFBPixel,
+      cookie_consent: !!sig.hasCookieConsent
+    },
+    tools_detected: {
+      site_search: sig.searchTool || '',
+      email_marketing: sig.emailTool || '',
+      heatmaps_or_session_recording: sig.heatmapTool || '',
+      ab_testing: sig.abtestTool || '',
+      loyalty: sig.loyaltyTool || '',
+      live_chat: !!sig.hasLiveChat,
+      reviews: !!sig.hasReviewWidget
+    },
+    ai_and_chatbot: {
+      ai_feature_detected: !!sig.hasAiFeature,
+      ai_chatbot_detected: !!sig.hasAiChatbot,
+      signals: sig.aiFeatureSignals || []
+    },
+    seo_signals: {
+      structured_data: !!sig.hasStructuredData,
+      meta_description: !!sig.hasMetaDesc,
+      open_graph: !!sig.hasOGTags,
+      canonical: !!sig.hasCanonical,
+      h1_count: sig.h1Count ?? null
+    },
+    sampled_commerce_pages: sig.pageScan || null
+  };
+}
+
+function buildSalesBackstory(platform, scores) {
+  const sig = platform?.signals || null;
+  const items = [
+    {
+      area: 'Audited URL',
+      status: 'submitted',
+      detail: currentUrl
+    },
+    {
+      area: 'Detected platform',
+      status: platform?.isMagento === false ? 'not_magento' : 'detected',
+      detail: platform?.themeDisplay || 'Magento platform detected, exact theme unclear.'
+    },
+    {
+      area: 'PageSpeed snapshot',
+      status: scores?._source || 'generated',
+      detail: `Mobile ${scores.mobileSpeed}/100, desktop ${scores.desktopSpeed}/100, LCP ${scores.lcp}s, server response ${scores.ttfb}ms, JS ${scores.bundleJs}MB.`
+    }
+  ];
+
+  if (!sig) {
+    items.push({
+      area: 'Technology context',
+      status: 'limited',
+      detail: 'Homepage technology signals were not available for this run.'
+    });
+    return items;
+  }
+
+  const storefrontName = sig.storefront?.name || platform?.theme || 'Magento frontend';
+  items.push(
+    {
+      area: 'Frontend architecture',
+      status: signalStatus(storefrontName),
+      detail: `${storefrontName}${sig.storefront?.confidence ? ` (${sig.storefront.confidence} confidence)` : ''}${sig.hasRequireJs ? '; Magento RequireJS layer detected.' : ''}`
+    },
+    {
+      area: 'Hosting and CDN',
+      status: sig.cdnType || sig.hasCaching ? 'detected' : 'review',
+      detail: `${sig.cdnType ? `${sig.cdnType} CDN detected` : 'No CDN signal detected'}; ${sig.hasCaching ? 'cache signal detected' : 'cache signal unclear'}; ${sig.serverSoftware ? `${sig.serverSoftware} server` : 'server software unclear'}.`
+    },
+    {
+      area: 'Security headers / PHP',
+      status: sig.phpEol || sig.exposesPhpVersion || !sig.hasSecurityHeaders ? 'review' : 'detected',
+      detail: `${sig.phpVersion ? `PHP ${sig.phpVersion}` : 'PHP version not exposed'}; HSTS ${sig.hasHsts ? 'detected' : 'not detected'}; security headers ${sig.hasSecurityHeaders ? 'detected' : 'unclear'}.`
+    },
+    {
+      area: 'Analytics and consent',
+      status: sig.hasGA4 || sig.hasGTM ? 'detected' : 'review',
+      detail: `GA4 ${sig.hasGA4 ? 'detected' : 'not detected'}; GTM ${sig.hasGTM ? 'detected' : 'not detected'}; Meta pixel ${sig.hasFBPixel ? 'detected' : 'not detected'}; consent banner ${sig.hasCookieConsent ? 'detected' : 'not detected'}.`
+    },
+    {
+      area: 'Commercial tools',
+      status: sig.searchTool || sig.emailTool || sig.heatmapTool || sig.abtestTool || sig.loyaltyTool ? 'detected' : 'unclear',
+      detail: [
+        sig.searchTool ? `Search: ${sig.searchTool}` : 'Search: not detected',
+        sig.emailTool ? `Email: ${sig.emailTool}` : 'Email: not detected',
+        sig.heatmapTool ? `Heatmaps/session recording: ${sig.heatmapTool}` : 'Heatmaps/session recording: not detected',
+        sig.abtestTool ? `A/B testing: ${sig.abtestTool}` : 'A/B testing: not detected',
+        sig.loyaltyTool ? `Loyalty: ${sig.loyaltyTool}` : 'Loyalty: not detected'
+      ].join('; ')
+    },
+    {
+      area: 'AI / chatbot signals',
+      status: sig.hasAiFeature ? 'detected' : sig.hasLiveChat ? 'chat_detected' : 'not_detected',
+      detail: sig.hasAiFeature ? sig.aiFeatureSignals.join('; ') : (sig.hasLiveChat ? 'Live chat detected, but no explicit AI feature signal found.' : 'No explicit AI or chatbot feature signal found.')
+    },
+    {
+      area: 'SEO signals',
+      status: sig.hasStructuredData && sig.hasMetaDesc && sig.hasCanonical ? 'detected' : 'review',
+      detail: `Structured data ${sig.hasStructuredData ? 'detected' : 'not detected'}; meta description ${sig.hasMetaDesc ? 'detected' : 'not detected'}; canonical ${sig.hasCanonical ? 'detected' : 'not detected'}; H1 count ${sig.h1Count ?? 'unclear'}.`
+    }
+  );
+
+  const pageScan = sig.pageScan;
+  if (pageScan) {
+    items.push(
+      {
+        area: 'Sampled PDP',
+        status: pageScan.pdp?.checked ? 'checked' : 'not_checked',
+        detail: pageScan.pdp?.checked
+          ? `${pageScan.pdp.url}; product schema ${pageScan.pdp.hasProductSchema ? 'detected' : 'not detected'}; offer schema ${pageScan.pdp.hasOfferSchema ? 'detected' : 'not detected'}; add to cart ${pageScan.pdp.hasAddToCart ? 'detected' : 'not detected'}; reviews ${pageScan.pdp.hasReviews ? 'detected' : 'not detected'}.`
+          : `PDP sample not checked (${pageScan.pdp?.error || 'not found'}).`
+      },
+      {
+        area: 'Sampled PLP',
+        status: pageScan.plp?.checked ? 'checked' : 'not_checked',
+        detail: pageScan.plp?.checked
+          ? `${pageScan.plp.url}; product grid ${pageScan.plp.hasProductGrid ? 'detected' : 'not detected'}; filters ${pageScan.plp.hasFilters ? 'detected' : 'not detected'}; sorting ${pageScan.plp.hasSorting ? 'detected' : 'not detected'}; pagination ${pageScan.plp.hasPagination ? 'detected' : 'not detected'}.`
+          : `PLP sample not checked (${pageScan.plp?.error || 'not found'}).`
+      },
+      {
+        area: 'Checkout signals',
+        status: pageScan.checkout?.hasCartLink || pageScan.checkout?.hasCheckoutLink ? 'detected' : 'review',
+        detail: `Cart link ${pageScan.checkout?.hasCartLink ? 'detected' : 'not detected'}; checkout link ${pageScan.checkout?.hasCheckoutLink ? 'detected' : 'not detected'}; payment signals ${pageScan.checkout?.hasPaymentSignals ? 'detected' : 'not detected'}; delivery/returns copy ${pageScan.checkout?.hasDeliveryReturnsCopy ? 'detected' : 'not detected'}.`
+      }
+    );
+  }
+
+  return items;
+}
+
 function buildReportSnapshot() {
   const scores = currentScores || generateScores(currentUrl);
+  const findings = buildFindings(scores, currentPlatform).map(f => ({
+    tag: f.tagNow,
+    heading: f.currentH,
+    context: f.currentBody,
+    next_step_tag: f.tagFix,
+    next_step_heading: f.fixH,
+    next_step: f.fixBody,
+    impact: f.impact
+  }));
+  const opportunityMap = buildOpportunityMap(scores, currentPlatform);
+  const fullOpportunityPool = buildOpportunityMap(scores, currentPlatform, { maxItems: null });
   return {
     recipient: REPORT_RECIPIENT,
     url: currentUrl,
     generated_at: new Date().toISOString(),
     detected_platform: currentPlatform.themeDisplay || 'Magento 2.4.x - Luma theme - Standard hosting',
     scores,
-    findings: buildFindings(scores, currentPlatform).map(f => ({
-      tag: f.tagNow,
-      heading: f.currentH,
-      context: f.currentBody,
-      next_step_tag: f.tagFix,
-      next_step_heading: f.fixH,
-      next_step: f.fixBody,
-      impact: f.impact
+    findings,
+    opportunity_map: opportunityMap,
+    full_opportunity_pool: fullOpportunityPool,
+    sales_backstory: buildSalesBackstory(currentPlatform, scores),
+    technology_context: buildTechnologyContext(currentPlatform),
+    insight_cards_seen_while_loading: buildPreviewInsights(currentPlatform).map(card => ({
+      tag: card.tag,
+      heading: card.h,
+      context: card.body,
+      cta: card.cta
     })),
-    opportunity_map: buildOpportunityMap(scores, currentPlatform)
+    report_summary: {
+      finding_count: findings.length,
+      opportunity_count: opportunityMap.length,
+      full_opportunity_count: fullOpportunityPool.length,
+      technology_scan_available: !!currentPlatform?.signals
+    }
   };
 }
 
@@ -4085,7 +4298,7 @@ async function sendReport(payload) {
 document.getElementById('modal-send').addEventListener('click', async () => {
   const name = document.getElementById('m-name').value.trim();
   const email = document.getElementById('m-email').value.trim();
-  const company = document.getElementById('m-company').value.trim();
+  const company = document.getElementById('m-company')?.value.trim() || '';
   const sendButton = document.getElementById('modal-send');
 
   if (!name || !email) {
@@ -4105,8 +4318,8 @@ document.getElementById('modal-send').addEventListener('click', async () => {
       name,
       company,
       email,
-      phone: document.getElementById('m-phone').value.trim(),
-      notes: document.getElementById('m-notes').value.trim()
+      phone: document.getElementById('m-phone')?.value.trim() || '',
+      notes: document.getElementById('m-notes')?.value.trim() || ''
     }
   };
   console.log('PAYLOAD ⤴', payload);
