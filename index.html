@@ -3154,9 +3154,9 @@ function buildOpportunityMap(scores, platform, options = {}) {
       !sig || hostingNeedsReview ? 2 : 1,
       'Infrastructure and hosting',
       sig
-        ? `${sig.cdnType ? `${sig.cdnType} CDN` : 'No CDN signal'} · ${sig.hasCaching ? 'cache signal found' : 'cache unclear'} · TTFB ${scores.ttfb}ms.`
+        ? `${sig.cdnType ? `${sig.cdnType} CDN` : 'No CDN signal'} · ${sig.hasCaching ? 'cache signal found' : 'cache signal unclear'} · ${sig.serverSoftware ? `${sig.serverSoftware} server` : 'server software unclear'} · TTFB ${scores.ttfb}ms.`
         : `Header scan limited · TTFB ${scores.ttfb}ms.`,
-      'Review hosting, CDN, cache, origin response, and Readymage fit.',
+      'Review CDN, caching, and origin response time, and whether Readymage hosting is a fit.',
       92
     ),
     classify(
