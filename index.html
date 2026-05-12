@@ -1809,7 +1809,7 @@ const VERTICALS = {
         tag: 'Security',
         h: 'Every month on an unpatched Magento build adds risk.',
         body: 'Adobe releases security patches regularly. Many ecommerce teams apply them late because they are worried about breaking custom modules. Scandiweb\'s managed stack handles patching and zero-downtime deployments.',
-        cta: 'Scandiweb → managed updates, 48hr patch SLA'
+        cta: 'Scandiweb → managed updates and security patching'
       },
       {
         tag: 'Custom AI',
@@ -3475,7 +3475,7 @@ function renderOpportunityMap(scores, platform) {
     <div class="opportunity-cell ${item.status}">
       <div class="opportunity-top">
         <div class="opportunity-area">${item.area}</div>
-        <div class="opportunity-status ${item.status}">${item.status}</div>
+        <div class="opportunity-status ${item.status}">${item.status === 'missing' ? 'review' : item.status}</div>
       </div>
       <div class="opportunity-heat heat-${item.heat}">
         <span></span><span></span><span></span>
@@ -3802,7 +3802,7 @@ function buildPreviewInsights(platform) {
       tag: 'Check result: PHP version',
       h: `Your server is running PHP ${sig.phpVersion}.`,
       body: `PHP ${sig.phpVersion} ${parseFloat(sig.phpVersion) < 8.2 ? 'is approaching end-of-life. Security patches stop, and newer Magento features require 8.2+. Many ecommerce teams delay upgrades because they\'re worried about breaking custom modules. Scandiweb handles this as part of every managed engagement.' : 'is current. One less thing to worry about, though staying current on patches still requires active management.'}`,
-      cta: 'Scandiweb → managed stack, 48hr security patch SLA'
+      cta: 'Scandiweb → managed stack: updates, patching, monitoring'
     });
   }
 
