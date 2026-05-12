@@ -2225,6 +2225,15 @@ async function detectPlatform(url) {
     if      (/loyaltylion/i.test(html))                          loyaltyTool = 'LoyaltyLion';
     else if (/smile\.io|sweetTooth/i.test(html))                 loyaltyTool = 'Smile.io';
 
+    const loyaltySignalPatterns = [
+      { label: 'Loyalty or rewards copy', re: /\b(loyalty|rewards?|reward points|points program|earn points|vip program|members? club)\b/i },
+      { label: 'Referral programme copy', re: /\b(refer a friend|referral program|invite friends)\b/i },
+      { label: '"Bucks" reward currency', re: /\b([A-Z]{1,4}\s*bucks|store bucks|reward bucks)\b/i }
+    ];
+    const loyaltyProgramSignals = loyaltySignalPatterns
+      .filter(item => item.re.test(html))
+      .map(item => item.label);
+
     // ── HTML signals — AI / chatbot features ───────────────────
     const aiSignalPatterns = [
       { label: 'AI assistant or chatbot copy', re: /\b(ai[-\s]?powered|ai assistant|ai chatbot|virtual assistant|conversational ai|generative ai|chatgpt|gpt[-\s]?powered)\b/i },
@@ -2311,7 +2320,7 @@ async function detectPlatform(url) {
       // frontend stack
       hasRequireJs, isHeadless, storefront,
       // third-party tools
-      searchTool, emailTool, heatmapTool, abtestTool, loyaltyTool,
+      searchTool, emailTool, heatmapTool, abtestTool, loyaltyTool, loyaltyProgramSignals,
       // AI / chatbot
       hasAiFeature, hasAiChatbot, aiFeatureSignals,
       // seo
@@ -3103,7 +3112,8 @@ function buildOpportunityMap(scores, platform, options = {}) {
   const securityNeedsReview = !sig || !!sig.phpEol || !!sig.exposesPhpVersion || !sig.hasHsts || !sig.hasSecurityHeaders;
   const croToolDetected = !!(sig && (sig.heatmapTool || sig.abtestTool));
   const trustDetected = !!(sig && (sig.hasReviewWidget || pdp?.hasReviews));
-  const loyaltyDetected = !!(sig && sig.loyaltyTool);
+  const loyaltyToolDetected = !!(sig && sig.loyaltyTool);
+  const loyaltySignalsDetected = !!(sig && Array.isArray(sig.loyaltyProgramSignals) && sig.loyaltyProgramSignals.length);
   const paidFeedSignals = !!(sig && (sig.hasFBPixel || sig.hasGTM || sig.hasStructuredData || sig.searchTool));
   const accessibilityNeedsReview = scores.accessibility < 90;
   const integrationSignals = !!(sig && (sig.emailTool || sig.searchTool || sig.hasGTM || sig.hasFBPixel));
@@ -3286,10 +3296,14 @@ function buildOpportunityMap(scores, platform, options = {}) {
       56
     ),
     classify(
-      !sig ? 'review' : loyaltyDetected ? 'detected' : 'missing',
-      !sig ? 2 : (loyaltyDetected ? 1 : 3),
+      !sig ? 'review' : loyaltyToolDetected ? 'detected' : loyaltySignalsDetected ? 'review' : 'missing',
+      !sig ? 2 : (loyaltyToolDetected ? 1 : loyaltySignalsDetected ? 2 : 3),
       'Loyalty and repeat purchase',
-      loyaltyDetected ? `${sig.loyaltyTool} detected.` : 'No loyalty, rewards, or repeat-purchase tool clearly detected.',
+      loyaltyToolDetected
+        ? `${sig.loyaltyTool} detected.`
+        : loyaltySignalsDetected
+          ? `Loyalty or rewards signals found (${sig.loyaltyProgramSignals.slice(0, 2).join(', ')}). Tool not verified.`
+          : 'No loyalty, rewards, or repeat-purchase signals clearly detected.',
       'Review rewards, referrals, subscriptions, win-back, and repeat purchase.',
       66
     ),
@@ -4182,6 +4196,7 @@ function buildTechnologyContext(platform) {
       heatmaps_or_session_recording: sig.heatmapTool || '',
       ab_testing: sig.abtestTool || '',
       loyalty: sig.loyaltyTool || '',
+      loyalty_signals: sig.loyaltyProgramSignals || [],
       live_chat: !!sig.hasLiveChat,
       reviews: !!sig.hasReviewWidget
     },
@@ -4254,13 +4269,13 @@ function buildSalesBackstory(platform, scores) {
     },
     {
       area: 'Commercial tools',
-      status: sig.searchTool || sig.emailTool || sig.heatmapTool || sig.abtestTool || sig.loyaltyTool ? 'detected' : 'unclear',
+      status: sig.searchTool || sig.emailTool || sig.heatmapTool || sig.abtestTool || sig.loyaltyTool || (sig.loyaltyProgramSignals && sig.loyaltyProgramSignals.length) ? 'detected' : 'unclear',
       detail: [
         sig.searchTool ? `Search: ${sig.searchTool}` : 'Search: not detected',
         sig.emailTool ? `Email: ${sig.emailTool}` : 'Email: not detected',
         sig.heatmapTool ? `Heatmaps/session recording: ${sig.heatmapTool}` : 'Heatmaps/session recording: not detected',
         sig.abtestTool ? `A/B testing: ${sig.abtestTool}` : 'A/B testing: not detected',
-        sig.loyaltyTool ? `Loyalty: ${sig.loyaltyTool}` : 'Loyalty: not detected'
+        sig.loyaltyTool ? `Loyalty: ${sig.loyaltyTool}` : (sig.loyaltyProgramSignals && sig.loyaltyProgramSignals.length ? `Loyalty: signals found (${sig.loyaltyProgramSignals.slice(0, 2).join(', ')})` : 'Loyalty: not detected')
       ].join('; ')
     },
     {
