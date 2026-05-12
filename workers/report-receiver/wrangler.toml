@@ -1,0 +1,10 @@
+name = "magento-audit-report"
+main = "src/index.js"
+compatibility_date = "2026-05-12"
+
+[vars]
+# Sender and recipient configuration (set to your preferred addresses).
+FROM_EMAIL = "Scandiweb Audit <audit@scandiweb.com>"
+SALES_TO_EMAIL = "samuel.goodey@scandiweb.com"
+# Set to "true" if you also want to send an acknowledgement email to the submitted contact email.
+SEND_ACK = "false"

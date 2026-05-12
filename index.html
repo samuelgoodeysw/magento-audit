@@ -1895,10 +1895,9 @@ let currentScores = null;
 let earlyPsiUrl = '';
 let earlyPsiPromise = null;
 let psiStartTime = 0;
-const REPORT_RECIPIENT = 'samuel.goodey@scandiweb.com';
-const REPORT_ENDPOINT = '';
-
 const PROXY = 'https://merchantminisite.samuel-goodey.workers.dev';
+const REPORT_RECIPIENT = 'samuel.goodey@scandiweb.com';
+const REPORT_ENDPOINT = new URLSearchParams(location.search).get('report_endpoint') || `${PROXY}/report`;
 
 function decodeHtmlText(text = '') {
   return String(text)
@@ -4346,20 +4345,28 @@ function buildReportSnapshot() {
 async function sendReport(payload) {
   console.log('REPORT PAYLOAD', payload);
   if (!REPORT_ENDPOINT) {
-    return { mode: 'demo', sent: false };
+    return { mode: 'demo', sent: false, reason: 'missing_endpoint' };
   }
 
-  const response = await fetch(REPORT_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  try {
+    const response = await fetch(REPORT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-  if (!response.ok) {
-    throw new Error('Report send failed');
+    if (!response.ok) {
+      let message = '';
+      try { message = await response.text(); } catch (e) {}
+      return { mode: 'demo', sent: false, reason: 'endpoint_error', status: response.status, message: (message || '').slice(0, 200) };
+    }
+
+    let data = null;
+    try { data = await response.json(); } catch (e) { data = {}; }
+    return { mode: 'live', sent: data?.sent !== false, ...(data || {}) };
+  } catch (error) {
+    return { mode: 'demo', sent: false, reason: 'network_error', message: String(error?.message || error) };
   }
-
-  return response.json();
 }
 
 document.getElementById('modal-send').addEventListener('click', async () => {
@@ -4406,8 +4413,8 @@ document.getElementById('modal-send').addEventListener('click', async () => {
   document.getElementById('modal-body').innerHTML = `
     <div class="sent-state">
       <div class="sent-mark">✓</div>
-      <div class="sent-h">${sendResult?.sent === false ? 'Email endpoint not connected yet.' : 'On its way.'}</div>
-      <div class="sent-sub">${sendResult?.sent === false ? `The report payload has been generated for ${REPORT_RECIPIENT}, but no email has been sent because REPORT_ENDPOINT is still blank.` : `Your details are ready for Scandiweb review. We'll use the report and your context to make the first conversation specific.`}</div>
+      <div class="sent-h">${sendResult?.sent === false ? 'Could not send email yet.' : 'On its way.'}</div>
+      <div class="sent-sub">${sendResult?.sent === false ? `The report payload was generated for ${REPORT_RECIPIENT}, but the email endpoint is not connected yet (${sendResult?.reason || 'unknown'}).` : `Your details are ready for Scandiweb review. We'll use the report and your context to make the first conversation specific.`}</div>
     </div>
     <details style="margin-top:14px;background:var(--bg-page);border:1px solid var(--border-soft);padding:12px;">
       <summary style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);">// JSON payload (what sales receives)</summary>
