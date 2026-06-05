@@ -118,6 +118,456 @@ body {
   padding: 32px 24px 48px;
 }
 
+/* LANDING PAGE */
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.landing-page.is-hidden { display: none; }
+
+.landing-hero {
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 48px;
+  padding: 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(110,247,110,0.08), transparent 34%),
+    repeating-linear-gradient(90deg, transparent 0, transparent 15px, rgba(255,255,255,0.035) 15px, rgba(255,255,255,0.035) 16px);
+  pointer-events: none;
+}
+
+.landing-hero > * { position: relative; z-index: 1; }
+
+.landing-eyebrow,
+.section-kicker,
+.module-tag,
+.case-kicker,
+.proof-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-eyebrow {
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+
+.landing-title {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: clamp(42px, 6vw, 74px);
+  line-height: 0.96;
+  letter-spacing: 0;
+  max-width: 820px;
+  margin-bottom: 24px;
+}
+
+.landing-title span { color: var(--accent); }
+
+.landing-sub {
+  color: var(--text-muted);
+  font-size: 17px;
+  line-height: 1.7;
+  max-width: 720px;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.landing-btn,
+.landing-btn-secondary {
+  border: 1px solid var(--accent);
+  padding: 16px 22px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.landing-btn {
+  background: var(--accent);
+  color: var(--bg-charcoal);
+}
+
+.landing-btn-secondary {
+  background: transparent;
+  color: var(--text-inverse);
+}
+
+.landing-btn:hover,
+.landing-btn-secondary:hover { background: white; color: var(--bg-charcoal); border-color: white; }
+
+.accelerator-board {
+  background: rgba(8,9,30,0.72);
+  border: 1px solid rgba(255,255,255,0.16);
+  padding: 24px;
+  align-self: stretch;
+}
+
+.board-title {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  margin-bottom: 18px;
+}
+
+.board-flow {
+  display: grid;
+  gap: 10px;
+}
+
+.board-audit-card {
+  background: var(--accent);
+  color: var(--bg-charcoal);
+  border: 1px solid var(--accent);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.board-audit-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: 0.78;
+}
+
+.board-audit-card strong {
+  display: block;
+  font-family: 'Archivo', sans-serif;
+  font-size: 24px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.board-audit-card p {
+  font-size: 13px;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.board-audit-button {
+  width: 100%;
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  border: 1px solid var(--bg-charcoal);
+  padding: 13px 14px;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.board-audit-button:hover {
+  background: white;
+  color: var(--bg-charcoal);
+  border-color: white;
+}
+
+.board-node {
+  border: 1px solid rgba(255,255,255,0.18);
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.04);
+}
+
+.board-node strong {
+  display: block;
+  font-family: 'Archivo', sans-serif;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.board-node span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.proof-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+}
+
+.proof-item {
+  padding: 24px;
+  border-right: 1px solid var(--border-soft);
+}
+
+.proof-item:last-child { border-right: none; }
+
+.proof-num {
+  font-family: 'Archivo', sans-serif;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.proof-label { color: var(--text-secondary); line-height: 1.45; }
+
+.landing-section {
+  padding: 44px 0 8px;
+}
+
+.section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(280px, 0.28fr);
+  gap: 32px;
+  align-items: end;
+  margin-bottom: 22px;
+}
+
+.section-kicker { color: var(--accent); margin-bottom: 10px; }
+
+.section-heading {
+  font-family: 'Archivo', sans-serif;
+  font-size: clamp(30px, 4vw, 48px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.section-copy {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.problem-grid,
+.module-grid,
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border-soft);
+  border: 1px solid var(--border-soft);
+}
+
+.problem-card,
+.module-card,
+.testimonial-card {
+  background: var(--bg-surface);
+  padding: 24px;
+  min-height: 100%;
+}
+
+.problem-card strong,
+.module-card h3 {
+  display: block;
+  font-family: 'Archivo', sans-serif;
+  font-size: 20px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.problem-card p,
+.module-card p,
+.testimonial-card p {
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.problem-num {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--brick);
+  margin-bottom: 18px;
+}
+
+.module-tag { color: var(--accent-dim); margin-bottom: 14px; }
+
+.case-study {
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 1px;
+  margin-top: 22px;
+}
+
+.case-panel {
+  padding: 34px;
+  background: rgba(255,255,255,0.04);
+}
+
+.case-kicker { color: var(--accent); margin-bottom: 14px; }
+
+.case-title {
+  font-family: 'Archivo', sans-serif;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.05;
+  margin-bottom: 18px;
+}
+
+.case-panel p,
+.case-panel li {
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.case-panel ul {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.case-panel li::before {
+  content: '+';
+  color: var(--accent);
+  margin-right: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.case-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.12);
+}
+
+.case-metric {
+  background: var(--bg-charcoal);
+  padding: 24px;
+}
+
+.case-metric strong {
+  display: block;
+  color: var(--accent);
+  font-family: 'Archivo', sans-serif;
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.case-metric span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.audit-landing-shell {
+  border: 1px solid var(--border);
+  background: var(--bg-charcoal);
+  padding: 10px;
+}
+
+.audit-landing-shell .stage-hero {
+  border: 1px solid rgba(255,255,255,0.16);
+}
+
+.testimonial-card blockquote {
+  font-family: 'Archivo', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+
+.testimonial-card .person {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.about-band {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 1px;
+}
+
+.about-panel {
+  padding: 30px;
+  border-right: 1px solid var(--border-soft);
+}
+
+.about-panel:last-child { border-right: none; }
+
+.about-panel h3 {
+  font-family: 'Archivo', sans-serif;
+  font-size: 28px;
+  line-height: 1.05;
+  margin-bottom: 14px;
+}
+
+.about-panel p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.faq-list {
+  border: 1px solid var(--border-soft);
+  background: var(--bg-surface);
+}
+
+.faq-item {
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.faq-item:last-child { border-bottom: none; }
+
+.faq-item strong {
+  display: block;
+  font-family: 'Archivo', sans-serif;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.faq-item p {
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.final-cta {
+  --accent: #6EF76E;
+  background: var(--bg-charcoal);
+  color: var(--text-inverse);
+  border: 1px solid var(--border);
+  padding: 40px;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+}
+
+.final-cta h2 {
+  font-family: 'Archivo', sans-serif;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+  max-width: 760px;
+}
+
 /* STAGES */
 .stage { display: none !important; }
 .stage.active { display: block !important; }
@@ -214,6 +664,24 @@ body {
 
 .url-submit:hover { background: white; }
 .url-submit:disabled { background: #5A5A5A; color: #999; cursor: not-allowed; }
+
+.prewarm-status {
+  display: none;
+  margin-top: 12px;
+  max-width: 760px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.05);
+  color: var(--text-muted);
+  padding: 10px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.prewarm-status.is-visible { display: block; }
+.prewarm-status strong { color: var(--text-inverse); font-weight: 600; }
+.prewarm-status.suggested { border-color: rgba(110,247,110,0.35); }
+.prewarm-status.failed { border-color: rgba(255,90,49,0.45); color: #ffd4c8; }
 
 .trust-strip {
   display: grid;
@@ -526,6 +994,27 @@ body {
 .score-num.bad { color: var(--brick); }
 .score-num.mid { color: var(--accent-dim); }
 .score-num.good { color: var(--sage); }
+
+.score-num.headline { font-size: 38px; letter-spacing: -0.02em; }
+
+.score-status {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.score-status.good { background: var(--sage); color: white; }
+.score-status.bad  { background: var(--brick); color: white; }
+.score-value-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
 
 .score-bar {
   height: 4px;
@@ -1451,6 +1940,31 @@ body {
 .sent-sub { color: var(--text-secondary); font-size: 13px; max-width: 400px; margin: 0 auto; }
 
 @media (max-width: 700px) {
+  .app { padding: 20px 14px 36px; }
+  .landing-hero { grid-template-columns: 1fr; padding: 28px 20px; gap: 26px; }
+  .landing-title { font-size: 40px; }
+  .landing-actions,
+  .final-cta { align-items: stretch; }
+  .landing-btn,
+  .landing-btn-secondary { width: 100%; }
+  .accelerator-board { padding: 18px; }
+  .proof-strip,
+  .problem-grid,
+  .module-grid,
+  .testimonial-grid,
+  .case-study,
+  .case-metrics,
+  .about-band,
+  .section-head {
+    grid-template-columns: 1fr;
+  }
+  .proof-item { border-right: none; border-bottom: 1px solid var(--border-soft); }
+  .proof-item:last-child { border-bottom: none; }
+  .case-title,
+  .final-cta h2 { font-size: 28px; }
+  .final-cta { flex-direction: column; padding: 28px 20px; }
+  .about-panel { border-right: none; border-bottom: 1px solid var(--border-soft); }
+  .about-panel:last-child { border-bottom: none; }
   .hero-title { font-size: 30px; }
   .stage-hero { padding: 22px 20px; }
   .url-form { grid-template-columns: 1fr; }
@@ -1617,6 +2131,84 @@ body {
 
 <main class="app">
 
+  <div class="landing-page" id="landing-page">
+    <section class="landing-hero" id="top">
+      <div>
+        <div class="landing-eyebrow">// HYVA COMMERCE ACCELERATOR FOR BUILDERS MERCHANTS</div>
+        <h1 class="landing-title">Launch the trade-ready Magento storefront your branches keep asking for. <span>Faster.</span></h1>
+        <p class="landing-sub">A production-ready Hyva and Adobe Commerce accelerator for builders merchants: branch pricing, account hierarchies, trade checkout, ERP stock, delivery rules, quote workflows, and the marketing engine needed to turn it into revenue.</p>
+        <div class="landing-actions">
+          <button class="landing-btn" id="hero-audit-cta" type="button">Run the free audit</button>
+          <button class="landing-btn-secondary" id="hero-contact-cta" type="button">Book a 30-min assessment</button>
+        </div>
+      </div>
+      <aside class="accelerator-board" aria-label="Builders merchant accelerator structure">
+        <div class="board-audit-card">
+          <div class="board-audit-label">// START HERE</div>
+          <strong>Free Magento audit</strong>
+          <p>Check your current storefront for speed, SEO, tracking, hosting, and conversion gaps before the assessment call.</p>
+          <button class="board-audit-button" id="board-audit-cta" type="button">Run audit now</button>
+        </div>
+        <div class="board-title">Built around the merchant operating model</div>
+        <div class="board-flow">
+          <div class="board-node"><strong>Customer account</strong><span>Trade, retail, branch, credit status, approvals</span></div>
+          <div class="board-node"><strong>Project or job list</strong><span>Saved baskets, quotes, repeat orders, partial deliveries</span></div>
+          <div class="board-node"><strong>Branch and delivery rules</strong><span>Local stock, collection, fleet routing, delivery windows</span></div>
+          <div class="board-node"><strong>ERP and PIM layer</strong><span>Price, stock, product data, invoices, account terms</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="proof-strip" aria-label="Scandiweb proof points">
+      <div class="proof-item"><div class="proof-num">11-14</div><div class="proof-label">weeks for comparable accelerator launches</div></div>
+      <div class="proof-item"><div class="proof-num">2100+</div><div class="proof-label">digital experience projects completed</div></div>
+      <div class="proof-item"><div class="proof-num">600+</div><div class="proof-label">eCommerce and digital marketing specialists</div></div>
+      <div class="proof-item"><div class="proof-num">$4B+</div><div class="proof-label">processed for clients per year</div></div>
+    </div>
+
+    <section class="landing-section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">// WHY GENERIC ECOMMERCE BREAKS</div>
+          <h2 class="section-heading">Builders merchant commerce is not a normal catalogue problem.</h2>
+        </div>
+        <p class="section-copy">A merchant storefront has to understand branches, account pricing, call-off orders, regulated products, heavy delivery, click-and-collect, credit limits, and the gap between counter trade and online self-service.</p>
+      </div>
+      <div class="problem-grid">
+        <article class="problem-card"><div class="problem-num">01</div><strong>ERP and web data drift apart</strong><p>Product, price, stock, customer terms, and invoices live in systems that were never designed for fast online buying.</p></article>
+        <article class="problem-card"><div class="problem-num">02</div><strong>Trade accounts need context</strong><p>One customer can have multiple buyers, branches, budgets, addresses, approval rules, and negotiated terms.</p></article>
+        <article class="problem-card"><div class="problem-num">03</div><strong>Delivery is operationally complex</strong><p>Bulk items, split consignments, local fleets, timed drops, and branch collection need rules at checkout, not manual calls later.</p></article>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">// ACCELERATOR MODULES</div>
+          <h2 class="section-heading">The hard parts arrive pre-shaped, then adapt to your business.</h2>
+        </div>
+        <p class="section-copy">The accelerator keeps custom work focused where your merchant model is different, while the foundation ships with proven Hyva, Magento, analytics, SEO, and integration patterns.</p>
+      </div>
+      <div class="module-grid">
+        <article class="module-card"><div class="module-tag">TRADE ACCOUNTS</div><h3>Company hierarchy and permissions</h3><p>Account roles, buyer approval, credit terms, saved lists, invoices, and repeat ordering for trade customers.</p></article>
+        <article class="module-card"><div class="module-tag">BRANCH LOGIC</div><h3>Local stock and collection</h3><p>Branch availability, collection eligibility, lead times, stock messaging, and region-specific delivery rules.</p></article>
+        <article class="module-card"><div class="module-tag">PRODUCT DATA</div><h3>Complex catalogue handling</h3><p>Units of measure, pack sizes, technical specs, substitutes, restricted items, and SEO-ready product content.</p></article>
+        <article class="module-card"><div class="module-tag">QUOTE TO ORDER</div><h3>Real buying workflows</h3><p>Quotes, job lists, abandoned basket recovery, assisted sales, and conversion flows built around trade behaviour.</p></article>
+        <article class="module-card"><div class="module-tag">ERP INTEGRATION</div><h3>Adapter-based sync</h3><p>Pricing, stock, accounts, orders, payments, and invoices connected without letting the old stack dictate the storefront.</p></article>
+        <article class="module-card"><div class="module-tag">GROWTH ENGINE</div><h3>SEO, PPC, CRO, and analytics</h3><p>GA4, server-side visibility, technical SEO, paid media, email, and CRO managed by one accountable team.</p></article>
+      </div>
+    </section>
+
+    <section class="landing-section" id="audit">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">// FREE DIAGNOSTIC CTA</div>
+          <h2 class="section-heading">Start with the audit tool.</h2>
+        </div>
+        <p class="section-copy">Use the live Magento audit to surface performance, SEO, tracking, hosting, and conversion signals. If the result looks worth discussing, the same report becomes the first agenda for the assessment call.</p>
+      </div>
+      <div class="audit-landing-shell">
+
   <!-- ========== STAGE 1 — INPUT ========== -->
   <section class="stage active" id="stage-input">
     <div class="stage-hero">
@@ -1628,6 +2220,7 @@ body {
         <input class="url-input" id="url-input" type="text" placeholder="https://your-business-site.com" autocomplete="off" spellcheck="false">
         <button class="url-submit" id="url-submit">Run audit →</button>
       </form>
+      <div class="prewarm-status" id="prewarm-status" aria-live="polite"></div>
 
       <div class="trust-strip">
         <div class="trust-item">
@@ -1645,6 +2238,80 @@ body {
       </div>
     </div>
   </section>
+
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="case-study">
+        <div class="case-panel">
+          <div class="case-kicker">// CASE STUDY PATTERN</div>
+          <h2 class="case-title">From legacy risk to a live vertical platform in weeks, not years.</h2>
+          <p>Scandiweb accelerator work follows the same shape as the school uniform and school photography platforms: model the real business entities first, connect legacy systems through a clean integration layer, then launch with the workflows that remove the most operational drag.</p>
+          <ul>
+            <li>Legacy platform stays live while the new foundation is built</li>
+            <li>ERP and catalogue workflows are mapped before frontend build-out</li>
+            <li>Peak readiness, analytics, admin training, and handover are part of launch</li>
+          </ul>
+        </div>
+        <div class="case-panel">
+          <div class="case-metrics">
+            <div class="case-metric"><strong>200</strong><span>school catalogues live on day one in a comparable accelerator launch</span></div>
+            <div class="case-metric"><strong>0</strong><span>launch incidents reported in that go-live window</span></div>
+            <div class="case-metric"><strong>90+</strong><span>mobile Lighthouse launch target for performance-led builds</span></div>
+            <div class="case-metric"><strong>1</strong><span>team across development, hosting, SEO, paid, CRM, CRO, and analytics</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">// WHAT CLIENTS VALUE</div>
+          <h2 class="section-heading">Built to reduce calls, manual fixes, and launch anxiety.</h2>
+        </div>
+      </div>
+      <div class="testimonial-grid">
+        <article class="testimonial-card"><blockquote>"Customer service is loving it because it saves so many phone calls."</blockquote><div class="person">CEO, post-launch accelerator client</div><p>A vertical commerce workflow replaced manual exception handling and gave the team cleaner self-service.</p></article>
+        <article class="testimonial-card"><blockquote>"Money coming in. No phone calls. Smooth sailing."</blockquote><div class="person">Operations, school photography platform client</div><p>The platform handled seasonal volume while reducing the support burden on operational teams.</p></article>
+        <article class="testimonial-card"><blockquote>"One accountable team changes the conversation."</blockquote><div class="person">Scandiweb delivery model</div><p>Development, growth, hosting, analytics, and CRO work from the same commercial context instead of separate reports.</p></article>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="about-band">
+        <div class="about-panel">
+          <div class="section-kicker">// ABOUT SCANDIWEB</div>
+          <h3>A full-service eCommerce agency with deep Magento roots.</h3>
+          <p>Founded in 2003, Scandiweb works across Adobe Commerce, Magento, Hyva, Shopify, BigCommerce, Salesforce, CRO, SEO, paid media, analytics, AI, and managed commerce operations.</p>
+        </div>
+        <div class="about-panel">
+          <h3>Why this matters for builders merchants</h3>
+          <p>The accelerator is not only a frontend theme. It combines architecture, integrations, data, UX, performance, growth, and post-launch support, so the online channel can become part of the merchant operating model instead of another disconnected system.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">// COMMON QUESTIONS</div>
+          <h2 class="section-heading">What we would cover on the first call.</h2>
+        </div>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item"><strong>Do we need to replace everything at once?</strong><p>No. The best starting point is usually the workflow causing the most cost: price and stock sync, trade account ordering, branch availability, checkout delivery rules, or catalogue quality.</p></div>
+        <div class="faq-item"><strong>Can this work with our ERP?</strong><p>Yes. The accelerator is designed around adapter-based integration, so SAP, Microsoft, Kerridge, Epicor, in-house platforms, and other ERP patterns can be mapped without direct database dependency.</p></div>
+        <div class="faq-item"><strong>Where does Hyva fit?</strong><p>Hyva provides the fast, maintainable storefront foundation. Scandiweb adds the merchant-specific workflows, Magento architecture, integration layer, analytics, and growth programme around it.</p></div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <h2>Map your current stack, find the highest-friction workflow, and decide whether the accelerator fits.</h2>
+      <button class="landing-btn" id="final-contact-cta" type="button">Book the assessment</button>
+    </section>
+  </div>
 
   <!-- ========== STAGE 2 — RUNNING ========== -->
   <section class="stage" id="stage-running" hidden>
@@ -2011,9 +2678,33 @@ let currentScores = null;
 let earlyPsiUrl = '';
 let earlyPsiPromise = null;
 let psiStartTime = 0;
+let activePrewarmJob = null;
+let activePrewarmDomain = '';
+const prewarmJobsByDomain = new Map();
 const PROXY = 'https://merchantminisite.samuel-goodey.workers.dev';
 const REPORT_RECIPIENT = 'samuel.goodey@scandiweb.com';
 const REPORT_ENDPOINT = new URLSearchParams(location.search).get('report_endpoint') || `${PROXY}/report`;
+const API_ENDPOINTS = {
+  prewarm: '/api/audit/prewarm',
+  status: '/api/audit/status',
+  identify: '/api/visit/identify'
+};
+
+function getSessionId() {
+  try {
+    const key = 'smb_magento_audit_session_id';
+    let id = sessionStorage.getItem(key);
+    if (!id) {
+      id = (crypto.randomUUID && crypto.randomUUID()) || `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      sessionStorage.setItem(key, id);
+    }
+    return id;
+  } catch {
+    return `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+}
+
+const SESSION_ID = getSessionId();
 
 function decodeHtmlText(text = '') {
   return String(text)
@@ -3466,6 +4157,75 @@ function buildOpportunityMap(scores, platform, options = {}) {
   return maxItems === null ? ranked : ranked.slice(0, maxItems);
 }
 
+function servicePriority(score) {
+  if (score >= 70) return 'high';
+  if (score >= 40) return 'medium';
+  return 'low';
+}
+
+function buildServiceOpportunityHeatMap(scores, platform) {
+  const sig = platform?.signals || {};
+  const backendHeatMap = window.__lastPrewarmAuditResult?.opportunityHeatMap;
+  if (Array.isArray(backendHeatMap) && backendHeatMap.length) return backendHeatMap;
+
+  const mobile = Number(scores.mobileSpeed || 0);
+  const lcp = parseFloat(scores.lcp || 0);
+  const seo = Number(scores.seo || 0);
+  const ttfb = Number(scores.ttfb || 0);
+  const bundle = parseFloat(scores.bundleJs || 0);
+  const securityGaps = [
+    !sig.hasHsts && 'HSTS not detected',
+    !sig.hasSecurityHeaders && 'Security headers incomplete or unclear',
+    sig.phpEol && 'PHP version risk signal'
+  ].filter(Boolean);
+  const bucket = (service, score, evidence, salesTalkingPoint) => ({
+    service,
+    score: Math.max(0, Math.min(100, Math.round(score))),
+    priority: servicePriority(score),
+    evidence: evidence.filter(Boolean),
+    salesTalkingPoint
+  });
+
+  return [
+    bucket('Magento support / technical audit', platform?.isMagento === false ? 20 : 78, [
+      platform?.themeDisplay || 'Magento platform requires manual confirmation',
+      sig.hasRequireJs && 'Magento RequireJS layer detected'
+    ], 'Open with a technical-risk review: theme, extensions, release process, and upgrade posture.'),
+    bucket('performance optimisation', mobile < 60 || lcp > 3 ? 86 : mobile < 80 ? 58 : 24, [
+      `Mobile PageSpeed ${mobile}/100`,
+      lcp ? `LCP ${lcp}s` : '',
+      scores.requests ? `${scores.requests} requests` : ''
+    ], 'Connect speed issues to conversion, paid traffic efficiency, and Hyva/frontend simplification.'),
+    bucket('Hyva / frontend modernisation', platform?.theme === 'Hyva' ? 32 : (mobile < 75 || bundle > 1.5 ? 82 : 55), [
+      platform?.themeDisplay || '',
+      bundle ? `JS bundle estimate ${scores.bundleJs}MB` : ''
+    ], 'Discuss whether Hyva can reduce frontend complexity while preserving Magento business logic.'),
+    bucket('hosting / infrastructure review', !sig.cdnType || ttfb > 600 ? 76 : 32, [
+      sig.cdnType ? `CDN hint: ${sig.cdnType}` : 'No major CDN hint detected',
+      ttfb ? `TTFB ${ttfb}ms` : ''
+    ], 'Review CDN, caching, autoscaling, and peak trading readiness.'),
+    bucket('Magento upgrade / version risk', sig.phpEol || sig.exposesPhpVersion ? 74 : 48, [
+      sig.phpVersion ? `PHP ${sig.phpVersion}` : 'Magento version/PHP needs manual check',
+      sig.phpEol && 'Potential PHP end-of-life risk'
+    ], 'Ask when the last Adobe Commerce/Magento upgrade and security patch cycle happened.'),
+    bucket('CRO / UX review', mobile < 70 || lcp > 3.5 || Number(scores.cls || 0) > 0.1 ? 72 : 42, [
+      `Mobile performance ${mobile}/100`,
+      scores.cls ? `CLS ${scores.cls}` : ''
+    ], 'Frame CRO around mobile buying friction, checkout confidence, and trade account workflows.'),
+    bucket('SEO / AEO', seo < 85 || !sig.hasStructuredData || !sig.hasMetaDesc ? 74 : 28, [
+      `SEO score ${seo}/100`,
+      sig.hasStructuredData ? 'Structured data detected' : 'Structured data not detected',
+      sig.hasMetaDesc ? 'Meta description detected' : 'Meta description missing'
+    ], 'Use technical SEO and product-data quality as the bridge into AI-search readiness.'),
+    bucket('analytics / GA4 / tracking', !sig.hasGA4 || !sig.hasGTM ? 80 : 30, [
+      sig.hasGA4 ? 'GA4 detected' : 'GA4 not detected',
+      sig.hasGTM ? 'GTM detected' : 'GTM not detected',
+      sig.hasFBPixel ? 'Meta Pixel detected' : 'Meta Pixel not detected'
+    ], 'Ask whether revenue, checkout, account, and product-list events are trusted enough for decision-making.'),
+    bucket('security hardening', securityGaps.length ? 68 : 22, securityGaps.length ? securityGaps : ['Common security signals look reasonable from the scan'], 'Position security hardening as a practical Magento maintenance and customer-trust workstream.')
+  ].sort((a, b) => b.score - a.score);
+}
+
 // ============================================================
 // RENDERING
 // ============================================================
@@ -3483,42 +4243,52 @@ function renderScoreGrid(scores) {
     };
     disclaimer.textContent = `// ${sourceCopy[scores._source] || sourceCopy.estimated}`;
   }
-  const scoreDelta = (current, benchmark) => {
-    const diff = benchmark - current;
-    if (diff > 0) return `+${diff} pts on Hyva`;
-    if (diff < 0) return `${Math.abs(diff)} pts above Hyva avg`;
-    return 'Matches Hyva avg';
-  };
-  const loadDelta = (current, benchmark) => {
-    const diff = parseFloat(current) - benchmark;
-    if (diff > 0) return `${diff.toFixed(1)}s faster on Hyva`;
-    if (diff < 0) return `${Math.abs(diff).toFixed(1)}s faster than Hyva avg`;
-    return 'Matches Hyva avg';
-  };
+  const lcpVal = parseFloat(scores.lcp);
+  const clsVal = parseFloat(scores.cls);
+  const inpVal = parseFloat(scores.inp);
+  const lcpPass = Number.isFinite(lcpVal) && lcpVal <= 2.5;
+  const clsPass = Number.isFinite(clsVal) && clsVal <= 0.1;
+  const inpPass = Number.isFinite(inpVal) && inpVal <= 200;
+  const passCount = [lcpPass, clsPass, inpPass].filter(Boolean).length;
+  const cwvPass = passCount === 3;
+  const pf = ok => ok ? 'good' : 'bad';
+  const pfLabel = ok => ok ? 'PASS' : 'FAIL';
+
   const cards = [
     {
-      label: 'Mobile speed', value: scores.mobileSpeed, unit: '/100',
-      cls: classify(scores.mobileSpeed, [50, 90]),
-      bench: `Hyva avg ${HYVA_BENCH.mobileSpeed}`,
-      delta: scoreDelta(scores.mobileSpeed, HYVA_BENCH.mobileSpeed)
+      label: 'Core Web Vitals',
+      headline: pfLabel(cwvPass),
+      cls: pf(cwvPass),
+      fillPct: passCount / 3 * 100,
+      bench: `${passCount} / 3 metrics passing`,
+      delta: cwvPass ? 'Google ranks this as good' : 'Google flags this in rankings'
     },
     {
-      label: 'Desktop speed', value: scores.desktopSpeed, unit: '/100',
-      cls: classify(scores.desktopSpeed, [50, 90]),
-      bench: `Hyva avg ${HYVA_BENCH.desktopSpeed}`,
-      delta: scoreDelta(scores.desktopSpeed, HYVA_BENCH.desktopSpeed)
+      label: 'LCP — Load',
+      value: scores.lcp, unit: 's',
+      cls: pf(lcpPass),
+      status: pfLabel(lcpPass),
+      fillPct: Math.min(lcpVal / 6 * 100, 100),
+      bench: 'Pass: ≤ 2.5s',
+      delta: `Hyva avg ${HYVA_BENCH.lcp}s`
     },
     {
-      label: 'Page load time', value: scores.lcp, unit: 's',
-      cls: classifyReverse(parseFloat(scores.lcp), [2.5, 4.0]),
-      bench: `Hyva avg ${HYVA_BENCH.lcp}s`,
-      delta: loadDelta(scores.lcp, HYVA_BENCH.lcp)
+      label: 'INP — Responsiveness',
+      value: scores.inp, unit: 'ms',
+      cls: pf(inpPass),
+      status: pfLabel(inpPass),
+      fillPct: Math.min(inpVal / 500 * 100, 100),
+      bench: 'Pass: ≤ 200ms',
+      delta: `Hyva avg ${HYVA_BENCH.inp}ms`
     },
     {
-      label: 'SEO health', value: scores.seo, unit: '/100',
-      cls: classify(scores.seo, [60, 90]),
-      bench: `Hyva avg ${HYVA_BENCH.seo}`,
-      delta: scoreDelta(scores.seo, HYVA_BENCH.seo)
+      label: 'CLS — Stability',
+      value: scores.cls, unit: '',
+      cls: pf(clsPass),
+      status: pfLabel(clsPass),
+      fillPct: Math.min(clsVal / 0.5 * 100, 100),
+      bench: 'Pass: ≤ 0.10',
+      delta: `Hyva avg ${HYVA_BENCH.cls}`
     }
   ];
 
@@ -3531,19 +4301,32 @@ function renderScoreGrid(scores) {
         <div class="score-bar"><div class="score-bar-fill mid" style="width:0%"></div></div>
         <div class="score-compare"><span>Fetching live score…</span></div>
       </div>`;
-    const max = c.unit === 's' ? 6 : c.unit === 'ms' ? 1000 : c.unit === 'MB' ? 5 : 100;
-    const fillPct = c.cls === 'bad' || c.cls === 'mid' ?
-      (c.unit === '/100' ? c.value : (c.unit === 's' || c.unit === 'MB' || c.unit === 'ms' ? Math.min(parseFloat(c.value) / max * 100, 100) : 50))
-      : (c.unit === '/100' ? c.value : 100 - Math.min(parseFloat(c.value) / max * 100, 100));
+    if (c.headline) {
+      return `
+        <div class="score-card">
+          <div class="score-card-label">// ${c.label}</div>
+          <div class="score-value">
+            <span class="score-num headline ${c.cls}">${c.headline}</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill ${c.cls}" style="width:${c.fillPct}%"></div>
+          </div>
+          <div class="score-compare">
+            <span>${c.bench}</span>
+            <span class="score-delta">${c.delta}</span>
+          </div>
+        </div>`;
+    }
     return `
       <div class="score-card">
         <div class="score-card-label">// ${c.label}</div>
-        <div class="score-value">
+        <div class="score-value score-value-row">
           <span class="score-num ${c.cls}">${c.value}</span>
           <span class="score-unit">${c.unit}</span>
+          <span class="score-status ${c.cls}">${c.status}</span>
         </div>
         <div class="score-bar">
-          <div class="score-bar-fill ${c.cls}" style="width:${fillPct}%"></div>
+          <div class="score-bar-fill ${c.cls}" style="width:${c.fillPct}%"></div>
         </div>
         <div class="score-compare">
           <span>${c.bench}</span>
@@ -3655,10 +4438,16 @@ async function startAudit(url) {
   submitBtn.textContent = 'Checking…';
   inputEl.disabled     = true;
 
-  // Reuse pre-fetched PSI promise if user typed this URL before clicking Run
-  const scoresPromise = (earlyPsiUrl === currentUrl && earlyPsiPromise)
-    ? earlyPsiPromise
-    : (psiStartTime = Date.now(), fetchRealScores(currentUrl));
+  const normalizedDomain = normalizeDomainValue(currentUrl);
+  const prewarmJob = prewarmJobsByDomain.get(normalizedDomain)
+    || await prewarmAuditJob(currentUrl, 'manual', { showStatus: false });
+
+  // Reuse prewarmed API jobs first, then fall back to the older in-browser PSI prefetch.
+  const scoresPromise = prewarmJob
+    ? (psiStartTime = Date.now(), fetchScoresFromPrewarmOrFallback(currentUrl, prewarmJob))
+    : ((earlyPsiUrl === currentUrl && earlyPsiPromise)
+      ? earlyPsiPromise
+      : (psiStartTime = Date.now(), fetchRealScores(currentUrl)));
   earlyPsiUrl = '';
   earlyPsiPromise = null;
   const platform = await detectPlatform(currentUrl);
@@ -4080,6 +4869,8 @@ function renderResults(url, platform, scores) {
 }
 
 function showStage(stage) {
+  const landingPage = document.getElementById('landing-page');
+  if (landingPage) landingPage.classList.toggle('is-hidden', stage !== 'input');
   document.querySelectorAll('.stage').forEach(s => {
     s.classList.remove('active');
     s.hidden = true;
@@ -4098,7 +4889,8 @@ function resetAudit() {
   currentScores = null;
   showStage('input');
   document.getElementById('url-input').value = '';
-  document.getElementById('url-input').focus();
+  document.getElementById('audit')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.setTimeout(() => document.getElementById('url-input').focus(), 450);
 }
 
 function normalizeUrl(url) {
@@ -4108,6 +4900,115 @@ function normalizeUrl(url) {
   // Trim trailing slashes
   url = url.replace(/\/+$/, '');
   return url;
+}
+
+function normalizeDomainValue(value) {
+  const normalizedUrl = normalizeUrl(value || '');
+  if (!normalizedUrl) return '';
+  try {
+    return new URL(normalizedUrl).hostname.replace(/^www\./i, '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function setPrewarmStatus(message, type = '') {
+  const el = document.getElementById('prewarm-status');
+  if (!el) return;
+  el.className = `prewarm-status${message ? ' is-visible' : ''}${type ? ` ${type}` : ''}`;
+  el.innerHTML = message || '';
+}
+
+async function prewarmAuditJob(rawDomain, source = 'manual', options = {}) {
+  const normalizedDomain = normalizeDomainValue(rawDomain);
+  if (!normalizedDomain) return null;
+
+  const existing = prewarmJobsByDomain.get(normalizedDomain);
+  if (existing && ['queued', 'running', 'completed'].includes(existing.status)) {
+    activePrewarmJob = existing;
+    activePrewarmDomain = normalizedDomain;
+    return existing;
+  }
+
+  if (options.showStatus) {
+    setPrewarmStatus(`Preparing audit for <strong>${normalizedDomain}</strong>...`);
+  }
+
+  try {
+    const response = await fetch(API_ENDPOINTS.prewarm, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        domain: normalizedDomain,
+        source,
+        sessionId: SESSION_ID,
+        confidence: options.confidence || undefined
+      })
+    });
+    if (!response.ok) throw new Error(`prewarm_http_${response.status}`);
+    const data = await response.json();
+    const job = {
+      jobId: data.jobId,
+      status: data.status,
+      normalizedDomain: data.normalizedDomain || normalizedDomain,
+      reused: !!data.reused,
+      source
+    };
+    prewarmJobsByDomain.set(job.normalizedDomain, job);
+    activePrewarmJob = job;
+    activePrewarmDomain = job.normalizedDomain;
+    if (options.showStatus) {
+      setPrewarmStatus(
+        data.reused
+          ? `Using a recent audit snapshot for <strong>${job.normalizedDomain}</strong>. You can edit this before running the audit.`
+          : `Preparing audit for <strong>${job.normalizedDomain}</strong> in the background. You can edit this before running the audit.`,
+        options.statusType || ''
+      );
+    }
+    return job;
+  } catch (error) {
+    if (options.showStatus && source === 'query_param') {
+      setPrewarmStatus(`We prefilled <strong>${normalizedDomain}</strong>. Click Run audit when ready.`, '');
+    }
+    return null;
+  }
+}
+
+async function pollAuditJob(job, timeoutMs = 120000) {
+  if (!job?.jobId) throw new Error('missing_prewarm_job');
+  const started = Date.now();
+  let delay = 1200;
+  while (Date.now() - started < timeoutMs) {
+    const response = await fetch(`${API_ENDPOINTS.status}?jobId=${encodeURIComponent(job.jobId)}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`status_http_${response.status}`);
+    const data = await response.json();
+    job.status = data.status;
+    if (data.status === 'completed' && data.result) {
+      prewarmJobsByDomain.set(data.normalizedDomain || job.normalizedDomain, job);
+      return data.result;
+    }
+    if (data.status === 'failed') throw new Error(data.error || 'prewarm_failed');
+    await new Promise(resolve => setTimeout(resolve, delay));
+    delay = Math.min(3500, delay + 400);
+  }
+  throw new Error('prewarm_timeout');
+}
+
+async function fetchScoresFromPrewarmOrFallback(url, job) {
+  const normalizedDomain = normalizeDomainValue(url);
+  const matchingJob = job || prewarmJobsByDomain.get(normalizedDomain);
+  if (matchingJob && matchingJob.normalizedDomain === normalizedDomain) {
+    try {
+      const result = await pollAuditJob(matchingJob);
+      if (result?.scores) {
+        window.__lastPrewarmAuditResult = result;
+        return result.scores;
+      }
+    } catch (error) {
+      console.warn('Prewarm job unavailable, falling back to direct PSI:', error?.message || error);
+    }
+  }
+  return fetchRealScores(url);
 }
 
 // ============================================================
@@ -4127,15 +5028,35 @@ document.getElementById('url-input').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') document.getElementById('url-submit').click();
 });
 
-// Pre-fire PSI as soon as the user types a valid-looking URL
+function focusAuditTool() {
+  document.getElementById('audit')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.setTimeout(() => document.getElementById('url-input')?.focus(), 450);
+}
+
+document.getElementById('hero-audit-cta')?.addEventListener('click', focusAuditTool);
+document.getElementById('board-audit-cta')?.addEventListener('click', focusAuditTool);
+
+function openAssessmentModal() {
+  currentUrl = 'Builders Merchant Accelerator assessment';
+  document.getElementById('modal-url').textContent = 'Builders Merchant Accelerator assessment';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+document.getElementById('hero-contact-cta')?.addEventListener('click', openAssessmentModal);
+document.getElementById('final-contact-cta')?.addEventListener('click', openAssessmentModal);
+
+// Prewarm as soon as the user types a valid-looking URL. If /api is unavailable
+// in a local static server, fall back to the original in-browser PSI prefetch.
 let psiEarlyTimer = null;
 document.getElementById('url-input').addEventListener('input', () => {
   clearTimeout(psiEarlyTimer);
   const raw = document.getElementById('url-input').value.trim();
   if (!raw || raw.length < 6 || !raw.includes('.')) return;
-  psiEarlyTimer = setTimeout(() => {
+  psiEarlyTimer = setTimeout(async () => {
     const url = normalizeUrl(raw);
     if (url === earlyPsiUrl) return;
+    const job = await prewarmAuditJob(url, 'manual', { showStatus: false });
+    if (job) return;
     earlyPsiUrl = url;
     psiStartTime = Date.now();
     earlyPsiPromise = fetchRealScores(url);
@@ -4448,6 +5369,25 @@ function buildReportSnapshot() {
   }));
   const opportunityMap = buildOpportunityMap(scores, currentPlatform);
   const fullOpportunityPool = buildOpportunityMap(scores, currentPlatform, { maxItems: null });
+  const serviceOpportunityHeatMap = buildServiceOpportunityHeatMap(scores, currentPlatform);
+  const salesReport = window.__lastPrewarmAuditResult?.salesReport || {
+    domain: normalizeDomainValue(currentUrl),
+    detectedStack: buildTechnologyContext(currentPlatform),
+    performanceStatus: {
+      source: scores._source || 'generated',
+      mobileSpeed: scores.mobileSpeed,
+      desktopSpeed: scores.desktopSpeed,
+      lcp: scores.lcp,
+      ttfb: scores.ttfb
+    },
+    keyRisks: serviceOpportunityHeatMap.filter(item => item.priority === 'high').slice(0, 5).map(item => ({
+      service: item.service,
+      evidence: item.evidence
+    })),
+    opportunityHeatMap: serviceOpportunityHeatMap,
+    suggestedTalkingPoints: serviceOpportunityHeatMap.slice(0, 5).map(item => item.salesTalkingPoint),
+    ctaContactFormStatus: 'submitted_with_contact_form'
+  };
   return {
     recipient: REPORT_RECIPIENT,
     url: currentUrl,
@@ -4456,6 +5396,8 @@ function buildReportSnapshot() {
     scores,
     findings,
     opportunity_map: opportunityMap,
+    service_opportunity_heat_map: serviceOpportunityHeatMap,
+    sales_report: salesReport,
     full_opportunity_pool: fullOpportunityPool,
     sales_backstory: buildSalesBackstory(currentPlatform, scores),
     technology_context: buildTechnologyContext(currentPlatform),
@@ -4559,11 +5501,57 @@ document.getElementById('modal-send').addEventListener('click', async () => {
   `;
 });
 
+async function initPrewarmOnLoad() {
+  const params = new URLSearchParams(location.search);
+  const queryDomain = params.get('website') || params.get('domain');
+  const input = document.getElementById('url-input');
+
+  if (queryDomain) {
+    const normalizedUrl = normalizeUrl(queryDomain);
+    const normalizedDomain = normalizeDomainValue(normalizedUrl);
+    if (normalizedDomain) {
+      input.value = normalizedUrl;
+      setPrewarmStatus(`Preparing audit for <strong>${normalizedDomain}</strong>...`);
+      await prewarmAuditJob(normalizedUrl, 'query_param', { showStatus: true });
+      return true;
+    }
+  }
+
+  try {
+    const response = await fetch(API_ENDPOINTS.identify, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: SESSION_ID })
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    if (!data?.suggested || !data.companyDomain) return false;
+
+    const suggestedUrl = normalizeUrl(data.companyDomain);
+    const suggestedDomain = normalizeDomainValue(suggestedUrl);
+    if (!suggestedDomain || input.value.trim()) return false;
+
+    input.value = suggestedUrl;
+    setPrewarmStatus(`Suggested website: <strong>${suggestedDomain}</strong>. You can edit this before running the audit.`, 'suggested');
+    await prewarmAuditJob(suggestedUrl, 'visitor_identification', {
+      showStatus: false,
+      confidence: data.confidence,
+      statusType: 'suggested'
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Apply vertical config on load
 applyVerticalConfig();
 
-// Initial focus
-setTimeout(() => document.getElementById('url-input').focus(), 200);
+// Initial prewarm + focus. Query-param and visitor suggestions should not feel like surveillance:
+// only domain-level suggestions are shown and the field remains editable.
+initPrewarmOnLoad().then((prefilled) => {
+  if (!prefilled) setTimeout(() => document.getElementById('url-input').focus(), 200);
+});
 </script>
 
 </body>
