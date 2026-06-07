@@ -2325,13 +2325,13 @@ body {
     </div>
     <div id="preview-container">
       <div id="preview-sticky">
-        <div class="preview-sticky-tag">// Google Lighthouse</div>
+        <div class="preview-sticky-tag">// Core Web Vitals</div>
         <div class="preview-sticky-h">Whilst we wait for Google to score your site…</div>
         <div class="preview-sticky-sub">Here's what we already know from scanning your page.</div>
         <div class="psi-progress-wrap">
           <div class="psi-progress-bar" id="psi-progress-fill"></div>
         </div>
-        <div class="psi-progress-label" id="psi-progress-label">Running Lighthouse audit…</div>
+        <div class="psi-progress-label" id="psi-progress-label">Fetching Chrome UX field data…</div>
       </div>
       <div id="preview-stream"></div>
     </div>
@@ -2382,7 +2382,7 @@ body {
     </div>
 
     <div class="score-grid" id="score-grid"></div>
-    <div class="score-disclaimer" id="score-disclaimer">// Live snapshot: scores come from the latest PageSpeed Insights API response and can vary between runs.</div>
+    <div class="score-disclaimer" id="score-disclaimer">// Field data from Chrome User Experience Report (CrUX) — 28-day p75 of real Chrome users on this URL.</div>
 
     <div class="section-title" data-num="01 / OPPORTUNITY HEATMAP" id="audit-opportunity-map">What looks missing or worth reviewing</div>
     <p class="section-sub" id="opportunity-sub">A practical heat map of areas the scan could see, could not see, or thinks are worth a closer look. It is not a diagnosis; it is a shortlist for the first Scandiweb review.</p>
@@ -2448,7 +2448,7 @@ body {
     </div>
 
     <div class="footnote">
-      <span id="footnote-source"><strong>// DEMO MODE</strong> · scores estimated from URL. Run a URL to get live PageSpeed Insights data.</span>
+      <span id="footnote-source"><strong>// DEMO MODE</strong> · scores estimated from URL. Run a URL to get live Core Web Vitals field data.</span>
       <span>v0.3 / magento-audit</span>
     </div>
   </section>
@@ -3206,130 +3206,79 @@ function classifyReverse(value, thresholds) {
 }
 
 // ============================================================
-// REAL SCORES — PAGESPEED INSIGHTS API
+// REAL SCORES — CHROME UX REPORT (CrUX) field data
 // ============================================================
 
-async function psiCall(url, strategy, signal) {
-  const WORKER = 'https://merchantminisite.samuel-goodey.workers.dev/psi';
-  const params = new URLSearchParams({ url, strategy });
-  const cats = strategy === 'mobile'
-    ? ['performance', 'seo', 'accessibility']
-    : ['performance'];
-  cats.forEach(c => params.append('category', c));
+async function cruxCall(url, formFactor, signal) {
+  const WORKER = 'https://merchantminisite.samuel-goodey.workers.dev/crux';
+  const params = new URLSearchParams({ url, formFactor });
   const res = await fetch(`${WORKER}?${params}`, { signal });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err?.error?.message || `HTTP ${res.status}`);
   }
-  const data = await res.json();
-  if (!data.lighthouseResult) throw new Error('No Lighthouse result in response');
-  return data;
+  return res.json();
 }
 
 async function fetchRealScores(url) {
-  const attempt = async () => {
-    const controller = new AbortController();
-    const tid = setTimeout(() => controller.abort(), 90000);
-    try {
-      const results = await Promise.allSettled([
-        psiCall(url, 'mobile',  controller.signal),
-        psiCall(url, 'desktop', controller.signal)
-      ]);
-      clearTimeout(tid);
-      return results;
-    } catch (e) {
-      clearTimeout(tid);
-      throw e;
-    }
-  };
-
-  let results = await attempt();
-
-  // Retry once if both failed (transient rate-limit / network blip)
-  const bothFailed = results.every(r => r.status === 'rejected');
-  if (bothFailed) {
-    await new Promise(r => setTimeout(r, 3000));
-    results = await attempt().catch(() => results);
-  }
-
-  const mResult = results[0];
-  const dResult = results[1];
-
-  // Need at least the mobile result for meaningful data
-  if (mResult.status === 'rejected') {
-    console.warn('PSI mobile failed:', mResult.reason?.message);
+  const controller = new AbortController();
+  const tid = setTimeout(() => controller.abort(), 8000);
+  let data;
+  try {
+    data = await cruxCall(url, 'PHONE', controller.signal);
+  } catch (e) {
+    clearTimeout(tid);
+    console.warn('CrUX fetch failed:', e.message);
     const fb = generateScores(url);
-    // If desktop worked, extract desktop speed at least
-    if (dResult.status === 'fulfilled') {
-      const dLh = dResult.value.lighthouseResult;
-      fb.desktopSpeed = Math.round((dLh.categories.performance?.score ?? 0) * 100);
-      fb._source = 'partial';
-    }
+    fb._source = 'estimated';
+    return fb;
+  }
+  clearTimeout(tid);
+
+  const metrics = data?.record?.metrics;
+  if (!metrics) {
+    // Site likely doesn't have enough Chrome traffic for CrUX field data.
+    console.warn('No CrUX data available for this URL — falling back to demo scores.');
+    const fb = generateScores(url);
+    fb._source = 'estimated';
     return fb;
   }
 
-  const mLh = mResult.value.lighthouseResult;
-  const dLh = dResult.status === 'fulfilled'
-    ? dResult.value.lighthouseResult
-    : null;
+  const p75 = (key) => {
+    const v = metrics[key]?.percentiles?.p75;
+    return v == null ? null : Number(v);
+  };
 
-  if (dResult.status === 'rejected') {
-    console.warn('PSI desktop failed (using mobile estimate):', dResult.reason?.message);
-  }
-
-  // JS bundle: sum Script resource sizes from network-requests audit
-  const netItems = mLh.audits['network-requests']?.details?.items || [];
-  const scriptItems = netItems.filter(i =>
-    i.resourceType === 'Script' ||
-    (i.mimeType && (i.mimeType.includes('javascript') || i.mimeType.includes('ecmascript')))
-  );
-  const scriptBytes = scriptItems.reduce((s, i) => s + (i.resourceSize || i.transferSize || 0), 0);
-
-  // INP (Lighthouse 10+) or TBT-based estimate
-  const inpRaw = mLh.audits['interaction-to-next-paint']?.numericValue
-    ?? mLh.audits['experimental-interaction-to-next-paint']?.numericValue
-    ?? Math.min(Math.round((mLh.audits['total-blocking-time']?.numericValue ?? 300) * 2.8 + 80), 900);
-
-  // Additional Lighthouse audits
-  const unusedJsBytes    = mLh.audits['unused-javascript']?.details?.overallSavingsBytes ?? 0;
-  const unusedCssBytes   = mLh.audits['unused-css-rules']?.details?.overallSavingsBytes ?? 0;
-  const renderBlockItems = mLh.audits['render-blocking-resources']?.details?.items || [];
-  const webpItems        = mLh.audits['uses-webp-images']?.details?.items || [];
-  const domSizeVal       = mLh.audits['dom-size']?.numericValue ?? 0;
-  const totalBytes       = netItems.reduce((s, i) => s + (i.transferSize || 0), 0);
-  const fontItems        = netItems.filter(i => i.resourceType === 'Font' || i.mimeType?.includes('font'));
-  const tbtMs            = Math.round(mLh.audits['total-blocking-time']?.numericValue ?? 0);
-  const thirdPartyCount  = mLh.audits['third-party-summary']?.details?.items?.length ?? 0;
-
-  const fb = generateScores(url); // fallback for any gaps
-
-  const mobileSpeed  = Math.round((mLh.categories.performance?.score ?? 0) * 100);
-  const desktopSpeed = dLh
-    ? Math.round((dLh.categories.performance?.score ?? 0) * 100)
-    : Math.min(mobileSpeed + 15, 100); // estimate from mobile if desktop call failed
+  const lcpMs  = p75('largest_contentful_paint');
+  const inpMs  = p75('interaction_to_next_paint');
+  const clsRaw = p75('cumulative_layout_shift');
+  const ttfbMs = p75('experimental_time_to_first_byte');
+  const fcpMs  = p75('first_contentful_paint');
 
   return {
-    mobileSpeed,
-    desktopSpeed,
-    lcp:           ((mLh.audits['largest-contentful-paint']?.numericValue ?? 3500) / 1000).toFixed(1),
-    cls:           (mLh.audits['cumulative-layout-shift']?.numericValue ?? 0.15).toFixed(2),
-    inp:           Math.round(inpRaw),
-    seo:           Math.round((mLh.categories.seo?.score ?? 0) * 100),
-    accessibility: Math.round((mLh.categories.accessibility?.score ?? 0) * 100),
-    bundleJs:      scriptBytes > 10000 ? (scriptBytes / 1048576).toFixed(1) : fb.bundleJs,
-    ttfb:          Math.round(mLh.audits['server-response-time']?.numericValue ?? fb.ttfb),
-    requests:      netItems.length || fb.requests,
-    // extended
-    unusedJs:       Math.round(unusedJsBytes / 1024),
-    unusedCss:      Math.round(unusedCssBytes / 1024),
-    renderBlocking: renderBlockItems.length,
-    webpImages:     webpItems.length,
-    domSize:        Math.round(domSizeVal),
-    totalPageKb:    Math.round(totalBytes / 1024),
-    fontCount:      fontItems.length,
-    tbt:            tbtMs,
-    thirdPartyCount,
-    _source:        dLh ? 'psi' : 'psi-mobile-only'
+    // Core Web Vitals (field data, 28-day p75 from real Chrome users)
+    lcp:  lcpMs  != null ? (lcpMs / 1000).toFixed(1) : '0.0',
+    inp:  inpMs  != null ? Math.round(inpMs)         : 0,
+    cls:  clsRaw != null ? Number(clsRaw).toFixed(2) : '0.00',
+    ttfb: ttfbMs != null ? Math.round(ttfbMs)        : 0,
+    fcp:  fcpMs  != null ? (fcpMs / 1000).toFixed(1) : null,
+    // Lighthouse-only metrics no longer fetched; left null so dependent UI skips gracefully.
+    mobileSpeed:   null,
+    desktopSpeed:  null,
+    seo:           null,
+    accessibility: null,
+    bundleJs:      null,
+    requests:      null,
+    unusedJs:      null,
+    unusedCss:     null,
+    renderBlocking: null,
+    webpImages:    null,
+    domSize:       null,
+    totalPageKb:   null,
+    fontCount:     null,
+    tbt:           null,
+    thirdPartyCount: null,
+    _source:       'crux'
   };
 }
 
@@ -3378,8 +3327,7 @@ function buildConsoleLines(url, platform) {
     );
   }
   lines.push(
-    { text: `Running Lighthouse — mobile performance…`, status: 'done', stat: 'complete' },
-    { text: `Running Lighthouse — desktop performance…`, status: 'done', stat: 'complete' },
+    { text: `Fetching Core Web Vitals from Chrome User Experience Report (CrUX)…`, status: 'done', stat: 'field data' },
     { text: `Checking page speed, load time, and visual stability…`, status: 'done', stat: 'complete' },
     { text: `Scanning for unused code, page complexity, load blockers…`, status: 'done', stat: 'complete' },
     { text: `Mapping Scandiweb opportunity areas…`, status: 'done', stat: 'OK' },
@@ -3912,10 +3860,13 @@ function buildOpportunityMap(scores, platform, options = {}) {
   const checkout = pageScan?.checkout || null;
   const lcp = parseFloat(scores.lcp);
   const bundle = parseFloat(scores.bundleJs);
+  const inp = parseFloat(scores.inp);
+  const cls = parseFloat(scores.cls);
   const hasTracking = !!(sig && (sig.hasGA4 || sig.hasGTM || sig.hasFBPixel));
   const consentRisk = !!(sig && !sig.hasCookieConsent && hasTracking);
-  const speedNeedsReview = scores.mobileSpeed < 70 || lcp > 2.5 || bundle > 1.5;
-  const hostingNeedsReview = scores.ttfb > 500 || (sig && !sig.cdnType && !sig.hasCaching);
+  const cwvFail = (Number.isFinite(lcp) && lcp > 2.5) || (Number.isFinite(inp) && inp > 200) || (Number.isFinite(cls) && cls > 0.1);
+  const speedNeedsReview = cwvFail || (Number.isFinite(bundle) && bundle > 1.5);
+  const hostingNeedsReview = (Number.isFinite(parseFloat(scores.ttfb)) && parseFloat(scores.ttfb) > 800) || (sig && !sig.cdnType && !sig.hasCaching);
   const securityNeedsReview = !sig || !!sig.phpEol || !!sig.exposesPhpVersion || !sig.hasHsts || !sig.hasSecurityHeaders;
   const croToolDetected = !!(sig && (sig.heatmapTool || sig.abtestTool));
   const trustDetected = !!(sig && (sig.hasReviewWidget || pdp?.hasReviews));
@@ -3952,7 +3903,7 @@ function buildOpportunityMap(scores, platform, options = {}) {
       speedNeedsReview ? 'review' : 'detected',
       speedNeedsReview ? 2 : 1,
       'Frontend speed',
-      `Mobile ${scores.mobileSpeed}/100 · LCP ${scores.lcp}s · JS ${scores.bundleJs}MB.`,
+      `LCP ${scores.lcp}s · INP ${scores.inp}ms · CLS ${scores.cls}.`,
       'Review Hyva fit, script weight, images, and third-party code.',
       96
     ),
@@ -4049,10 +4000,10 @@ function buildOpportunityMap(scores, platform, options = {}) {
       62
     ),
     classify(
-      !sig ? 'review' : sig.hasStructuredData && scores.seo >= 85 ? 'detected' : 'missing',
-      !sig ? 2 : (sig.hasStructuredData && scores.seo >= 85 ? 1 : 3),
+      !sig ? 'review' : sig.hasStructuredData ? 'detected' : 'missing',
+      !sig ? 2 : (sig.hasStructuredData ? 1 : 3),
       'SEO, schema, and AEO',
-      sig?.hasStructuredData ? `Structured data detected; SEO score ${scores.seo}/100.` : `Structured data not clearly detected; SEO score ${scores.seo}/100.`,
+      sig?.hasStructuredData ? 'Structured data detected on the homepage.' : 'Structured data not clearly detected on the homepage.',
       'Review product schema, technical SEO, content gaps, and AI visibility.',
       86
     ),
@@ -4235,11 +4186,12 @@ function renderScoreGrid(scores) {
   const disclaimer = document.getElementById('score-disclaimer');
   if (disclaimer) {
     const sourceCopy = {
-      loading: 'Fetching a fresh PageSpeed Insights API response. The report will update when the run completes.',
-      psi: 'Live snapshot: scores come from the latest PageSpeed Insights API response and can vary between runs.',
-      'psi-mobile-only': 'Partial snapshot: mobile scores come from the latest PageSpeed Insights API response; desktop speed is estimated.',
-      partial: 'Partial snapshot: desktop speed comes from the latest PageSpeed Insights API response; mobile scores are estimated.',
-      estimated: 'Estimated snapshot: PageSpeed Insights was unavailable, so these scores are illustrative.'
+      loading: 'Fetching field data from Chrome User Experience Report (CrUX). The report will update when the run completes.',
+      psi: 'Field data from Chrome User Experience Report (CrUX) — 28-day p75 of real Chrome users on this URL.',
+      crux: 'Field data from Chrome User Experience Report (CrUX) — 28-day p75 of real Chrome users on this URL.',
+      'psi-mobile-only': 'Field data from Chrome User Experience Report (CrUX).',
+      partial: 'Field data from Chrome User Experience Report (CrUX).',
+      estimated: 'Estimated snapshot: this URL does not have enough Chrome user traffic for CrUX field data, so these numbers are illustrative.'
     };
     disclaimer.textContent = `// ${sourceCopy[scores._source] || sourceCopy.estimated}`;
   }
@@ -4510,7 +4462,7 @@ async function finishConsoleWithPSI(scoresPromise) {
   waitEl.style.animationDelay = '0s';
   waitEl.innerHTML = `
     <span class="marker warn" id="psi-marker">·</span>
-    <span class="text" id="psi-text">Running PageSpeed Insights — mobile + desktop in parallel…</span>
+    <span class="text" id="psi-text">Fetching Core Web Vitals from Chrome UX Report…</span>
     <span class="stat" id="psi-stat">waiting</span>
   `;
   linesEl.appendChild(waitEl);
@@ -4576,25 +4528,20 @@ async function finishConsoleWithPSI(scoresPromise) {
   const textEl   = document.getElementById('psi-text');
   const statEl   = document.getElementById('psi-stat');
   if (markerEl) {
-    if (scores._source === 'psi') {
-      markerEl.className   = 'marker done';
-      markerEl.textContent = '✓';
-      textEl.innerHTML     = `PageSpeed Insights complete — mobile <strong>${scores.mobileSpeed}</strong>/100, desktop <strong>${scores.desktopSpeed}</strong>/100`;
-      statEl.textContent   = 'live data';
-    } else if (scores._source === 'psi-mobile-only') {
-      markerEl.className   = 'marker warn';
-      markerEl.textContent = '!';
-      textEl.innerHTML     = `PageSpeed Insights — mobile <strong>${scores.mobileSpeed}</strong>/100 (desktop call failed, estimated)`;
-      statEl.textContent   = 'partial data';
-    } else if (scores._source === 'partial') {
-      markerEl.className   = 'marker warn';
-      markerEl.textContent = '!';
-      textEl.innerHTML     = `PageSpeed Insights — mobile failed, desktop <strong>${scores.desktopSpeed}</strong>/100. Other scores estimated.`;
-      statEl.textContent   = 'partial data';
+    if (scores._source === 'crux') {
+      const lcpVal = parseFloat(scores.lcp);
+      const clsVal = parseFloat(scores.cls);
+      const inpVal = parseFloat(scores.inp);
+      const passing = [(lcpVal <= 2.5), (clsVal <= 0.1), (inpVal <= 200)].filter(Boolean).length;
+      const cwvPass = passing === 3;
+      markerEl.className   = cwvPass ? 'marker done' : 'marker warn';
+      markerEl.textContent = cwvPass ? '✓' : '!';
+      textEl.innerHTML     = `Core Web Vitals — LCP <strong>${scores.lcp}s</strong> · INP <strong>${scores.inp}ms</strong> · CLS <strong>${scores.cls}</strong>`;
+      statEl.textContent   = cwvPass ? 'pass' : `${passing}/3 pass`;
     } else {
       markerEl.className   = 'marker warn';
       markerEl.textContent = '!';
-      textEl.textContent   = 'PageSpeed Insights unavailable — scores are estimated based on page signals';
+      textEl.textContent   = 'CrUX field data unavailable for this URL — scores are estimated. Real-user data requires enough Chrome traffic on the site.';
       statEl.textContent   = 'estimated';
     }
   }
@@ -4789,14 +4736,10 @@ function patchLiveScores(scores) {
   const footnote = document.getElementById('footnote-source');
   if (!footnote) return;
   const t = new Date().toLocaleTimeString('en-GB');
-  if (scores._source === 'psi') {
-    footnote.innerHTML = `<strong>// LIVE DATA</strong> · scores from Google PageSpeed Insights (Lighthouse). Ran ${t}.`;
-  } else if (scores._source === 'psi-mobile-only') {
-    footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · mobile scores live from PageSpeed Insights; desktop speed estimated. Ran ${t}.`;
-  } else if (scores._source === 'partial') {
-    footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · desktop speed live from PageSpeed Insights; mobile scores estimated. Ran ${t}.`;
+  if (scores._source === 'crux') {
+    footnote.innerHTML = `<strong>// FIELD DATA</strong> · 28-day p75 Core Web Vitals from real Chrome users on this URL (Chrome UX Report). Fetched ${t}.`;
   } else {
-    footnote.innerHTML = '<strong>// ESTIMATED</strong> · PageSpeed Insights was unavailable — scores are illustrative. Try again in a moment, or check the URL is publicly accessible.';
+    footnote.innerHTML = '<strong>// ESTIMATED</strong> · this URL does not have enough Chrome user traffic for CrUX field data. Numbers are illustrative.';
   }
 }
 
@@ -4838,15 +4781,11 @@ function renderResults(url, platform, scores) {
   if (footnote) {
     const t = new Date().toLocaleTimeString('en-GB');
     if (scores._source === 'loading') {
-      footnote.innerHTML = `<strong>// LOADING</strong> · fetching live PageSpeed scores — report will update automatically.`;
-    } else if (scores._source === 'psi') {
-      footnote.innerHTML = `<strong>// LIVE DATA</strong> · scores from Google PageSpeed Insights (Lighthouse). Ran ${t}.`;
-    } else if (scores._source === 'psi-mobile-only') {
-      footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · mobile scores live from PageSpeed Insights; desktop speed estimated. Ran ${t}.`;
-    } else if (scores._source === 'partial') {
-      footnote.innerHTML = `<strong>// PARTIAL DATA</strong> · desktop speed live from PageSpeed Insights; mobile scores estimated. Ran ${t}.`;
+      footnote.innerHTML = `<strong>// LOADING</strong> · fetching field data from Chrome User Experience Report — report will update automatically.`;
+    } else if (scores._source === 'crux') {
+      footnote.innerHTML = `<strong>// FIELD DATA</strong> · 28-day p75 Core Web Vitals from real Chrome users on this URL (Chrome UX Report). Fetched ${t}.`;
     } else {
-      footnote.innerHTML = '<strong>// ESTIMATED</strong> · PageSpeed Insights was unavailable — scores are illustrative. Try again in a moment, or check the URL is publicly accessible.';
+      footnote.innerHTML = '<strong>// ESTIMATED</strong> · this URL does not have enough Chrome user traffic for CrUX field data. Numbers are illustrative; rerun a higher-traffic URL to see real data.';
     }
   }
 
